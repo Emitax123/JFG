@@ -1,0 +1,43 @@
+{% extends 'base_template.html' %}
+{% load static %}
+{% block form %}
+    <div class="history-cont">
+        {% for i in files %}
+            <div class="history-item" >
+                <a href="{{i.files.url}}" >
+                <span> {{ i.filename }} </span>
+                </a>
+            </div>
+        {% endfor %} 
+    </div>
+
+<style>
+    .history-cont {
+        width: 40%;
+        margin-bottom: 30px;
+        border-radius: 20px;
+        color: black;
+        background-color: white;
+        padding: 40px 20px;
+        box-shadow: 2px 2px 10px black;
+    }
+    .history-item {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid gray;
+        display: flex;
+        align-items: center;
+        
+    }
+    .history-item a {
+        text-decoration: none;
+        color: black;
+    }
+    .history-item span {
+        margin-left: 60px;
+        margin-right: 20px;
+        font-weight: 600;
+    }
+</style>
+
+{% endblock %}

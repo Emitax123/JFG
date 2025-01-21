@@ -1,0 +1,194 @@
+<html>
+  <head>
+    {% load static %}
+    
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{% static 'img/logo.jpg' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">;
+    <meta charset="utf-8" />
+    <title>JF GESTION</title>
+  </head>
+  <body>
+        <!-- COMIENZO NAVBAR -->
+       <nav >
+        <div class="navbar">
+        <div id="logo"><a href="{% url 'projects' %}">
+          <img src="{% static 'img/logo.jpg' %}" >
+        </a>
+            
+        </div>
+        <div class="nav-list">
+        <ul class="nav-dropdown">
+            <li><a href="{% url 'projects' %}">Proyectos</a></li>
+            <li><a href="{% url 'balance' %}">Balances</a></li>
+            <li><a href="{% url 'history' %}">Historial</a></li>  
+            <li><a href="{% url 'create' %}">Formulario</a></li> <!-- AGREGAMOS FORMULARIO AL NAVBAR QUE REDIRECCIONA AL FORMULARIO EN UNA NUEVA PAGINA -->
+            <li>
+              <form method="post" id="search-form" style="display: flex; flex-flow: row;" action="{% url 'projects' %}">
+                {% csrf_token %}
+              <input autocomplete="off" type="text" id="search-input" name="search-input">
+              <input type="hidden" id="project-link" data-url="{% url 'projectview' pk=0 %}">
+              <button class="search-button"  id="search-button">
+                <img style="width: 25px; height: 25px;" src="{% static 'img/search-alt-1-svgrepo-com (1).svg' %}" alt="Submit">
+              </button>
+              <div id="search-results">
+                
+              </div>
+              </form>
+              
+              <div id="results-cont" class="results-cont">
+                
+              </div>
+            </li>
+          </ul>
+        </div>
+        </div>
+        </nav>
+
+        <!-- FIN NAVBAR -->
+  <div class="container">  
+    <div class="fila">
+    {% block form %}{% endblock  %}
+    {% block graph %}{% endblock graph %}
+    </div>
+  </div>
+  </body>
+
+<style>
+  .results-cont {
+    display: none;
+    position: absolute;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 2px 2px 10px black;;
+  }
+  .results-cont.show {
+    display: flex;
+    flex-flow: column;
+  }
+  .results-cont.show a {
+    display: flex;
+    flex-flow: column;
+  }
+  .results-cont.show a span.date-search {
+    color: black;
+    font-size: 12px;
+  }
+  .search-button {
+    background-color: transparent;border: none; cursor: pointer;
+  }
+  .see-more:hover{
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    background-color: antiquewhite;
+  }
+  .see-more {
+    overflow: hidden;
+    color: #00799b;
+    font-weight: bold;
+    padding: 5px;
+  }
+</style>
+
+<script>
+ var searchFlag = false;
+ var searchInput = document.getElementById('search-input');
+ var div = document.getElementById('results-cont');
+ searchInput.addEventListener('keyup', function() {
+    var query = document.getElementById('search-input').value;
+    if (query === ""){
+      clearSearchResults();
+    }else {
+      var searchTimeout;
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(function() {
+          clearSearchResults();//Clear previous spans
+          sendSearchRequest(query);
+      }, 500);
+    }
+    
+});
+
+ searchInput.addEventListener('click', function() {
+   if (searchFlag ){
+     div.classList.add('show');
+     }
+ });
+
+ document.body.addEventListener('click', function(event){
+   
+
+   if (event.target !== searchInput && event.target !== div){
+    div.classList.remove('show');
+   }
+   
+ });
+
+
+function sendSearchRequest(query) {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+              var response = JSON.parse(xhr.responseText);
+              if (response.results && response.results.length > 0) {
+                searchFlag = true;
+                displaySearchResults(response.results);
+              } else {
+                console.log('Search results are empty.');
+                searchFlag = false;
+                clearSearchResults();
+            }
+            } else {
+                console.error('Search request failed.');
+                searchFlag = false;
+                
+            }
+        }
+    };
+    xhr.open('GET', '/search/?query=' + encodeURIComponent(query), true);
+    xhr.send();
+}
+function clearSearchResults() {
+  var resultsContainer = document.getElementById('results-cont');
+  resultsContainer.innerHTML = ''; // Clear the HTML content of the container element
+}
+
+var form = document.getElementById('search-form');
+
+function displaySearchResults(results) {
+  var dataURL = document.getElementById('project-link').getAttribute('data-url');
+  var divElement = document.getElementById('results-cont');
+  var buttonElement = document.createElement('button');
+  buttonElement.classList.add('search-button');
+  buttonElement.classList.add('see-more');
+  buttonElement.addEventListener('click', function(){
+    form.submit();
+  });
+    results.forEach(function(result) {
+       
+        var spanElement1 = document.createElement('span');
+        var spanElement2 = document.createElement('span');
+        var linkElement = document.createElement('a');
+        
+        buttonElement.textContent = 'Ver más'
+        linkElement.href = dataURL.replace(0, result.id)
+        spanElement1.textContent = result.type
+        spanElement2.textContent = result.datecreated
+        spanElement2.classList.add('date-search')
+        linkElement.appendChild(spanElement1);
+        linkElement.appendChild(spanElement2);
+        divElement.appendChild(linkElement);
+       
+       
+    });
+    divElement.appendChild(buttonElement);
+    divElement.classList.add('show');
+}
+</script>
+</html>

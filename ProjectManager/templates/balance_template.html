@@ -1,0 +1,124 @@
+{% extends 'base_template.html' %}
+{% load static %}
+{% block graph %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<div class="balance-cont">
+<div class="month-selector" >
+    <form name="month" action="{% url 'balance' %}" method="post">
+        {% csrf_token %}
+        <input id="date-input" name="date" type="month">
+        <button id="submit-date" class="white-button" type="submit">Hecho</button>
+    </form>
+</div>
+{% if non_exist %}
+    <p>No existen registros en la fecha indicada</p>
+{% else %}
+
+<div class="board">
+    <div style="width: 30%; margin: 0 auto;">
+        <canvas id="myChart"></canvas>
+    </div>
+    <div class="balance-info">
+        <h3><span>{{month}} - {{year}}</span></h3>
+        <div>
+            
+            <span>La suma de <span style="font-weight: bold;">{{ cant }}</span> presupuestos supone un ingreso final de 
+            <span style="font-weight: bold;">${{ total }}</span>, de los cuales se han cobrado
+            <span style="font-weight: bold;">${{ adv }}</span>. Esto supone el {{percent}}% del total a cobrar.  </span>
+            <br>
+            <span>Los gastos ingresados son <span style="font-weight: bold;">${{ gastos }}</span>.</span><br>
+            <span>Las ganacias netas son de <span style="font-weight: bold;">${{ net }}</span>.</span>
+        </div>
+        <div  style="display: flex; align-items: center; justify-content: center; width: 80%; height: 50%; ">
+            <canvas id="myChart2"></canvas>
+        </div>
+        
+    </div>
+</div>
+</div>
+{% endif %}
+<!-- charts/templates/chart.html -->
+
+<style>
+    .balance-cont {
+        display: flex;
+        align-items: center;
+        flex-flow: column;
+    }
+    .balance-info {
+        width: 70%; 
+        height: 100%;
+        border-left: 1px solid gray;
+        color: black;
+        font-weight: 500;
+        padding: 20px;
+        display: flex;
+        flex-flow: column;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .month-selector form {
+        display: flex;
+        flex-flow: row;
+    }
+    .month-selector {
+        margin: 0 0 20px 0;
+    }
+</style>
+<script>
+    
+    document.addEventListener('DOMContentLoaded', function () {
+        fetch('/chart-data/')
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.labels && data.values && data.chart_type && data.label) {
+                const ctx = document.getElementById('myChart').getContext('2d');
+                
+                new Chart(ctx, {
+                    type: data.chart_type,
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: data.label,
+                            data: data.values,
+                            backgroundColor: ['#2997D6', '#CB372B', '#2FCA06'],
+                            hoverOffset: 4
+                        }]
+                    },
+                   
+                });
+                const ctxx = document.getElementById('myChart2').getContext('2d');
+                
+                new Chart(ctxx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: data.label,
+                            data: data.values,
+                            backgroundColor: ['#2997D6', '#CB372B', '#2FCA06'],
+                            hoverOffset: 4
+                        }]
+                    },
+                   
+                });
+                } else {
+                    console.error('Incomplete or empty data received.');
+                    
+                }
+                
+            });
+            
+    });
+    
+    document.getElementById('submit-date').addEventListener('click', () => {
+        const dateInput = document.getElementById('date-input');
+        if (dateInput.value === ""){
+            event.preventDefault();
+        };
+
+        
+
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,270 @@
+{% extends 'base_template.html' %}
+{% load static %}
+{% block form %}
+  <div class="cont-project-div">
+    <div class="project-div">
+      <h1>{{ project.type }}</h1>
+      {% if project.type == "Mensura" %}
+        <h3>{{project.mens}}</h3>
+      {% endif %}
+      <div class="show-box" id="client-titular" >
+        <span class="slide-text">Cliente y titular </span>
+        <button class="arrow-button" >
+          <img src="{% static 'img/arrow-down-svgrepo-com.svg' %}" alt="down-arrow">
+        </button>
+        <div class="info-box">
+            <div class="client-box" id="client-data" >
+              <h5>Cliente</h5>
+              <span>Nombre:{{project.client.name}} </span>
+              <span>DNI: {{project.client.dni}} </span>
+              <span>Telefono: {{project.client.phone}} </span>
+            </div>
+            <div class="client-box" id="titular-data" >
+              <h5>Titular</h5>
+              <span>Nombre:{{project.titular_name}} </span>
+              <span>DNI: {{project.titular_dni}} </span>
+              <span>Telefono: {{project.titular_phone}} </span>
+            </div>
+        </div>
+      </div>
+      <div class="show-box" id="nomenclatura" >
+        <span class="slide-text">Nomenclatura </span>
+        <button class="arrow-button" >
+          <img src="{% static 'img/arrow-down-svgrepo-com.svg' %}" alt="down-arrow">
+        </button>
+        <div class="info-box" id="">
+          <div >
+            <span>Partido: {{project.partido}}</span>
+            <span>Partida: {{project.partida}}</span>
+            <span>Circuns.: {{project.circuns}}</span>
+            <span>Sección: {{project.seccion}}</span>
+          </div>
+          <div class="cqfmp" >
+            {% with p=project %}
+            <div style="flex-flow: column;" >
+              <span>Chacra: {{p.chacra_num}} {{p.chacra_letra}} </span>
+              <span>Quinta: {{p.quinta_num}} {{p.quinta_letra}}</span>
+              <span>Fracción: {{p.fraccion_num}} {{p.fraccion_letra}} </span>
+            </div>
+            <div style="flex-flow: column;" >
+              <span>Manzana: {{p.manzana_num}} {{p.manzana_letra}} </span>
+              <span>Parcela: {{p.parcela_num}} {{p.manzana_letra}} </span>
+            </div>
+            
+            {% endwith %}
+        
+          </div>
+        </div>
+      </div>
+      <div class="mini-div">
+        <span>N° de Tramite: {{ project.procedure }}</span>
+        <button class="blue-button modify">Modificar</button>
+        <form style="display: none;" method="post" action="{% url 'modification' pk=project.pk %}" id="proc-form">
+          {% csrf_token %}
+          <input required autocomplete="off" placeholder="N° Tramite" type="number" name="proc" />
+          <button class="blue-button" type="submit">Hecho</button>
+        </form>
+      </div>
+
+      <div class="mini-div">
+        <span>Inscripcion: {{ project.inscription_type }}</span>
+        <button class="blue-button modify">Modificar</button>
+        <form style="display: none;" method="post" action="{% url 'modification' pk=project.pk %}" id="insctype-form">
+          {% csrf_token %}
+          <select id="incstype" name="insctype" required>
+            <option value="">----------</option>
+            <option value="Folio">Folio</option>
+            <option value="Matricula">Matricula</option>
+          </select>
+          <button class="blue-button" type="submit">Hecho</button>
+        </form>
+      </div>
+
+      <div class="mini-div">
+        <span>Presupuesto: ${{ project.price }}</span>
+        <button class="blue-button modify">Modificar</button>
+        <form style="display: none;" method="post" action="{% url 'modification' pk=project.pk %}" id="price-form">
+          {% csrf_token %}
+          <input required placeholder="Presupuesto" type="number" name="price" />
+          <button class="blue-button" type="submit">Hecho</button>
+        </form>
+      </div>
+
+      <div class="mini-div">
+        <span>Adelanto: ${{ project.adv }}</span>
+        <button class="blue-button modify">Modificar</button>
+        <form style="display: none;" method="post" action="{% url 'modification' pk=project.pk %}" id="adv-form">
+          {% csrf_token %}
+          <input required placeholder="Nuevo adelanto" type="number" name="adv" />
+          <button class="blue-button" type="submit">Hecho</button>
+        </form>
+      </div>
+
+      <div class="mini-div">
+        <span>Gastos: ${{ project.gasto }}</span>
+        <button class="blue-button modify">Modificar</button>
+        <form style="display: none;" method="post" action="{% url 'modification' pk=project.pk %}" id="gasto-form">
+          {% csrf_token %}
+          <input required placeholder="Nuevo gasto" type="number" name="gasto" />
+          <button class="blue-button" type="submit">Hecho</button>
+        </form>
+      </div>
+      <div class="mini-div">
+        <a class="files-tag" style="color: black;" href="{% url 'files' pk=project.pk %}" title="Ver archivos" ><span>Archivos</span></a>
+        <button class="blue-button modify">Cargar</button>
+        <form enctype="multipart/form-data" style="display: none;" method="post" action="{% url 'upload' pk=project.pk %}" id="file-form">
+          {% csrf_token %}
+          {% for field in form %}
+            <label for="{{ field.id_for_label}}" id="file-label">Cargar</label>
+            {{field}}
+          {% endfor %}
+          <input class="blue-button" type="submit" value="Guardar">
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <style>
+     div.info-box div.cqfmp span {
+      font-size: small;
+     }
+    div.info-box div.cqfmp {
+      flex-flow: row;
+    }
+    div.info-box div {
+      display: none;
+      flex-flow: column;
+      margin-top: 0;
+    }
+    div.info-box {
+      display: flex;
+      width: 100%;
+      opacity: 0;
+    }
+    div.show-box.marginb100 {
+      margin-bottom: 90px;
+    }
+ 
+    .show-box {
+      height: 20px;
+      margin-top: 10px;
+      transition: margin-bottom 1s ease;
+      display: flex; flex-flow: wrap;
+    }
+    .show-box button.arrow-button{
+      background-color: transparent; border: none; cursor: pointer;
+    }
+    .show-box button.arrow-button img {
+      padding-bottom: 2px;
+      height: 25px; 
+      width: 30px;
+    }
+    .show-box span.slide-text {
+      margin-right: 10px;
+    }
+    div.expand {
+      background-color: blueviolet;
+      transition: 3s;
+    }
+    div.expand:hover{
+      height: 100px;
+    }
+    .project-div {
+      min-width: 599px;
+      padding: 20px;
+      background-color: white;
+      color: black;
+      box-shadow: 2px 2px 10px black;
+      border-radius: 10px;
+      display: flex;
+      flex-flow: column;
+    }
+    .project-div div.mini-div {
+      display: flex;
+      flex-flow: row;
+      max-height: 20px;
+      margin-right: 20px;
+      margin-top: 10px;
+    }
+    .project-div div span {
+      margin-right: 20px;
+      font-weight: 600;
+    }
+    input#id_file_field {
+      background-color: white;
+    }
+    input[type="file"] {
+      display: none;
+    }
+    #file-label {
+      border: 2px solid black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding-bottom: 2px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 100px;
+      margin-right: 20px;
+      font-size: 12px;
+    }
+  </style>
+
+  <script>
+    document.getElementById('id_file_field').addEventListener('change', function() {
+      var fileCount = this.files.length;
+      var label = document.getElementById('file-label');
+      if (fileCount === 1) {
+          label.textContent = '1 archivo';
+      } else {
+          label.textContent = fileCount + ' archivos';
+      }
+    });
+
+    var buttonArrow = document.querySelectorAll('button.arrow-button');
+    
+    buttonArrow.forEach(function (button){
+      var flag = true;
+      button.addEventListener('click', function(){
+        var div = button.nextElementSibling; 
+        var parentDiv = button.parentNode;
+        var divChilds = div.querySelectorAll('*');
+        if (flag){
+          div.style.transition = 'all 2s ease-in-out';
+          div.style.opacity = '1';
+          parentDiv.classList.toggle('marginb100');
+          divChilds.forEach(function(child){
+            console.log(child);
+            child.style.display = 'flex';
+          });
+          flag = false;
+        } else {
+          div.style.display = 'flex';
+          div.style.transition = 'all 0.5s ';
+          div.style.opacity = '0';
+          divChilds.forEach(function(child){
+            console.log(child);
+            child.style.display = 'none';
+          });
+          parentDiv.classList.remove('marginb100');
+          flag = true;
+        }
+      });
+    });
+    
+    var buttons = document.querySelectorAll('button.modify')
+    buttons.forEach(function (button) {
+      button.addEventListener('click', function (event) {
+        event.preventDefault()
+        var form = button.parentElement.querySelector('form')
+        // or use:
+        if (form) {
+          // Display or perform actions on the form
+          form.style.display = 'flex'
+          button.style.display = 'none'
+        }
+      })
+    })
+  </script>
+{% endblock %}

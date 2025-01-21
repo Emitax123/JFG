@@ -1,0 +1,96 @@
+{% extends 'base_template.html' %}
+{% load static %}
+{% block form %}
+
+<div id="galeria-work" class="galeria-work">
+    {% if no_projects %}
+      <span>No se encontraron resultados</span>
+    {% else %}
+    {% for Project in projects %}
+    <div>
+      <a href="{% url 'projectview' pk=Project.pk %}">
+        <div class="cont-work">
+                <h1>{{Project.type}}</h1> 
+                <span>
+                  <h5>Partido: {{Project.partido}}</h5>
+                  <h5>Cliente: {{Project.client.name}}</h5>
+                  <h5>Fecha: {{Project.created|date:"d/m/Y" }}</h5>
+                </span>
+        </div>
+        </a>
+    </div>
+    
+    {% endfor %}
+    
+    
+      
+  
+    
+</div>
+<div class="pagination-cont" >
+  {% for page in pages.page_range %}
+   <a href="?page={{page}}">{{page}}</a>
+  {% endfor %}
+</div>
+{% endif %}
+<style>
+
+.pagination-cont a {
+  color: rgb(83, 137, 151);
+  font-weight: bold;
+  font-size: 20px;
+  transition: ease .5s;
+  margin: 0 3px;
+}
+.pagination-cont a:hover {
+  color: rgb(21, 61, 71);
+}
+.pagination-cont{
+  width: fit-content;
+  display: flex; justify-content: center; margin-top: 20px;
+  padding: 2px;
+  border-radius: 5px;
+  background-color: white;
+  border: solid 1px black;
+}
+.galeria-work {
+  width: 90%;
+  height: 80%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content:start;
+
+}
+
+a {
+  text-decoration: none;
+}
+.cont-work {
+  width: 300px;
+  height: 200px;
+  padding: 20px;
+  margin: 0px 20px 20px;
+  border: 1px solid black;
+  border-radius: 10px;
+  background-color: white;
+  color: black;
+  box-shadow: 2px 2px 10px black;
+  display: flex;
+  flex-flow: column;
+  justify-content: space-between;
+  
+}
+.cont-work h1 {
+  text-decoration: none;
+}
+
+
+.textos-work {
+  margin-top: 10px;
+}
+
+
+</style>
+
+
+{% endblock %}
