@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-ov@+3upl)l1-8v^a*ivz&7p3av2&s233rsm)5+q&x!7z-%!-gj
 DEBUG = True
 
 ALLOWED_HOSTS = ['localhost','web-production-abe4.up.railway.app']
-
+CSRF_TRUSTED_ORIGINS = ['https://web-production-abe4.up.railway.app']
 
 # Application definition
 
