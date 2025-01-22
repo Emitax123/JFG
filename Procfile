@@ -1,1 +1,1 @@
-web: gunicorn JFG.wsgi
+web: python manage.py collectstatic && gunicorn JFG.wsgi
