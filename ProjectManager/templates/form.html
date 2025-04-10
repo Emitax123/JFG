@@ -235,6 +235,9 @@
         //Checkbox is checked and clientSelector is empty
         if (checkbox.checked && clientSelector.value == '') {
         let allFilled = true;
+        titularInputs.forEach(input => {
+          removeError(input);
+        });
         clientInputs.forEach(input => {
           removeError(input);
           if (input.value.trim() === '') {
