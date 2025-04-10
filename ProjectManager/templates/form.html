@@ -151,10 +151,18 @@
   </div>
 
   <script>
-    
+    // Disable the inputs when the select option is changed
+    // and enable them when the select option is empty
+    // Get the select element and the inputs
+
     const selectElement = document.getElementById('client-list')
-    
+    const inputs = ['client-name', 'client-dni', 'client-phone'].map(id => document.getElementById(id));
+
     selectElement.addEventListener('change', function () {
+      
+      inputs.forEach(input => input.disabled = selectElement.value !== '');
+    });
+    /*selectElement.addEventListener('change', function () {
       var input1 = document.getElementById('client-name')
       var input2 = document.getElementById('client-dni')
       var input3 = document.getElementById('client-phone')
@@ -167,7 +175,7 @@
         input2.disabled = false
         input3.disabled = false
       }
-    })
+    })*/
   </script>
   <script>
     document.getElementById('client-titular-checkbox').addEventListener('change', function () {
