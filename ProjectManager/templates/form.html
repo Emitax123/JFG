@@ -34,7 +34,7 @@
             </div>
 
             <div style="width: 100%; display: flex; justify-content: center; ">
-              <div style="margin: 20px;" class="fields">
+              <div id="clien-data" style="margin: 20px;" class="fields">
                 <h4>Datos cliente</h4>
                 <div style="margin: 10px;" class="input-field">
                   <label for="client-name">Nombre y apellido</label>
@@ -56,7 +56,7 @@
 
             
             <!-- Datos Titular -->
-            <div style="margin: 20px;" class="fields">
+            <div id="titular-data" style="margin: 20px;" class="fields">
               <h4>Datos titular</h4>
               <div style="margin: 10px;" class="input-field">
                 <label for="{{ form.titular_name.id_for_label }}">{{ form.titular_name.label }}</label>
@@ -206,9 +206,11 @@
       const return1 = document.getElementById('return1')
       const return2 = document.getElementById('return2')
       const content1 = document.getElementById('content1')
-      const content2 = document.getElementById('content2')
+      const clientInputs = document.getElementById('clien-data').querySelectorAll('input')
+      const titularInputs = document.getElementById('titular-data').querySelectorAll('input')
       const content3 = document.getElementById('content3')
       const selectedOption = document.getElementById('id_type')
+      //JS for content1
       selectedOption.addEventListener( 'change', () => {
         if (selectedOption.value !== '') {
           removeError(selectedOption);
@@ -225,22 +227,62 @@
           content2.style.transform = 'translateX(-115%)';
         }
       });
+      //JS for content2
       toggleButton2.addEventListener('click', () => {
-        
-        const inputsContent2 = content2.querySelectorAll('input');
+        //select by id the checkbox inside content2
+        const checkbox = document.getElementById('client-titular-checkbox')
+        const clientSelector = document.getElementById('client-list')
+        //Checkbox is checked and clientSelector is empty
+        if (checkbox.checked && clientSelector.value == '') {
         let allFilled = true;
-  
-        inputsContent2.forEach(input => {
+        clientInputs.forEach(input => {
           removeError(input);
           if (input.value.trim() === '') {
             allFilled = false;
             showError(input, "Este campo es obligatorio");
           }
         });
-  
         if (!allFilled) {
           event.preventDefault();
           return;
+        }
+        }
+        //Checkbox is unchecked and clientSelector is not empty
+        if (!checkbox.checked && clientSelector.value !== '') {
+          let allFilled = true;
+          titularInputs.forEach(input => {
+            removeError(input);
+            if (input.value.trim() === '') {
+              allFilled = false;
+              showError(input, "Este campo es obligatorio");
+            }
+          });
+          if (!allFilled) {
+            event.preventDefault();
+            return;
+          }
+        }
+        //Checkbox is unchecked and clientSelector is empty
+        if (!checkbox.checked && clientSelector.value == '') {
+          let allFilled = true;
+          clientInputs.forEach(input => {
+            removeError(input);
+            if (input.value.trim() === '') {
+              allFilled = false;
+              showError(input, "Este campo es obligatorio");
+            }
+          });
+          titularInputs.forEach(input => {
+            removeError(input);
+            if (input.value.trim() === '') {
+              allFilled = false;
+              showError(input, "Este campo es obligatorio");
+            }
+          });
+          if (!allFilled) {
+            event.preventDefault();
+            return;
+          }
         }
         content2.style.transform = 'translateX(-230%)'
         content3.style.transform = 'translateX(-315%)'
