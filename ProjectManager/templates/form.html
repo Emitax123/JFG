@@ -208,41 +208,8 @@
         field.closest(".input-field").lastChild.remove();
       }
     };
+
     
-    // Function to validate all required inputs
-    const validateInputs = (inputs) => {
-      let allValid = true;
-      inputs.forEach(input => {
-      removeError(input);
-      if (input.value.trim() === '') {
-        showError(input, "Este campo es obligatorio");
-        allValid = false;
-      }
-      });
-      return allValid;
-    };
-
-    // Add validation to toggleButton1
-    toggleButton1.addEventListener('click', (event) => {
-      const inputsContent1 = Array.from(content1.querySelectorAll('input, select')).filter(input => !input.disabled);
-      if (!validateInputs(inputsContent1)) {
-      event.preventDefault();
-      } else {
-      content1.style.transform = 'translateX(-100%)';
-      content2.style.transform = 'translateX(-115%)';
-      }
-    });
-
-    // Add validation to toggleButton2
-    toggleButton2.addEventListener('click', (event) => {
-      const inputsContent2 = Array.from(content2.querySelectorAll('input, select')).filter(input => !input.disabled);
-      if (!validateInputs(inputsContent2)) {
-      event.preventDefault();
-      } else {
-      content2.style.transform = 'translateX(-230%)';
-      content3.style.transform = 'translateX(-315%)';
-      }
-    });
 
     const toggleButton1 = document.getElementById('toggleButton1')
     const toggleButton2 = document.getElementById('toggleButton2')
