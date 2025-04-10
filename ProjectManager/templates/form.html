@@ -183,60 +183,77 @@
   </script>
 
   <script>
-    // Function to display error messages
-    const showError = (field, errorText) => {
-      field.classList.add("error");
-      const errorElement = document.createElement("small");
-      errorElement.classList.add("error-text");
-      errorElement.innerText = errorText;
-      field.closest(".input-field").appendChild(errorElement);
-    }
-    const removeError = (field) => {
-      if (field.classList.contains("error")) {
-        field.classList.remove("error");
-        field.closest(".input-field").lastChild.remove();
+  
+      // Function to display error messages
+      const showError = (field, errorText) => {
+        field.classList.add("error");
+        const errorElement = document.createElement("small");
+        errorElement.classList.add("error-text");
+        errorElement.innerText = errorText;
+        field.closest(".input-field").appendChild(errorElement);
       }
-    };
-
-    
-    
-    const toggleButton1 = document.getElementById('toggleButton1')
-    const toggleButton2 = document.getElementById('toggleButton2')
-    const return1 = document.getElementById('return1')
-    const return2 = document.getElementById('return2')
-    const content1 = document.getElementById('content1')
-    const content2 = document.getElementById('content2')
-    const content3 = document.getElementById('content3')
-    const selectedOption = document.getElementById('id_type')
-    selectedOption.addEventListener( 'change', () => {
-      if (selectedOption.value !== '') {
+      const removeError = (field) => {
+        if (field.classList.contains("error")) {
+          field.classList.remove("error");
+          field.closest(".input-field").lastChild.remove();
+        }
+      };
+  
+      
+      
+      const toggleButton1 = document.getElementById('toggleButton1')
+      const toggleButton2 = document.getElementById('toggleButton2')
+      const return1 = document.getElementById('return1')
+      const return2 = document.getElementById('return2')
+      const content1 = document.getElementById('content1')
+      const content2 = document.getElementById('content2')
+      const content3 = document.getElementById('content3')
+      const selectedOption = document.getElementById('id_type')
+      selectedOption.addEventListener( 'change', () => {
+        if (selectedOption.value !== '') {
+          removeError(selectedOption);
+        }
+      });
+      toggleButton1.addEventListener('click', (event) => {
         removeError(selectedOption);
-      }
-    });
-    toggleButton1.addEventListener('click', (event) => {
-      removeError(selectedOption);
-      if (selectedOption.value === '') {
-        event.preventDefault();
-        showError(selectedOption, "Elegir el tipo de proyecto");
-        // Display an error message or provide visual feedback to the user
-      } else {
-        content1.style.transform = 'translateX(-100%)';
-        content2.style.transform = 'translateX(-115%)';
-      }
-    });
-    toggleButton2.addEventListener('click', () => {
-      content2.style.transform = 'translateX(-230%)'
-      content3.style.transform = 'translateX(-315%)'
-    })
-    return1.addEventListener('click', () => {
-      content1.style.transform = 'translateX(0%)'
-      content2.style.transform = 'translateX(0%)'
-    })
-    return2.addEventListener('click', () => {
-      content2.style.transform = 'translateX(-115%)'
-      content3.style.transform = 'translateX(0%)'
-    })
-  </script>
+        if (selectedOption.value === '') {
+          event.preventDefault();
+          showError(selectedOption, "Elegir el tipo de proyecto");
+          // Display an error message or provide visual feedback to the user
+        } else {
+          content1.style.transform = 'translateX(-100%)';
+          content2.style.transform = 'translateX(-115%)';
+        }
+      });
+      toggleButton2.addEventListener('click', () => {
+        
+        const inputsContent2 = content2.querySelectorAll('input');
+        let allFilled = true;
+  
+        inputsContent2.forEach(input => {
+          removeError(input);
+          if (input.value.trim() === '') {
+            allFilled = false;
+            showError(input, "Este campo es obligatorio");
+          }
+        });
+  
+        if (!allFilled) {
+          event.preventDefault();
+          return;
+        }
+        content2.style.transform = 'translateX(-230%)'
+        content3.style.transform = 'translateX(-315%)'
+      })
+      return1.addEventListener('click', () => {
+        content1.style.transform = 'translateX(0%)'
+        content2.style.transform = 'translateX(0%)'
+      })
+      return2.addEventListener('click', () => {
+        content2.style.transform = 'translateX(-115%)'
+        content3.style.transform = 'translateX(0%)'
+      })
+    </script>
   <style>
     input:disabled {
       cursor: default;
