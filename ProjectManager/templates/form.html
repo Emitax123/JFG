@@ -53,9 +53,9 @@
                   <input style="width: 50px;" type="checkbox" name="client-titular-checkbox" id="client-titular-checkbox" />
                 </div>
               </div>
-            </div>
+
+            
             <!-- Datos Titular -->
-             
             <div style="margin: 20px;" class="fields">
               <h4>Datos titular</h4>
               <div style="margin: 10px;" class="input-field">
@@ -127,14 +127,16 @@
                     <input name="manzana_letra" type="text" placeholder="Letra" maxlength="10" required="" id="id_manzana_letra" />
                   </div>
                 </div>
-                <div  class="input-field">
+                  <div  class="input-field">
                     <label for="">Parcela</label>
                     <div class="sub-input">
                       <input name="parcela_num" type="text" placeholder="Numero" maxlength="10" required="" id="id_parcela_num" />
                       <input name="parcela_letra" type="text" placeholder="Letra" maxlength="10" required="" id="id_parcela_letra" />
                     </div>
                   </div>
-                </div>
+
+                  
+</div>
               </div>
               
             </div>
@@ -223,22 +225,6 @@
       }
     });
     toggleButton2.addEventListener('click', () => {
-      
-      const inputsContent2 = content2.querySelectorAll('input');
-      let allFilled = true;
-
-      inputsContent2.forEach(input => {
-        removeError(input);
-        if (input.value.trim() === '') {
-          allFilled = false;
-          showError(input, "Este campo es obligatorio");
-        }
-      });
-
-      if (!allFilled) {
-        event.preventDefault();
-        return;
-      }
       content2.style.transform = 'translateX(-230%)'
       content3.style.transform = 'translateX(-315%)'
     })
