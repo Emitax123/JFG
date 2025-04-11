@@ -6,8 +6,9 @@
       <form action="" method="POST" enctype="multipart/form-data">
         <h2>Crear un nuevo proyecto</h2>
         {% csrf_token %}
-
+        
         <div class="form-group">
+          <!-- Content 1 -->
           <div id="content1">
             <div style="margin: 20px;" class="fields">
               <h4>Proyecto</h4>
@@ -21,8 +22,8 @@
               </div>
               <button type="button" class="blue-button" id="toggleButton1">Siguiente</button>
             </div>
-          </div>
-          <!-- Datos Cliente y Titular -->
+          </div> <!-- End Content 1 -->
+          <!--Content 2 -->
           <div id="content2">
             <div style="width: 100%; align-self: center; display: flex; justify-content: center;">
               <select name="client-list" id="client-list">
@@ -32,7 +33,6 @@
                 {% endfor %}
               </select>
             </div>
-
             <div style="width: 100%; display: flex; justify-content: center; ">
               <div id="clien-data" style="margin: 20px;" class="fields">
                 <h4>Datos cliente</h4>
@@ -53,30 +53,27 @@
                   <input style="width: 50px;" type="checkbox" name="client-titular-checkbox" id="client-titular-checkbox" />
                 </div>
               </div>
-
-            
-            <!-- Datos Titular -->
-            <div id="titular-data" style="margin: 20px;" class="fields">
-              <h4>Datos titular</h4>
-              <div style="margin: 10px;" class="input-field">
+            <!-- Datos Titular dentro de content 2 -->
+              <div id="titular-data" style="margin: 20px;" class="fields">
+                <h4>Datos titular</h4>
+                <div style="margin: 10px;" class="input-field">
                 <label for="{{ form.titular_name.id_for_label }}">{{ form.titular_name.label }}</label>
                 {{ form.titular_name }}
-              </div>
-              <div style="margin: 10px;" class="input-field">
+                </div>
+                <div style="margin: 10px;" class="input-field">
                 <label for="{{ form.titular_dni.id_for_label }}">{{ form.titular_dni.label }}</label>
                 {{ form.titular_dni }}
-              </div>
-              <div style="margin: 10px;" class="input-field">
+                </div>
+                <div style="margin: 10px;" class="input-field">
                 <label for="{{ form.titular_phone.id_for_label }}">{{ form.titular_phone.label }}</label>
                 {{ form.titular_phone }}
+                </div>
               </div>
             </div>
-          </div>
-          <div>
             <button type="button" class="blue-button" id="toggleButton2">Siguiente</button>
             <button type="button" class="blue-button" id="return1">Regresar</button>
-          </div>
-          <!-- Fin datos cliente y titular -->      
+          </div> <!-- End content 2 -->
+          <!-- Content 3 -->      
           <div id="content3">
             <div class="nomen-cont" style="margin: 20px; width: 100%;" class="fields">
               <div style="order: 0;" class="partida">
@@ -127,23 +124,22 @@
                     <input name="manzana_letra" type="text" placeholder="Letra" maxlength="10" required="" id="id_manzana_letra" />
                   </div>
                 </div>
-                  <div  class="input-field">
+                <div  class="input-field">
                     <label for="">Parcela</label>
                     <div class="sub-input">
                       <input name="parcela_num" type="text" placeholder="Numero" maxlength="10" required="" id="id_parcela_num" />
                       <input name="parcela_letra" type="text" placeholder="Letra" maxlength="10" required="" id="id_parcela_letra" />
                     </div>
-                  </div>
-              </div>            
+                </div>
+              </div>          
             </div>
+            <div class="container-button">
+              <button type="submit" class="blue-button" name="save_and_backhome" class="next-bton">Guardar</button>
+              <button type="button" class="blue-button" id="return2">Regresar</button>
+            </div>      
           </div>
-          <div class="container-button">
-            <button type="submit" class="blue-button" name="save_and_backhome" class="next-bton">Guardar</button>
-          </div>
-        </div>
+        </div> 
       </form>
-    </div>
-  </div>
     </div>
   </div>
 
