@@ -27,31 +27,27 @@ class Project (models.Model):
     mens = models.CharField(max_length=30, choices=MENS_CHOICES, verbose_name='Mensura')
     #CLiente
     client = models.ForeignKey(Client, on_delete=models.CASCADE, null=True)
-
+    
     #Titular, que puede o no puede ser el cliente
     titular_name = models.CharField(max_length=30, verbose_name='Nombre y apellido')
     titular_dni = models.IntegerField(verbose_name='DNI')
     titular_phone = models.IntegerField(verbose_name='Telefono')
     #Nomenclatura
-    partido= models.CharField(max_length=30, verbose_name='Partido')
-    partida= models.CharField(max_length=30, verbose_name='Partida')
-    circuns= models.CharField(max_length=30, verbose_name='Circunscripcion')
-    seccion= models.CharField(max_length=30, verbose_name='Seccion')
+    partido= models.CharField(max_length=30, blank=True, verbose_name='Partido')
+    partida= models.CharField(max_length=30, blank=True, verbose_name='Partida')
+    circuns= models.CharField(max_length=30, blank=True, verbose_name='Circunscripcion')
+    seccion= models.CharField(max_length=30, blank=True, verbose_name='Seccion')
     #Partida
     #Si hay chacra no hay quinta y vice
-    chacra_num = models.CharField(max_length=10, verbose_name='Numero')
-    chacra_letra= models.CharField(max_length=10, verbose_name='Letra')
+    chacra_num = models.CharField(max_length=10, blank=True, verbose_name='Numero')
+    chacra_letra= models.CharField(max_length=10, blank=True, verbose_name='Letra')
 
-    quinta_num= models.CharField(max_length=10, verbose_name='Numero')
-    quinta_letra= models.CharField(max_length=10, verbose_name='Letra')
+    quinta_num= models.CharField(max_length=10, blank=True, verbose_name='Numero')
+    quinta_letra= models.CharField(max_length=10, blank=True, verbose_name='Letra')
     
-    fraccion_num = models.CharField(max_length=10, verbose_name='Numero')
-    fraccion_letra = models.CharField(max_length=10, verbose_name='Letra')
-
-    manzana_num= models.CharField(max_length=10, verbose_name='Numero')
-    manzana_letra= models.CharField(max_length=10, verbose_name='Letra')
-    parcela_num= models.CharField(max_length=10, verbose_name='Numero')
-    parcela_letra= models.CharField(max_length=10, verbose_name='Letra')
+    fraccion_num = models.CharField(max_length=10, blank=True, verbose_name='Numero')
+    fraccion_letra = models.CharField(max_length=10, blank=True, verbose_name='Letra')
+    
     INSC_CHOICES = (
         ('Folio','Folio'),
         ('Matricula','Matricula'),
