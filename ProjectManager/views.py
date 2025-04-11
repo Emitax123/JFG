@@ -55,6 +55,13 @@ def generate_month_data(months, year):
             months.append({'year': y, 'month': m})
 
     return months, year
+#add a delete project function
+def delete_view(request, pk):
+    project = Project.objects.get(pk=pk)
+    if request.method == 'POST':
+        project.delete()
+        return redirect('projects')
+    return render(request, 'delete_template.html', {'project': project})
 
 #Vista del balance
 def balance(request):
