@@ -6,10 +6,7 @@
       <form action="" method="POST" enctype="multipart/form-data">
         <h2>Crear un nuevo proyecto</h2>
         {% csrf_token %}
-        <div id="content2" style="transform: translateX(0%);">
-        </div>
-        <div id="content3" style="transform: translateX(0%);">
-        </div>
+
         <div class="form-group">
           <div id="content1">
             <div style="margin: 20px;" class="fields">
@@ -136,14 +133,17 @@
                       <input name="parcela_num" type="text" placeholder="Numero" maxlength="10" required="" id="id_parcela_num" />
                       <input name="parcela_letra" type="text" placeholder="Letra" maxlength="10" required="" id="id_parcela_letra" />
                     </div>
-                  </div>            
+                  </div>
+              </div>            
+            </div>
           </div>
           <div class="container-button">
             <button type="submit" class="blue-button" name="save_and_backhome" class="next-bton">Guardar</button>
-            <button type="button" class="blue-button" id="return2">Regresar</button>
-          </div>      
+          </div>
         </div>
       </form>
+    </div>
+  </div>
     </div>
   </div>
 
