@@ -97,7 +97,7 @@ def projectlist_view(request):
               actual_pag = pages.get_page(1)
             if not projects:
                 return render (request, 'project_list_template.html', {'no_projects':True})    
-        return render (request, 'project_list_template.html', {'projects':projects})
+        return render (request, 'project_list_template.html', {'projects':projects, 'pages':pages})
     else:
         num_page = request.GET.get('page')
         pages = Paginator (Project.objects.all().order_by('created'), 8)
