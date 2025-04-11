@@ -96,103 +96,97 @@
 </style>
 
 <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search-input');
+    const resultsContainer = document.getElementById('results-cont');
+    const searchForm = document.getElementById('search-form');
+    const projectLinkUrl = document.getElementById('project-link').dataset.url;
+    let searchTimeout;
+    let isSearchActive = false;
 
- var searchFlag = false;
- var searchInput = document.getElementById('search-input');
- var div = document.getElementById('results-cont');
- var searchTimeout;
- 
- searchInput.addEventListener('keyup', function() {
-    var query = document.getElementById('search-input').value;
-    if (query === ""){
-      clearSearchResults();
-      searchFlag = false;
-    }else {
+    // Search input handler with debouncing
+    searchInput.addEventListener('keyup', () => {
+      const query = searchInput.value.trim();
+      if (!query) {
+        clearResults();
+        isSearchActive = false;
+        return;
+      }
+
       clearTimeout(searchTimeout);
-      searchTimeout = setTimeout(function() {
-          clearSearchResults();
-          sendSearchRequest(query);
-      }, 500);
-    }
-    
-});
-
- searchInput.addEventListener('click', function() {
-   if (searchFlag ){
-     div.classList.add('show');
-     }
- });
-
- document.body.addEventListener('click', function(event){
-   
-
-   if (event.target !== searchInput && event.target !== div){
-    div.classList.remove('show');
-   }
-   
- });
-
-
-function sendSearchRequest(query) {
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
-            if (xhr.status === 200) {
-              var response = JSON.parse(xhr.responseText);
-              if (response.results && response.results.length > 0) {
-                searchFlag = true;
-                displaySearchResults(response.results);
-              } else {
-                console.log('Search results are empty.');
-                searchFlag = false;
-                clearSearchResults();
-            }
-            } else {
-                console.error('Search request failed.');
-                searchFlag = false;
-                
-            }
-        }
-    };
-    xhr.open('GET', '/search/?query=' + encodeURIComponent(query), true);
-    xhr.send();
-}
-function clearSearchResults() {
-  var resultsContainer = document.getElementById('results-cont');
-  resultsContainer.innerHTML = ''; // Clear the HTML content of the container element
-}
-
-var form = document.getElementById('search-form');
-
-function displaySearchResults(results) {
-  var dataURL = document.getElementById('project-link').getAttribute('data-url');
-  var divElement = document.getElementById('results-cont');
-  divElement.innerHTML = ''; // Clear previous results
-  var buttonElement = document.createElement('button');
-  buttonElement.classList.add('search-button');
-  buttonElement.classList.add('see-more');
-  buttonElement.addEventListener('click', function(){
-    form.submit();
-  });
-    results.forEach(function(result) {
-       
-        var spanElement1 = document.createElement('span');
-        var spanElement2 = document.createElement('span');
-        var linkElement = document.createElement('a');
-        
-        buttonElement.textContent = 'Ver más'
-        linkElement.href = dataURL.replace(0, result.id)
-        spanElement1.textContent = result.type
-        spanElement2.textContent = result.datecreated
-        spanElement2.classList.add('date-search')
-        linkElement.appendChild(spanElement1);
-        linkElement.appendChild(spanElement2);
-        divElement.appendChild(linkElement);
-       
-       
+      searchTimeout = setTimeout(() => {
+        clearResults();
+        performSearch(query);
+      }, 300);
     });
-    divElement.appendChild(buttonElement);
-    divElement.classList.add('show');
-}
+
+    // Click handlers
+    searchInput.addEventListener('click', () => {
+      if (isSearchActive) {
+        resultsContainer.classList.add('show');
+      }
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!searchInput.contains(event.target) && !resultsContainer.contains(event.target)) {
+        resultsContainer.classList.remove('show');
+      }
+    });
+
+    // Search functionality
+    async function performSearch(query) {
+      try {
+        const response = await fetch(`/search/?query=${encodeURIComponent(query)}`);
+        if (!response.ok) throw new Error('Search failed');
+        
+        const data = await response.json();
+        if (data.results?.length) {
+          isSearchActive = true;
+          displayResults(data.results);
+        } else {
+          isSearchActive = false;
+          clearResults();
+        }
+      } catch (error) {
+        console.error('Search error:', error);
+        isSearchActive = false;
+      }
+    }
+
+    function displayResults(results) {
+      clearResults();
+      
+      const fragment = document.createDocumentFragment();
+      
+      results.forEach(result => {
+        const link = document.createElement('a');
+        link.href = projectLinkUrl.replace('0', result.id);
+        
+        const titleSpan = document.createElement('span');
+        titleSpan.textContent = result.type;
+        
+        const dateSpan = document.createElement('span');
+        dateSpan.textContent = result.datecreated;
+        dateSpan.classList.add('date-search');
+        
+        link.append(titleSpan, dateSpan);
+        fragment.appendChild(link);
+      });
+
+      const seeMoreButton = document.createElement('button');
+      seeMoreButton.className = 'search-button see-more';
+      seeMoreButton.textContent = 'Ver más';
+      seeMoreButton.onclick = () => searchForm.submit();
+      
+      fragment.appendChild(seeMoreButton);
+      resultsContainer.appendChild(fragment);
+      resultsContainer.classList.add('show');
+    }
+
+    function clearResults() {
+      resultsContainer.innerHTML = '';
+      resultsContainer.classList.remove('show');
+    }
+  });
 </script>
 </html>
