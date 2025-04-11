@@ -96,18 +96,21 @@
 </style>
 
 <script>
+
  var searchFlag = false;
  var searchInput = document.getElementById('search-input');
  var div = document.getElementById('results-cont');
+ var searchTimeout;
+ 
  searchInput.addEventListener('keyup', function() {
     var query = document.getElementById('search-input').value;
     if (query === ""){
       clearSearchResults();
+      searchFlag = false;
     }else {
-      var searchTimeout;
       clearTimeout(searchTimeout);
       searchTimeout = setTimeout(function() {
-          clearSearchResults();//Clear previous spans
+          clearSearchResults();
           sendSearchRequest(query);
       }, 500);
     }
@@ -164,6 +167,7 @@ var form = document.getElementById('search-form');
 function displaySearchResults(results) {
   var dataURL = document.getElementById('project-link').getAttribute('data-url');
   var divElement = document.getElementById('results-cont');
+  divElement.innerHTML = ''; // Clear previous results
   var buttonElement = document.createElement('button');
   buttonElement.classList.add('search-button');
   buttonElement.classList.add('see-more');

@@ -363,9 +363,10 @@ button {
   white-space: nowrap;
   font-weight: 600;
 }
-form button {
-
+form label {
+  font-weight: bold;
 }
+
 
 
 div.nomen-cont {

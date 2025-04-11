@@ -21,13 +21,11 @@
     <div class="balance-info">
         <h3><span>{{month}} - {{year}}</span></h3>
         <div>
-            
-            <span>La suma de <span style="font-weight: bold;">{{ cant }}</span> presupuestos supone un ingreso final de 
-            <span style="font-weight: bold;">${{ total }}</span>, de los cuales se han cobrado
-            <span style="font-weight: bold;">${{ adv }}</span>. Esto supone el {{percent}}% del total a cobrar.  </span>
-            <br>
-            <span>Los gastos ingresados son <span style="font-weight: bold;">${{ gastos }}</span>.</span><br>
-            <span>Las ganacias netas son de <span style="font-weight: bold;">${{ net }}</span>.</span>
+            <span>Presupuestos: </span><span style="font-weight: bold;">{{ cant }}</span>
+            <span>Total a cobrar: </span><span style="font-weight: bold;">${{ total }}</span>
+            <span>Cobrados: </span><span style="font-weight: bold;">${{ adv }}</span> Un {{percent}}% del total.</span>
+            <span>Gastos ingresados: <span style="font-weight: bold;">${{ gastos }}</span>.</span><br>
+            <span>Ganancia neta:  <span style="font-weight: bold;">${{ net }}</span>.</span>
         </div>
         <div  style="display: flex; align-items: center; justify-content: center; width: 80%; height: 50%; ">
             <canvas id="myChart2"></canvas>
