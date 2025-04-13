@@ -8,7 +8,7 @@ from . import views
 urlpatterns = [
   path('', views.projectlist_view, name = 'projects'),
   path('create/', views.create_view, name = 'create'),
-  path('app/project/delete/<int:pk>', views.delete_view, name = 'delete'),
+  path('/app/project/delete/<int:pk>', views.delete_view, name = 'delete'),
   path('balance/', views.balance, name= 'balance'),
   path('upload/<int:pk>', views.upload_files, name= 'upload'),
   path('filesview/<int:pk>', views.file_view, name = 'files'),
