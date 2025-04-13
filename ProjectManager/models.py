@@ -3,8 +3,8 @@ from os.path import basename
 # Create your models here.
 class Client(models.Model):
     name = models.CharField(max_length=30, verbose_name='Nombre y apellido')
-    dni = models.CharField(verbose_name='DNI')
-    phone = models.CharField(verbose_name='Tel')
+    dni = models.CharField(default="", verbose_name='DNI')
+    phone = models.CharField(default="", verbose_name='Telefono')
 
 class Project (models.Model):
     TYPE_CHOICES = (
@@ -30,8 +30,8 @@ class Project (models.Model):
     
     #Titular, que puede o no puede ser el cliente
     titular_name = models.CharField(max_length=30, verbose_name='Nombre y apellido')
-    titular_dni = models.IntegerField(verbose_name='DNI')
-    titular_phone = models.IntegerField(verbose_name='Telefono')
+    titular_dni = models.CharField(verbose_name='DNI')
+    titular_phone = models.CharField(verbose_name='Telefono')
     #Nomenclatura
     partido= models.CharField(max_length=30, blank=True, verbose_name='Partido')
     partida= models.CharField(max_length=30, blank=True, verbose_name='Partida')
