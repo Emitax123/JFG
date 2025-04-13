@@ -3,7 +3,7 @@ from os.path import basename
 # Create your models here.
 class Client(models.Model):
     name = models.CharField(max_length=30, verbose_name='Nombre y apellido')
-    dni = models.IntegerField(default=0, verbose_name='DNI')
+    dni = models.CharField(verbose_name='DNI')
     phone = models.CharField(verbose_name='Telefono')
 
 class Project (models.Model):
