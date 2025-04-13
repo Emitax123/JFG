@@ -4,7 +4,7 @@ from os.path import basename
 class Client(models.Model):
     name = models.CharField(max_length=30, verbose_name='Nombre y apellido')
     dni = models.CharField(verbose_name='DNI')
-    phone = models.CharField(verbose_name='Telefono')
+    phone = models.CharField(verbose_name='Tel')
 
 class Project (models.Model):
     TYPE_CHOICES = (
