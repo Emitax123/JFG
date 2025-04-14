@@ -4,7 +4,23 @@
   <div class="cont-project-div">
 
 
-    
+    <style>
+    .delete-button {
+      background-color: #ff0000;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+
+    .delete-container {
+      display: flex;
+      justify-content: flex-end;
+    }
+    </style>
     <div class="project-div">
       <h1>{{ project.type }}</h1>
       {% if project.type == "Mensura" %}
@@ -113,11 +129,10 @@
         </form>
       </div>
       <div class="delete-container">
-        <form action="{% url 'delete' pk=project.pk %}" method="POST">
-          {% csrf_token %}
-          <button class="delete-button" type="submit">Eliminar Proyecto</button>
-        </form>
-      </div>
+      <form action="{% url 'delete' pk=project.pk %}" method="POST">
+        <button class="delete-button" type="submit">Eliminar Proyecto</button>
+      </form>
+    </div>
       <!-- Boton de carga de archivos
       <div class="mini-div">
         <a class="files-tag" style="color: black;" href="{% url 'files' pk=project.pk %}" title="Ver archivos" ><span>Archivos</span></a>
@@ -136,7 +151,7 @@
   </div>
 
   <style>
-    div.info-box div.cqfmp span {
+     div.info-box div.cqfmp span {
       font-size: small;
      }
     div.info-box div.cqfmp {
@@ -155,7 +170,7 @@
     div.show-box.marginb100 {
       margin-bottom: 90px;
     }
-    
+ 
     .show-box {
       height: 20px;
       margin-top: 10px;
@@ -220,22 +235,8 @@
       margin-right: 20px;
       font-size: 12px;
     }
-    .delete-button {
-      background-color: #ff0000;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-bottom: 20px;
-    }
-
-    .delete-container {
-      display: flex;
-      justify-content: flex-end;
-    }
   </style>
+
   <script>
     document.getElementById('id_file_field').addEventListener('change', function() {
       var fileCount = this.files.length;
@@ -282,7 +283,8 @@
     buttons.forEach(function (button) {
       button.addEventListener('click', function (event) {
         event.preventDefault()
-    
+        // Hide the button and show the form next to button
+
         var form = button.nextElementSibling
         if (form && form.tagName === 'FORM') {
           form.style.display = 'flex'
@@ -291,6 +293,4 @@
       })
     })
   </script>
-  
-
 {% endblock %}
