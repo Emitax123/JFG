@@ -284,10 +284,8 @@
     buttons.forEach(function (button) {
       button.addEventListener('click', function (event) {
         event.preventDefault()
-        var form = button.parentElement.querySelector('form')
-        // or use:
-        if (form) {
-          // Display or perform actions on the form
+        var form = button.nextElementSibling
+        if (form && form.tagName === 'FORM') {
           form.style.display = 'flex'
           button.style.display = 'none'
         }
