@@ -130,10 +130,7 @@
       </div>
       <div class="delete-container">
       
-      {% csrf_token %}
-      <form action="{% url 'delete' pk=project.pk %}" method="POST">
-        <button class="delete-button" type="submit">Eliminar Proyecto</button>
-      </form>
+      
     </div>
       <!-- Boton de carga de archivos
       <div class="mini-div">
@@ -249,7 +246,7 @@
           label.textContent = fileCount + ' archivos';
       }
     });
-    
+
     var buttonArrow = document.querySelectorAll('button.arrow-button');
     
     buttonArrow.forEach(function (button){
@@ -281,29 +278,18 @@
       });
     });
     
-    var buttons = document.querySelectorAll('button.modify');
+    var buttons = document.querySelectorAll('button.modify')
     buttons.forEach(function (button) {
       button.addEventListener('click', function (event) {
-        event.preventDefault();
-        
-        // First hide all other forms and show their buttons
-        buttons.forEach(function(otherButton) {
-          if (otherButton !== button) {
-            var otherForm = otherButton.nextElementSibling;
-            if (otherForm && otherForm.tagName === 'FORM') {
-              otherForm.style.display = 'none';
-              otherButton.style.display = 'block';
-            }
-          }
-        });
+        event.preventDefault()
+        // Hide the button and show the form next to button
 
-        // Toggle current form
-        var form = button.nextElementSibling;
+        var form = button.nextElementSibling
         if (form && form.tagName === 'FORM') {
-          form.style.display = 'flex';
-          button.style.display = 'none';
+          form.style.display = 'flex'
+          button.style.display = 'none'
         }
-      });
-    });
+      })
+    })
   </script>
 {% endblock %}
