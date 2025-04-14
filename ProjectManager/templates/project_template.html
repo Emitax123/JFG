@@ -129,6 +129,8 @@
         </form>
       </div>
       <div class="delete-container">
+      
+      {% csrf_token %}
       <form action="{% url 'delete' pk=project.pk %}" method="POST">
         <button class="delete-button" type="submit">Eliminar Proyecto</button>
       </form>
@@ -247,33 +249,33 @@
           label.textContent = fileCount + ' archivos';
       }
     });
-
+    
     var buttonArrow = document.querySelectorAll('button.arrow-button');
     
     buttonArrow.forEach(function (button){
       var flag = true;
       button.addEventListener('click', function(){
-        var div = button.nextElementSibling; 
+        var infoBox = button.parentNode.querySelector('.info-box');
         var parentDiv = button.parentNode;
-        var divChilds = div.querySelectorAll('*');
+        var divChilds = infoBox.children;
+        
         if (flag){
-          div.style.transition = 'all 2s ease-in-out';
-          div.style.opacity = '1';
-          parentDiv.classList.toggle('marginb100');
-          divChilds.forEach(function(child){
-            console.log(child);
+          infoBox.style.transition = 'all 0.5s ease-in-out';
+          infoBox.style.opacity = '1';
+          parentDiv.classList.add('marginb100');
+          Array.from(divChilds).forEach(function(child){
             child.style.display = 'flex';
           });
           flag = false;
         } else {
-          div.style.display = 'flex';
-          div.style.transition = 'all 0.5s ';
-          div.style.opacity = '0';
-          divChilds.forEach(function(child){
-            console.log(child);
-            child.style.display = 'none';
-          });
+          infoBox.style.transition = 'all 0.5s ease-in-out';
+          infoBox.style.opacity = '0';
           parentDiv.classList.remove('marginb100');
+          setTimeout(function() {
+            Array.from(divChilds).forEach(function(child){
+              child.style.display = 'none';
+            });
+          }, 500);
           flag = true;
         }
       });
