@@ -73,6 +73,7 @@ class ProjectFiles (models.Model):
 class Event (models.Model):
     #Para modificaciones type=1
     #Para creaciones type = 2
+    #Para deletes type = 3
     type = models.IntegerField(default=0)
     time = models.DateTimeField(auto_now_add=True)
     model_pk = models.IntegerField(default=0)

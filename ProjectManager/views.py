@@ -59,7 +59,9 @@ def generate_month_data(months, year):
 def delete_view(request, pk):
     project = Project.objects.get(pk=pk)
     if request.method == 'POST':
+        msg = "Se ha eliminado un proyecto"
         project.delete()
+        save_in_history(pk, 3, msg)
         return redirect('projects')
     return redirect('index')
 
