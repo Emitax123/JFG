@@ -237,16 +237,7 @@
   </style>
 
   <script>
-    document.getElementById('id_file_field').addEventListener('change', function() {
-      var fileCount = this.files.length;
-      var label = document.getElementById('file-label');
-      if (fileCount === 1) {
-          label.textContent = '1 archivo';
-      } else {
-          label.textContent = fileCount + ' archivos';
-      }
-    });
-
+    
     var buttonArrow = document.querySelectorAll('button.arrow-button');
     
     buttonArrow.forEach(function (button){
