@@ -4,23 +4,7 @@
   <div class="cont-project-div">
 
 
-    <style>
-    .delete-button {
-      background-color: #ff0000;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-bottom: 20px;
-    }
-
-    .delete-container {
-      display: flex;
-      justify-content: flex-end;
-    }
-    </style>
+    
     <div class="project-div">
       <h1>{{ project.type }}</h1>
       {% if project.type == "Mensura" %}
@@ -150,150 +134,8 @@
     </div>
   </div>
 
+
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      document.getElementById('id_file_field')?.addEventListener('change', function() {
-        var fileCount = this.files.length;
-        var label = document.getElementById('file-label');
-        if (fileCount === 1) {
-            label.textContent = '1 archivo';
-        } else {
-            label.textContent = fileCount + ' archivos';
-        }
-      });
-
-      var buttonArrow = document.querySelectorAll('button.arrow-button');
-      
-      buttonArrow.forEach(function (button){
-        var flag = true;
-        button.addEventListener('click', function(){
-          var div = button.nextElementSibling; 
-          var parentDiv = button.parentNode;
-          var divChilds = div.querySelectorAll('*');
-          if (flag){
-            div.style.transition = 'all 2s ease-in-out';
-            div.style.opacity = '1';
-            parentDiv.classList.toggle('marginb100');
-            divChilds.forEach(function(child){
-              console.log(child);
-              child.style.display = 'flex';
-            });
-            flag = false;
-          } else {
-            div.style.display = 'flex';
-            div.style.transition = 'all 0.5s ';
-            div.style.opacity = '0';
-            divChilds.forEach(function(child){
-              console.log(child);
-              child.style.display = 'none';
-            });
-            parentDiv.classList.remove('marginb100');
-            flag = true;
-          }
-        });
-      });
-       
-      var buttons = document.querySelectorAll('button.modify')
-      buttons.forEach(function (button) {
-        button.addEventListener('click', function (event) {
-          event.preventDefault()
-      
-          var form = button.nextElementSibling
-          if (form && form.tagName === 'FORM') {
-            form.style.display = 'flex'
-            button.style.display = 'none'
-          }
-        })
-      })
-    });
-  </script>
-
-  <style>
-     div.info-box div.cqfmp span {
-      font-size: small;
-     }
-    div.info-box div.cqfmp {
-      flex-flow: row;
-    }
-    div.info-box div {
-      display: none;
-      flex-flow: column;
-      margin-top: 0;
-    }
-    div.info-box {
-      display: flex;
-      width: 100%;
-      opacity: 0;
-    }
-    div.show-box.marginb100 {
-      margin-bottom: 90px;
-    }
- 
-    .show-box {
-      height: 20px;
-      margin-top: 10px;
-      transition: margin-bottom 1s ease;
-      display: flex; flex-flow: wrap;
-    }
-    .show-box button.arrow-button{
-      background-color: transparent; border: none; cursor: pointer;
-    }
-    .show-box button.arrow-button img {
-      padding-bottom: 2px;
-      height: 25px; 
-      width: 30px;
-    }
-    .show-box span.slide-text {
-      margin-right: 10px;
-    }
-    div.expand {
-      background-color: blueviolet;
-      transition: 3s;
-    }
-    div.expand:hover{
-      height: 100px;
-    }
-    .project-div {
-      min-width: 599px;
-      padding: 20px;
-      background-color: white;
-      color: black;
-      box-shadow: 2px 2px 10px black;
-      border-radius: 10px;
-      display: flex;
-      flex-flow: column;
-    }
-    .project-div div.mini-div {
-      display: flex;
-      flex-flow: row;
-      max-height: 20px;
-      margin-right: 20px;
-      margin-top: 10px;
-    }
-    .project-div div span {
-      margin-right: 20px;
-      font-weight: 600;
-    }
-    input#id_file_field {
-      background-color: white;
-    }
-    input[type="file"] {
-      display: none;
-    }
-    #file-label {
-      border: 2px solid black;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding-bottom: 2px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-      width: 100px;
-      margin-right: 20px;
-      font-size: 12px;
-    }
-  </style>
     document.getElementById('id_file_field').addEventListener('change', function() {
       var fileCount = this.files.length;
       var label = document.getElementById('file-label');
@@ -334,7 +176,7 @@
         }
       });
     });
-     
+    
     var buttons = document.querySelectorAll('button.modify')
     buttons.forEach(function (button) {
       button.addEventListener('click', function (event) {
@@ -348,4 +190,21 @@
       })
     })
   </script>
+  <style>
+    .delete-button {
+      background-color: #ff0000;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+
+    .delete-container {
+      display: flex;
+      justify-content: flex-end;
+    }
+    </style>
 {% endblock %}
