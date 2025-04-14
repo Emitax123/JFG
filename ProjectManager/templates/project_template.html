@@ -255,27 +255,27 @@
     buttonArrow.forEach(function (button){
       var flag = true;
       button.addEventListener('click', function(){
-        var infoBox = button.parentNode.querySelector('.info-box');
+        var div = button.nextElementSibling; 
         var parentDiv = button.parentNode;
-        var divChilds = infoBox.children;
-        
+        var divChilds = div.querySelectorAll('*');
         if (flag){
-          infoBox.style.transition = 'all 0.5s ease-in-out';
-          infoBox.style.opacity = '1';
-          parentDiv.classList.add('marginb100');
-          Array.from(divChilds).forEach(function(child){
+          div.style.transition = 'all 2s ease-in-out';
+          div.style.opacity = '1';
+          parentDiv.classList.toggle('marginb100');
+          divChilds.forEach(function(child){
+            console.log(child);
             child.style.display = 'flex';
           });
           flag = false;
         } else {
-          infoBox.style.transition = 'all 0.5s ease-in-out';
-          infoBox.style.opacity = '0';
+          div.style.display = 'flex';
+          div.style.transition = 'all 0.5s ';
+          div.style.opacity = '0';
+          divChilds.forEach(function(child){
+            console.log(child);
+            child.style.display = 'none';
+          });
           parentDiv.classList.remove('marginb100');
-          setTimeout(function() {
-            Array.from(divChilds).forEach(function(child){
-              child.style.display = 'none';
-            });
-          }, 500);
           flag = true;
         }
       });
