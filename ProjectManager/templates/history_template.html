@@ -17,11 +17,19 @@
                 
                 {% for i in items %}
                     <div class="history-item" >
-                        <a href="{% url 'projectview' pk=i.model_pk %}">
-                        <span> {{ i.time|date:"d/m/Y" }} </span>
                     
-                        <span>{{ i.msg }}</span>
-                        </a>
+                        {% if i.type == 3 %}
+                            
+                            <span> {{ i.time|date:"d/m/Y" }} </span>
+                            <span style="padding-left: 4px;">{{ i.msg }}</span>
+                            
+                        {% else %}
+                            <a href="{% url 'projectview' pk=i.model_pk %}">
+                                <span> {{ i.time|date:"d/m/Y" }} </span>
+                                <span>{{ i.msg }}</span>
+                            </a>
+                        {% endif %}
+                        
                     </div>
                 {% endfor %}
             </div>

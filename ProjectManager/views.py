@@ -200,7 +200,6 @@ def history_view(request):
     grouped_objects_def = defaultdict(lambda: defaultdict(list))
     for h in history:
         year = h.time.year
-        print(year)
         month = h.time.month
         grouped_objects_def[year][month].append(h)
     for obj in grouped_objects_def:            
@@ -234,7 +233,7 @@ def upload_files(request, pk):
           
           files = form.cleaned_data['file_field']
           for f in files:
-              print(f.name)
+              
               file_instance = ProjectFiles(project = Project.objects.get(pk=pk), files = f)
               file_instance.save()  
 
@@ -243,6 +242,6 @@ def upload_files(request, pk):
 
 def file_view(request, pk):
     files = ProjectFiles.objects.filter(project__pk = pk)
-    print(files)
+    
     return render (request, 'files_template.html', {'files':files})   
 
