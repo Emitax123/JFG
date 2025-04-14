@@ -2,33 +2,36 @@
 {% load static %}
 {% block form %}
   <div class="cont-project-div">
-    <div class="delete-container">
-      <form method="post" action="{% url 'delete' pk=project.pk %}">
-        {% csrf_token %}
-        <button type="submit" class="delete-button" onclick="return confirm('¿Estás seguro que deseas eliminar este proyecto?')">
-          Eliminar Proyecto
-        </button>
-      </form>
-    </div>
+    
 
-    <style>
-    .delete-button {
-      background-color: #ff0000;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-bottom: 20px;
-    }
-
-    .delete-container {
-      display: flex;
-      justify-content: flex-end;
-    }
-    </style>
     <div class="project-div">
+      
+      <div class="delete-container">
+        <form method="post" action="{% url 'delete' pk=project.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="delete-button" onclick="return confirm('¿Estás seguro que deseas eliminar este proyecto?')">
+            Eliminar Proyecto
+          </button>
+        </form>
+      </div>
+      
+    <style>
+      .delete-button {
+        background-color: #ff0000;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-bottom: 20px;
+      }
+  
+      .delete-container {
+        display: flex;
+        justify-content: flex-end;
+      }
+      </style>
       <h1>{{ project.type }}</h1>
       {% if project.type == "Mensura" %}
         <h3>{{project.mens}}</h3>
