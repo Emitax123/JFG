@@ -2,7 +2,14 @@
 {% load static %}
 {% block form %}
   <div class="cont-project-div">
-
+    <div class="delete-container">
+      <form method="post" action="{% url 'delete_project' pk=project.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="delete-button" onclick="return confirm('¿Estás seguro que deseas eliminar este proyecto?')">
+          Eliminar Proyecto
+        </button>
+      </form>
+    </div>
 
     <style>
     .delete-button {
@@ -128,8 +135,6 @@
           <button class="blue-button" type="submit">Hecho</button>
         </form>
       </div>
-      <div class="delete-container">
-      
       
     </div>
       <!-- Boton de carga de archivos
