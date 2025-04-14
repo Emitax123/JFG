@@ -2,12 +2,6 @@
 {% load static %}
 {% block form %}
   <div class="cont-project-div">
-    <div class="delete-container">
-      <form action="{% url 'delete' pk=project.pk %}" method="POST">
-        {% csrf_token %}
-        <button class="delete-button" type="submit">Eliminar Proyecto</button>
-      </form>
-    </div>
 
 
     <style>
@@ -132,6 +126,11 @@
           {% csrf_token %}
           <input required placeholder="Nuevo gasto" type="number" name="gasto" />
           <button class="blue-button" type="submit">Hecho</button>
+        </form>
+      </div>
+      <div class="delete-container">
+        <form action="{% url 'delete' pk=project.pk %}" method="POST">
+          <button class="delete-button" type="submit">Eliminar Proyecto</button>
         </form>
       </div>
       <!-- Boton de carga de archivos
@@ -284,6 +283,8 @@
     buttons.forEach(function (button) {
       button.addEventListener('click', function (event) {
         event.preventDefault()
+        // Hide the button and show the form next to button
+
         var form = button.nextElementSibling
         if (form && form.tagName === 'FORM') {
           form.style.display = 'flex'
