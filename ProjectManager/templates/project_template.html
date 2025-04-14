@@ -278,13 +278,12 @@
         }
       });
     });
-    
+     
     var buttons = document.querySelectorAll('button.modify')
     buttons.forEach(function (button) {
       button.addEventListener('click', function (event) {
         event.preventDefault()
-        // Hide the button and show the form next to button
-
+    
         var form = button.nextElementSibling
         if (form && form.tagName === 'FORM') {
           form.style.display = 'flex'
@@ -293,4 +292,5 @@
       })
     })
   </script>
+</div>
 {% endblock %}
