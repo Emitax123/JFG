@@ -27,11 +27,14 @@
   
     
 </div>
+{% if pages.number > 1 %}
 <div class="pagination-cont" >
   {% for page in pages.page_range %}
    <a href="?page={{page}}">{{page}}</a>
   {% endfor %}
 </div>
+{% endif %}
+
 {% endif %}
 <style>
 
