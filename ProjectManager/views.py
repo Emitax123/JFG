@@ -61,7 +61,7 @@ def delete_view(request, pk):
     if request.method == 'POST':
         project.delete()
         return redirect('projects')
-    return render(request, 'index.html', {'project': project})
+    return redirect('index')
 
 #Vista del balance
 def balance(request):

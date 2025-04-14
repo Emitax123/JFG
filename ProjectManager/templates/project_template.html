@@ -3,7 +3,11 @@
 {% block form %}
   <div class="cont-project-div">
     <div class="delete-container">
-      <button class="delete-button" onclick="confirmDelete({{ project.pk }})">ELIMINAR PROYECTO</button>
+      <form action="{% url 'delete' pk=project.pk %}" method="POST">
+        {% csrf_token %}
+        <button class="delete-button" type="submit">Eliminar Proyecto</button>
+      </form>
+      
     </div>
 
     <style>
@@ -23,14 +27,6 @@
       justify-content: flex-end;
     }
     </style>
-
-    <script>
-    function confirmDelete(projectId) {
-      if (confirm('¿Está seguro que desea eliminar este proyecto?')) {
-        window.location.href = `delete/${projectId}`;
-      }
-    }
-    </script>
     <div class="project-div">
       <h1>{{ project.type }}</h1>
       {% if project.type == "Mensura" %}
