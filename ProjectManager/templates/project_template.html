@@ -3,7 +3,7 @@
 {% block form %}
   <div class="cont-project-div">
     <div class="delete-container">
-      <form method="post" action="{% url 'delete_project' pk=project.pk %}">
+      <form method="post" action="{% url 'delete' pk=project.pk %}">
         {% csrf_token %}
         <button type="submit" class="delete-button" onclick="return confirm('¿Estás seguro que deseas eliminar este proyecto?')">
           Eliminar Proyecto
