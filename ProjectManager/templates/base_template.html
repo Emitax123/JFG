@@ -1,15 +1,14 @@
 <html>
   <head>
     {% load static %}
-    
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="{% static 'img/Logo.jpg' %}">
+    <link rel="icon" type="image/x-icon" href="{% static 'img/favicon/favicon.ico' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">;
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">;
     <meta charset="utf-8" />
     <title>JF GESTION</title>
   </head>
@@ -17,11 +16,11 @@
         <!-- COMIENZO NAVBAR -->
        <nav >
         <div class="navbar">
-        <div id="logo"><a href="{% url 'projects' %}">
-          <img src="{% static 'img/Logo.jpg' %}" >
-        </a>
-            
-        </div>
+          <div id="logo">
+            <a href="{% url 'projects' %}">
+              <img src="{% static 'img/Logo.jpg' %}" >
+            </a> 
+          </div>
         <div class="nav-list">
         <ul class="nav-dropdown">
             <li><a href="{% url 'projects' %}">Proyectos</a></li>
@@ -96,6 +95,10 @@
 </style>
 
 <script>
+  // JavaScript for search functionality
+  // This script handles the search input, fetches results from the server, and displays them in a dropdown.
+  // It also includes debouncing to optimize performance and event listeners for user interactions.
+  // The search results are displayed in a dropdown below the input field, and clicking outside the dropdown closes it.
   document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('search-input');
     const resultsContainer = document.getElementById('results-cont');
@@ -104,7 +107,7 @@
     let searchTimeout;
     let isSearchActive = false;
 
-    // Search input handler with debouncing
+    
     searchInput.addEventListener('keyup', () => {
       const query = searchInput.value.trim();
       if (!query) {
