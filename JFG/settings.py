@@ -23,12 +23,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ov@+3upl)l1-8v^a*ivz&7p3av2&s233rsm)5+q&x!7z-%!-gj'
+SECRET_KEY = os.getenv('SECRET_KEY')
+#
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG =os.getenv('DEBUG', default=False) == 'True'
 
-ALLOWED_HOSTS = ['localhost','web-production-abe4.up.railway.app','127.0.0.1:8000','127.0.0.1']
+
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', default='localhost').split(',')
 CSRF_TRUSTED_ORIGINS = ['https://web-production-abe4.up.railway.app']
 
 # Application definition
@@ -138,3 +140,12 @@ STORAGES = {
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Security settings HTTPS
+SECURE_HSTS_SECONDS = 31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
