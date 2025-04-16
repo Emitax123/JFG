@@ -136,12 +136,19 @@ def create_view(request):
                 client_pk = request.POST.get('client-list')
                 form_instance.client = Client.objects.get(pk=client_pk)
             else:
-                client_instance = Client()
-                client_instance.name = request.POST.get('client-name')
-                client_instance.dni = request.POST.get('client-dni')
-                client_instance.phone = request.POST.get('client-phone')
-                form_instance.client = client_instance
-                client_instance.save()
+                # First try to find an existing client with the same name
+                existing_client = Client.objects.filter(name=request.POST.get('client-name')).first()
+                if existing_client:
+                    form_instance.client = existing_client
+                else:
+                    # If no existing client found, create new one
+                    client_instance = Client()
+                    client_instance.name = request.POST.get('client-name')
+                    client_instance.dni = request.POST.get('client-dni')
+                    client_instance.phone = request.POST.get('client-phone')
+                    form_instance.client = client_instance
+                    client_instance.save()
+               
             #Si el cliente es el titular
             if request.POST.get('client-titular-checkbox') == 'on':
                 #Asignamos los datos de clienta al titular

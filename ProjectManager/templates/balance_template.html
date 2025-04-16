@@ -70,6 +70,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data && data.labels && data.values && data.chart_type && data.label) {
+                    // Circle chart
                 const ctx = document.getElementById('myChart').getContext('2d');
                 
                 new Chart(ctx, {
@@ -86,7 +87,7 @@
                    
                 });
                 const ctxx = document.getElementById('myChart2').getContext('2d');
-                
+                // Bar Chart
                 new Chart(ctxx, {
                     type: 'bar',
                     data: {

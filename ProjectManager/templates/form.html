@@ -36,15 +36,15 @@
             <div style="width: 100%; display: flex; justify-content: center; ">
               <div id="clien-data" style="margin: 20px;" class="fields">
                 <h4>Datos cliente</h4>
-                <div style="margin: 10px;" class="input-field">
+                <div style="margin-top:10px; height: 80px;" class="input-field">
                   <label for="client-name">Nombre y apellido</label>
                   <input type="text" name="client-name" id="client-name" />
                 </div>
-                <div style="margin: 10px;" class="input-field">
+                <div style="height: 80px;" class="input-field">
                   <label for="client-dni">DNI</label>
                   <input type="text" name="client-dni" id="client-dni" />
                 </div>
-                <div style="margin: 10px;" class="input-field">
+                <div style="height: 80px;" class="input-field">
                   <label for="client-phone">Telefono</label>
                   <input type="text" name="client-phone" id="client-phone" />
                 </div>
@@ -56,15 +56,15 @@
             <!-- Datos Titular dentro de content 2 -->
               <div id="titular-data" style="margin: 20px;" class="fields">
                 <h4>Datos titular</h4>
-                <div style="margin: 10px;" class="input-field">
+                <div style="margin-top:10px; height: 80px;" class="input-field">
                 <label for="{{ form.titular_name.id_for_label }}">{{ form.titular_name.label }}</label>
                 {{ form.titular_name }}
                 </div>
-                <div style="margin: 10px;" class="input-field">
+                <div style="height: 80px;" class="input-field">
                 <label for="{{ form.titular_dni.id_for_label }}">{{ form.titular_dni.label }}</label>
                 {{ form.titular_dni }}
                 </div>
-                <div style="margin: 10px;" class="input-field">
+                <div style="height: 80px;" class="input-field">
                 <label for="{{ form.titular_phone.id_for_label }}">{{ form.titular_phone.label }}</label>
                 {{ form.titular_phone }}
                 </div>
@@ -75,7 +75,7 @@
           </div> <!-- End content 2 -->
           <!-- Content 3 -->      
           <div id="content3">
-            <div class="nomen-cont" style="margin: 20px; width: 100%;" class="fields">
+            <div class="nomen-cont fields" style="margin: 20px; width: 100%;">
               <div style="order: 0;" class="partida">
                 <div style="margin: 10px;" class="input-field">
                   <label for="{{ form.partido.id_for_label }}">{{ form.partido.label }}</label>
@@ -135,7 +135,7 @@
               </div>          
             </div>
             <div class="container-button">
-              <button type="submit" class="blue-button" name="save_and_backhome" class="next-bton">Guardar</button>
+              <button type="submit" class="blue-button next-bton" name="save_and_backhome">Guardar</button>
               <button type="button" class="blue-button" id="return2">Regresar</button>
             </div>      
           </div>
@@ -148,32 +148,12 @@
     // Disable the inputs when the select option is changed
     // and enable them when the select option is empty
 
-    const selectElement = document.getElementById('client-list')
-    const inputs = ['client-name', 'client-dni', 'client-phone'].map(id => document.getElementById(id));
-    selectElement.addEventListener('change', function () {
-      inputs.forEach(input => input.disabled = selectElement.value !== '');
-    });
+   
   </script>
 
   <script>
     
-    document.getElementById('client-titular-checkbox').addEventListener('change', function () {
-      // Obtener los elementos del formulario que deseas anular
-      const inputsToCheck = ['id_titular_name', 'id_titular_dni', 'id_titular_phone'].map(id => document.getElementById(id));
-
-      // Otros elementos que desees anular
-    
-      // Verificar si el checkbox está marcado o desmarcado
-      if (this.checked) {
-        // Si el checkbox está marcado, deshabilitar los inputs
-        inputsToCheck.forEach(input => input.disabled = true);
-        // Deshabilitar otros elementos que desees anular
-      } else {
-        // Si el checkbox está desmarcado, habilitar los inputs
-        inputsToCheck.forEach(input => input.disabled = false);
-        // Habilitar otros elementos que desees anular
-      }
-    })
+   
   </script>
 
   <script>
@@ -195,15 +175,22 @@
   
       
       
-      const toggleButton1 = document.getElementById('toggleButton1')
-      const toggleButton2 = document.getElementById('toggleButton2')
-      const return1 = document.getElementById('return1')
-      const return2 = document.getElementById('return2')
-      const content1 = document.getElementById('content1')
-      const clientInputs = document.getElementById('clien-data').querySelectorAll('input')
-      const titularInputs = document.getElementById('titular-data').querySelectorAll('input')
-      const content3 = document.getElementById('content3')
-      const selectedOption = document.getElementById('id_type')
+      const toggleButton1 = document.getElementById('toggleButton1');
+      const toggleButton2 = document.getElementById('toggleButton2');
+      const return1 = document.getElementById('return1');
+      const return2 = document.getElementById('return2');
+      const content1 = document.getElementById('content1');
+      
+
+      //collect all inputs of type=text inside clien-data
+      const content2 = document.getElementById('content2');
+      const clientInputs = document.getElementById('clien-data').querySelectorAll('input[type="text"]');
+      //const clientInputs = document.getElementById('clien-data').querySelectorAll('input');//exceptcheckox
+
+
+      const titularInputs = document.getElementById('titular-data').querySelectorAll('input');
+      const content3 = document.getElementById('content3');
+      const selectedOption = document.getElementById('id_type');
       //JS for content1
       selectedOption.addEventListener( 'change', () => {
         if (selectedOption.value !== '') {
@@ -215,14 +202,16 @@
         if (selectedOption.value === '') {
           event.preventDefault();
           showError(selectedOption, "Elegir el tipo de proyecto");
+          return;
           // Display an error message or provide visual feedback to the user
         } else {
           content1.style.transform = 'translateX(-100%)';
-          content2.style.transform = 'translateX(-115%)';
+          content2.style.transform = 'translateX(-112%)';
         }
       });
       //JS for content2
-      toggleButton2.addEventListener('click', () => {
+      toggleButton2.addEventListener('click', (event) => {
+        
         //select by id the checkbox inside content2
         const checkbox = document.getElementById('client-titular-checkbox')
         const clientSelector = document.getElementById('client-list')
@@ -284,39 +273,43 @@
             return;
           }
         }
-        content2.style.transform = 'translateX(-230%)'
-        content3.style.transform = 'translateX(-315%)'
+        content2.style.transform = 'translateX(-224%)'
+        content3.style.transform = 'translateX(-305%)'
       })
       return1.addEventListener('click', () => {
         content1.style.transform = 'translateX(0%)'
         content2.style.transform = 'translateX(0%)'
       })
       return2.addEventListener('click', () => {
-        content2.style.transform = 'translateX(-115%)'
+        content2.style.transform = 'translateX(-112%)'
         content3.style.transform = 'translateX(0%)'
       })
+
+
+    const selectElement = document.getElementById('client-list');
+    selectElement.addEventListener('change', function () {
+      clientInputs.forEach(input => input.disabled = selectElement.value !== '');
+      clientInputs.forEach(input => {
+        removeError(input);
+      });
+    });
+
+    //Checkbox Script
+    document.getElementById('client-titular-checkbox').addEventListener('change', function() {
+      if (this.checked) {
+        titularInputs.forEach(input => {
+          removeError(input);
+          input.disabled = true;
+          input.value = '';
+        });
+      } else {
+        titularInputs.forEach(input => {
+          input.disabled = false;
+        });
+      }
+    });
     </script>
   <style>
-    input:disabled {
-      cursor: default;
-      background-color: rgb(182, 178, 178) !important;
-      color: rgb(224, 224, 236) !important;
-      border-color: rgba(118, 118, 118, 0.3);
-    }
-    .container-button {
-      display: flex;
-      flex-flow: row!important;
-    }
-    form input.error,
-    form select.error {
-      border-color: #f91919;
-      background: #f9f0f1;
-    }
-    form small {
-      font-size: 14px;
-      margin-top: 5px;
-      display: block;
-      color: #f91919;
-    }
+    
   </style>
 {% endblock %}
