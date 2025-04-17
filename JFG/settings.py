@@ -15,6 +15,9 @@ from dotenv import load_dotenv
 import dj_database_url
 load_dotenv()
 
+from django.test.utils import ignore_warnings
+ignore_warnings(message="No directory at", module="whitenoise.base").enable()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -28,7 +31,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 #
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG =os.getenv('DEBUG', default=False, cast=bool)
+DEBUG =os.getenv('DEBUG', default=False) == 'True'
 
 
 
