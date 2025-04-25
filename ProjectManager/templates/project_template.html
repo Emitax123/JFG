@@ -260,7 +260,7 @@
       opacity: 0;
     }
     div.show-box.marginb100 {
-      margin-bottom: 90px;
+      margin-bottom: 1px;
     }
     .fix-show-box {
       
@@ -274,9 +274,9 @@
     }
     .show-box {
       padding: 0;
-      height: 20px;
+      
       margin-top: 10px;
-      transition: margin-bottom 1s ease;
+      transition: display 0.2s ease;
       display: flex; flex-flow: wrap;
     }
     .show-box button.arrow-button{
@@ -351,7 +351,7 @@
         var parentDiv = button.parentNode;
         var divChilds = div.querySelectorAll('*');
         if (flag){
-          div.style.transition = 'all 2s ease-in-out';
+          div.style.transition = 'all 1s ease-in-out';
           div.style.opacity = '1';
           parentDiv.classList.toggle('marginb100');
           divChilds.forEach(function(child){
