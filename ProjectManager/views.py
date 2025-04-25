@@ -109,7 +109,7 @@ def projectlist_view(request):
         return render (request, 'project_list_template.html', {'projects':projects, 'pages':pages})
     else:
         num_page = request.GET.get('page')
-        pages = Paginator (Project.objects.all().order_by('created'), 8)
+        pages = Paginator (Project.objects.all().order_by('-created'), 8)
         try:
             actual_pag = pages.get_page(num_page)
         except PageNotAnInteger:
@@ -179,6 +179,14 @@ def create_view(request):
 def mod_view(request, pk):
     if request.method == 'POST':
         instance = Project.objects.get(pk=pk)
+        if request.POST.get('client-data') == '':
+
+            instance.titular_name = instance.client.name
+            instance.titular_phone = instance.client.phone
+        if request.POST.get('titular'):
+            instance.titular_name = request.POST.get('titular')
+        if request.POST.get('titular_phone'):
+            instance.titular_phone = request.POST.get('titular_phone')
         if request.POST.get('proc'):
             instance.procedure = request.POST.get('proc')
         if request.POST.get('insctype'):

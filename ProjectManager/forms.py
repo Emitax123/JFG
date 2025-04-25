@@ -15,7 +15,6 @@ class ProjectForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ProjectForm, self).__init__(*args, **kwargs)
         self.fields['titular_name'].required = False
-        self.fields['titular_dni'].required = False
         self.fields['titular_phone'].required = False
         self.fields['mens'].required = False
         

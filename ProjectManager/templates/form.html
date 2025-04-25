@@ -33,6 +33,7 @@
                 {% endfor %}
               </select>
             </div>
+            <!-- Datos Cliente -->
             <div style="width: 100%; display: flex; justify-content: center; ">
               <div id="clien-data" style="margin: 20px;" class="fields">
                 <h4>Datos cliente</h4>
@@ -41,19 +42,12 @@
                   <input type="text" name="client-name" id="client-name" />
                 </div>
                 <div style="height: 80px;" class="input-field">
-                  <label for="client-dni">DNI</label>
-                  <input type="text" name="client-dni" id="client-dni" />
-                </div>
-                <div style="height: 80px;" class="input-field">
                   <label for="client-phone">Telefono</label>
                   <input type="text" name="client-phone" id="client-phone" />
                 </div>
-                <div style="margin: 10px; flex-flow: row; justify-content: flex-start; white-space: nowrap;" class="input-field check">
-                  <label style="font-weight: bold;" for="client_check">¿Es titular?</label>
-                  <input style="width: 50px;" type="checkbox" name="client-titular-checkbox" id="client-titular-checkbox" />
-                </div>
               </div>
             <!-- Datos Titular dentro de content 2 -->
+            <!--
               <div id="titular-data" style="margin: 20px;" class="fields">
                 <h4>Datos titular</h4>
                 <div style="margin-top:10px; height: 80px;" class="input-field">
@@ -68,11 +62,12 @@
                 <label for="{{ form.titular_phone.id_for_label }}">{{ form.titular_phone.label }}</label>
                 {{ form.titular_phone }}
                 </div>
-              </div>
+              </div>-->
             </div>
             <button type="button" class="blue-button" id="toggleButton2">Siguiente</button>
             <button type="button" class="blue-button" id="return1">Regresar</button>
-          </div> <!-- End content 2 -->
+          </div>  <!-- End content 2 -->
+       
           <!-- Content 3 -->      
           <div id="content3">
             <div class="nomen-cont fields" style="margin: 20px; width: 100%;">
@@ -157,7 +152,21 @@
   </script>
 
   <script>
-  
+
+    const projectTypleSelect = document.getElementById('id_type');
+
+    projectTypleSelect.addEventListener('change', function () {
+      const mensElement = document.getElementById('id_mens');
+      if (this.value === 'Mensura') {
+        mensElement.disabled = false;
+      } else {
+        mensElement.value = ''; // Clear the value if not Mensura
+        mensElement.disabled = true;
+      }
+    });
+
+
+
       // Function to display error messages
       const showError = (field, errorText) => {
         field.classList.add("error");
@@ -180,15 +189,13 @@
       const return1 = document.getElementById('return1');
       const return2 = document.getElementById('return2');
       const content1 = document.getElementById('content1');
-      
-
       //collect all inputs of type=text inside clien-data
       const content2 = document.getElementById('content2');
       const clientInputs = document.getElementById('clien-data').querySelectorAll('input[type="text"]');
       //const clientInputs = document.getElementById('clien-data').querySelectorAll('input');//exceptcheckox
 
 
-      const titularInputs = document.getElementById('titular-data').querySelectorAll('input');
+      
       const content3 = document.getElementById('content3');
       const selectedOption = document.getElementById('id_type');
       //JS for content1
@@ -197,6 +204,7 @@
           removeError(selectedOption);
         }
       });
+
       toggleButton1.addEventListener('click', (event) => {
         removeError(selectedOption);
         if (selectedOption.value === '') {
@@ -210,65 +218,24 @@
         }
       });
       //JS for content2
+
       toggleButton2.addEventListener('click', (event) => {
-        
-        //select by id the checkbox inside content2
-        const checkbox = document.getElementById('client-titular-checkbox')
-        const clientSelector = document.getElementById('client-list')
-        //Checkbox is checked and clientSelector is empty
-        if (checkbox.checked && clientSelector.value == '') {
-        let allFilled = true;
-        titularInputs.forEach(input => {
-          removeError(input);
-        });
-        clientInputs.forEach(input => {
-          removeError(input);
-          if (input.value.trim() === '') {
-            allFilled = false;
-            showError(input, "Este campo es obligatorio");
-          }
-        });
-        if (!allFilled) {
-          event.preventDefault();
-          return;
-        }
-        }
-        //Checkbox is unchecked and clientSelector is not empty
-        if (!checkbox.checked && clientSelector.value !== '') {
+        const clientList = document.getElementById('client-list');
+        const clientInputs = document.getElementById('clien-data').querySelectorAll('input[type="text"]');
+
+        // Remove any existing errors first
+        clientInputs.forEach(input => removeError(input));
+
+        if (clientList.value === '') {
+          // Check each input in client-data
+          let isValid = true;
           clientInputs.forEach(input => {
-            removeError(input);
-          });
-          let allFilled = true;
-          titularInputs.forEach(input => {
-            removeError(input);
             if (input.value.trim() === '') {
-              allFilled = false;
-              showError(input, "Este campo es obligatorio");
+              isValid = false;
+              showError(input, "Este campo es requerido");
             }
           });
-          if (!allFilled) {
-            event.preventDefault();
-            return;
-          }
-        }
-        //Checkbox is unchecked and clientSelector is empty
-        if (!checkbox.checked && clientSelector.value == '') {
-          let allFilled = true;
-          clientInputs.forEach(input => {
-            removeError(input);
-            if (input.value.trim() === '') {
-              allFilled = false;
-              showError(input, "Este campo es obligatorio");
-            }
-          });
-          titularInputs.forEach(input => {
-            removeError(input);
-            if (input.value.trim() === '') {
-              allFilled = false;
-              showError(input, "Este campo es obligatorio");
-            }
-          });
-          if (!allFilled) {
+          if (!isValid) {
             event.preventDefault();
             return;
           }
@@ -294,20 +261,7 @@
       });
     });
 
-    //Checkbox Script
-    document.getElementById('client-titular-checkbox').addEventListener('change', function() {
-      if (this.checked) {
-        titularInputs.forEach(input => {
-          removeError(input);
-          input.disabled = true;
-          input.value = '';
-        });
-      } else {
-        titularInputs.forEach(input => {
-          input.disabled = false;
-        });
-      }
-    });
+   
     </script>
   <style>
     

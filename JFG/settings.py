@@ -31,12 +31,13 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 #
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "False").lower() == "true"
+DEBUG = True
 
 
-
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS',"").split(',')
+ALLOWED_HOSTS = ['localhost','web-production-abe4.up.railway.app','127.0.0.1:8000','127.0.0.1','*']
 CSRF_TRUSTED_ORIGINS = ['https://web-production-abe4.up.railway.app']
+
+LOGIN_URL = 'login'
 
 # Application definition
 
@@ -50,6 +51,7 @@ INSTALLED_APPS = [
     'whitenoise.runserver_nostatic',
     'ProjectManager',
     'Accounting',
+    'Users',
 ]
 
 MIDDLEWARE = [
@@ -144,11 +146,11 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Security settings HTTPS
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+'''SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_HSTS_SECONDS = 31536000
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 
 SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True'''

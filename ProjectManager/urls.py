@@ -1,4 +1,5 @@
-from django.urls import path, include
+from django.urls import path
+from django.urls import include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.staticfiles.urls import static, staticfiles_urlpatterns
@@ -17,6 +18,7 @@ urlpatterns = [
   path('history', views.history_view, name='history'),
   path('chart-data/', views.chart_data, name='chartdata'),
   path('search/', views.search, name='search'),
+  path('users/', include ('Users.urls')),
   
 ]
 urlpatterns += staticfiles_urlpatterns()
