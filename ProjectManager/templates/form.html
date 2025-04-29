@@ -74,19 +74,19 @@
               <div style="order: 0;" class="partida">
                 <div style="margin: 10px;" class="input-field">
                   <label for="{{ form.partido.id_for_label }}">{{ form.partido.label }}</label>
-                  {{ form.partido }}
+                  {{ form.partido|attr:"placeholder:Partido"  }}
                 </div>
                 <div style="margin: 10px;" class="input-field">
                   <label for="{{ form.partida.id_for_label }}">{{ form.partida.label }}</label>
-                  {{ form.partida }}
+                  {{ form.partida|attr:"placeholder:Partida"  }}
                 </div>
                 <div style="margin: 10px;" class="input-field">
                   <label for="{{ form.circuns.id_for_label }}">{{ form.circuns.label }}</label>
-                  {{ form.circuns }}
+                  {{ form.circuns|attr:"placeholder:Cricunscripcion"  }}
                 </div>
                 <div style="margin: 10px;" class="input-field">
                   <label for="{{ form.seccion.id_for_label }}">{{ form.seccion.label }}</label>
-                  {{ form.seccion }}
+                    {{ form.seccion|attr:"placeholder:Seccion" }}
                 </div>
               </div>
 
