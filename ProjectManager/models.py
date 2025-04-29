@@ -55,9 +55,9 @@ class Project (models.Model):
     subparcela = models.CharField(max_length=10, blank=True, verbose_name='Subparcela')
    
     
-    direction = models.CharField(max_length=30, blank=True, verbose_name='Direccion')
-    floor = models.CharField(max_length=30, blank=True, verbose_name='Piso')
-    depto = models.CharField(max_length=30, blank=True, verbose_name='Depto')
+    direction = models.CharField(max_length=50, blank=True, verbose_name='Direccion')
+    floor = models.CharField(max_length=10, blank=True, verbose_name='Piso')
+    depto = models.CharField(max_length=10, blank=True, verbose_name='Depto')
 
     INSC_CHOICES = (
         ('Folio','Folio'),
