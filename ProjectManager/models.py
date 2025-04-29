@@ -23,7 +23,7 @@ class Project (models.Model):
         )
     
     type = models.CharField(max_length=30, choices=TYPE_CHOICES, verbose_name='Proyecto')
-    mens = models.CharField(max_length=30, choices=MENS_CHOICES, verbose_name='Mensura')
+    mens = models.CharField(null=True, blank=True, max_length=30, choices=MENS_CHOICES, verbose_name='Mensura')
     #CLiente
     client = models.ForeignKey(Client, on_delete=models.CASCADE, null=True)
     
@@ -46,11 +46,24 @@ class Project (models.Model):
     fraccion_num = models.CharField(max_length=10, blank=True, verbose_name='Numero')
     fraccion_letra = models.CharField(max_length=10, blank=True, verbose_name='Letra')
     
+    manzana_num= models.CharField(max_length=10, blank=True, verbose_name='Numero')
+    manzana_letra= models.CharField(max_length=10, blank=True, verbose_name='Letra')
+
+    parcela_num = models.CharField(max_length=10, blank=True, verbose_name='Numero')
+    parcela_letra = models.CharField(max_length=10, blank=True, verbose_name='Letra')
+    
+    subparcela = models.CharField(max_length=10, blank=True, verbose_name='Subparcela')
+   
+    
+    direction = models.CharField(max_length=30, blank=True, verbose_name='Direccion')
+    floor = models.CharField(max_length=30, blank=True, verbose_name='Piso')
+    depto = models.CharField(max_length=30, blank=True, verbose_name='Depto')
+
     INSC_CHOICES = (
         ('Folio','Folio'),
         ('Matricula','Matricula'),
         )
-    inscription_type = models.CharField(null=True, max_length=30, default='', choices=INSC_CHOICES, verbose_name='Parcela')
+    inscription_type = models.CharField(null=True, max_length=30, default='', choices=INSC_CHOICES, verbose_name='Inscripcion')
     #Costos
     price = models.DecimalField(default=0, decimal_places=2, max_digits=8, verbose_name='Presupuesto')
     adv = models.DecimalField(default=0, decimal_places=2, max_digits=8, verbose_name='Anticipo')

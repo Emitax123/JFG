@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.core.paginator import Paginator, PageNotAnInteger
-from .forms import ProjectForm, FileFieldForm, DecimalForm
+from .forms import ProjectForm, FileFieldForm, ProjectFullForm
 from .models import Project, Client, Event, ProjectFiles
 from django.db.models import Q
 from decimal import Decimal as Dec
@@ -180,7 +180,6 @@ def mod_view(request, pk):
     if request.method == 'POST':
         instance = Project.objects.get(pk=pk)
         if request.POST.get('client-data') == '':
-
             instance.titular_name = instance.client.name
             instance.titular_phone = instance.client.phone
         if request.POST.get('titular'):
@@ -192,14 +191,11 @@ def mod_view(request, pk):
         if request.POST.get('insctype'):
             instance.inscription_type = request.POST.get('insctype')
         if request.POST.get('price'):
-            if isinstance(request.POST.get('price'), int):
-                print(request.POST.get('price'))
             instance.price = request.POST.get('price')
         if request.POST.get('adv'):
             instance.adv = instance.adv + Dec(request.POST.get('adv'))
         if request.POST.get('gasto'):
             instance.gasto = instance.gasto + Dec(request.POST.get('gasto'))
-        
         instance.save()
         msg = "Se ha modificado un proyecto"   
         pk = instance.pk
@@ -208,6 +204,22 @@ def mod_view(request, pk):
     prev = request.META.get('HTTP_REFERER')
     return redirect(prev)
 
+#Modificacion total del proyecto
+def full_mod_view(request, pk):
+    if request.method == 'POST':
+        instance = Project.objects.get(pk=pk)
+        form = ProjectFullForm(request.POST, instance=instance) 
+        if form.is_valid():
+            print("El formulario es valido")
+            form.save()
+            msg = "Se ha modificado un proyecto"   
+            pk = instance.pk
+            save_in_history(pk, 1, msg)
+            return redirect('projectview', pk=pk)
+    else:
+        instance = Project.objects.get(pk=pk)
+        form = ProjectFullForm(instance=instance)
+    return render (request, 'full_mod_template.html', {'form':form, 'project':instance})
 
 #Vista de historial
 def history_view(request):
@@ -228,7 +240,7 @@ def search(request):
     # Perform your search logic here and get the results
     if query:
         objectcs = Project.objects.filter(
-                 Q(client__name__icontains=query) | Q(partido__icontains=query)
+                 Q(client__name__icontains=query) | Q(partida__icontains=query)
             ).order_by('-created')[:5]
         results = []
         for obj in objectcs:

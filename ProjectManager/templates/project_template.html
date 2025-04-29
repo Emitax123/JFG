@@ -14,11 +14,16 @@
           </button>
         </form>
       </div>
+      <div>
+        
+        <div style="display: flex; flex-flow: wrap; align-items: flex-end;"><h1>{{ project.type }}</h1><h4 style="margin-left: 10px; padding-bottom: 6px;">{{project.created|date:"d/m/Y"}}</h4></div>
+        
+        {% if project.type == "Mensura" %}
+          <h3>{{project.mens}}</h3>
+        {% endif %}
+      </div>
       
-      <h1>{{ project.type }}</h1>
-      {% if project.type == "Mensura" %}
-        <h3>{{project.mens}}</h3>
-      {% endif %}
+      
       {% if not project.titular_name%}
       <div class="fix-show-box" style="" id="client-titular" >
       {% else %}
@@ -98,13 +103,13 @@
             </div>
             <div style="flex-flow: column;" >
               <span>Manzana: {{p.manzana_num}} {{p.manzana_letra}} </span>
-              <span>Parcela: {{p.parcela_num}} {{p.manzana_letra}} </span>
-              <span>Subparcela: #faltamodificar </span>
+              <span>Parcela: {{p.parcela_num}} {{p.parcela_letra}} </span>
+              <span>Subparcela: {{p.subparcela}} </span>
             </div>
             <div style="flex-flow: column;" >
-              <span>Dirección: #faltamodificar </span>
-              <span>Piso: #faltamodificar </span>
-              <span>Departamento: #faltamodificar </span>
+              <span>Dirección: {{p.direction}} </span>
+              <span>Piso:{{p.floor}}</span>
+              <span>Departamento:{{p.depto}} </span>
             </div>
             
             {% endwith %}
@@ -182,6 +187,30 @@
       </div>
         -->
     </div>
+    <div class="full-modify-btn-container">
+
+      <button class="blue-button" onclick="window.location.href='{% url 'fullmodification' pk=project.pk %}'" class="full-modify-btn">
+        Modificación completa
+      </button>
+    </div>
+
+    <style>
+      .full-modify-btn-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+        height: 40px;
+        width: 80px;
+      }
+      .full-modify-btn-container button.blue-button {
+        padding: 5px;
+        font-weight: 700;
+      }
+      
+      
+
+    
+    </style>
   </div>
 
   <style>
@@ -217,7 +246,11 @@
       width: 130px;
       height: 40px;
     }
-
+    .delete-button:hover {
+      background-color: #cc0000;
+      transform: scale(1.05);
+      transition: all 0.2s ease;
+    }
     .delete-container {
       display: flex;
       justify-content: flex-end;
@@ -258,6 +291,7 @@
     div.info-box {
       display: flex;
       opacity: 0;
+      width: 100%;
     }
     div.show-box.marginb100 {
       margin-bottom: 1px;

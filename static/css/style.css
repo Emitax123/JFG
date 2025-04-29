@@ -352,6 +352,9 @@ footer{
   flex-flow: column;
 }
 
+div.nomen-cont div.directions div.sub-input input {
+  width: 150px;
+}
 .sub-input input {
   margin-right: 5px;
 }
@@ -391,6 +394,10 @@ button {
   white-space: nowrap;
 
 }
+.blue-button:hover {
+  background-color: #005b75;
+  transition: background-color 0.3s ease;
+}
 
 .white-button {
   background-color: white;
@@ -412,6 +419,13 @@ div.nomen-cont {
   justify-content: center;
 }
 
+div.nomen-cont div.partida {
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+  align-items: center;
+  margin-right: 10px;
+}
 
 div.input-field div.sub-input {
   display: flex;
@@ -421,6 +435,10 @@ div.input-field div.sub-input {
 div.input-field div.sub-input input {
   margin-right: 5px;
   width: 80px;
+}
+div.input-field div.sub-input-long input {
+  margin-right: 5px;
+  width: 100px;
 }
 
 textarea{
@@ -446,6 +464,13 @@ input:disabled {
 .container-button {
   display: flex;
   flex-flow: row!important;
+  justify-content: space-between;
+  margin-left: 10px;
+  min-width: 170px;
+}
+.container-button button{
+  margin-right:0px!important;
+  
 }
 form input.error,
 form select.error {

@@ -15,6 +15,7 @@ urlpatterns = [
   path('filesview/<int:pk>', views.file_view, name = 'files'),
   path('project/<int:pk>',views.project_view, name= 'projectview'),
   path('project/mod/<int:pk>', views.mod_view, name= 'modification',),
+  path('project/modify/<int:pk>', views.full_mod_view, name='fullmodification'),
   path('history', views.history_view, name='history'),
   path('chart-data/', views.chart_data, name='chartdata'),
   path('search/', views.search, name='search'),

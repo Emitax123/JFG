@@ -17,7 +17,35 @@ class ProjectForm(forms.ModelForm):
         self.fields['titular_name'].required = False
         self.fields['titular_phone'].required = False
         self.fields['mens'].required = False
+
+class ProjectFullForm(forms.ModelForm):
+    class Meta:
+        model = Project
+        fields = '__all__'
+        exclude = ['client','titular_name', 'titular_phone','inscription_type', 'price', 'adv', 'gasto', 'procedure', 'files']
+    
+    def __init__(self, *args, **kwargs):
+        super(ProjectFullForm, self).__init__(*args, **kwargs)
+        self.fields['titular_name'].required = False
+        self.fields['titular_phone'].required = False
+        self.fields['mens'].required = False
+
+    def __init__(self, *args, **kwargs):
+        super(ProjectFullForm, self).__init__(*args, **kwargs)
+        self.fields['chacra_num'].label = "Chacra Num"
+        self.fields['chacra_letra'].label = "Chacra Letra"
+        self.fields['quinta_num'].label = "Quinta Num"
+        self.fields['quinta_letra'].label = "Quinta Letra"
+        self.fields['parcela_num'].label = "Parcela Num"
+        self.fields['parcela_letra'].label = "Parcela Letra"
+        self.fields['manzana_num'].label = "Manzana Num"
+        self.fields['manzana_letra'].label = "Manzana Letra"
+        self.fields['fraccion_num'].label = "Fraccion Num"
+        self.fields['fraccion_letra'].label = "Fraccion Letra"
         
+
+
+
 class ProjectFormMod(forms.ModelForm):
     class Meta:
         model = Project
