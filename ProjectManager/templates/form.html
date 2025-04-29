@@ -1,5 +1,6 @@
 {% extends 'base_template.html' %}
 {% load static %}
+{% load widget_tweaks %}
 {% block form %}
   <div class="container-form">
     <div class="form-location">
@@ -75,6 +76,7 @@
                 <div style="margin: 10px;" class="input-field">
                   <label for="{{ form.partido.id_for_label }}">{{ form.partido.label }}</label>
                   {{ form.partido|attr:"placeholder:Partido"  }}
+
                 </div>
                 <div style="margin: 10px;" class="input-field">
                   <label for="{{ form.partida.id_for_label }}">{{ form.partida.label }}</label>
