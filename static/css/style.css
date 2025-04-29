@@ -351,7 +351,9 @@ footer{
   display: flex;
   flex-flow: column;
 }
-
+div.nomen-cont div.directions div.sub-input input[name="subparcela"] {
+  width: 250px;
+}
 div.nomen-cont div.directions div.sub-input input {
   width: 150px;
 }
