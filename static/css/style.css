@@ -388,6 +388,9 @@ button {
   align-items: center;
   justify-content: center;
 }
+.small-btn {
+  max-height: 25px;
+}
 .blue-button {
   background-color: #00799b;
   color: white;

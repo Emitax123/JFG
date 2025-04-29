@@ -3,6 +3,7 @@
 {% block form %}
 
 <div id="galeria-work" class="galeria-work">
+  <div>
     {% if no_projects %}
       <span>No se encontraron resultados</span>
     {% else %}
@@ -22,10 +23,7 @@
     
     {% endfor %}
     
-    
-      
-  
-    
+  </div>    
 </div>
 {% if pages.number > 1 %}
 <div class="pagination-cont" >
@@ -61,8 +59,13 @@
   height: 80%;
   display: flex;
   flex-wrap: wrap;
-  justify-content:start;
-
+  justify-content: center;
+  
+}
+.galeria-work div {
+  display: flex;
+  flex-flow: wrap;
+  justify-content: start;
 }
 
 a {

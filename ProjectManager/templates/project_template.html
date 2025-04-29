@@ -59,7 +59,7 @@
               <div style="min-width: 280px; display: flex; flex-flow: row; justify-content: space-between;" >
                 <span>Nombre: <span class="client-span1">{{project.titular_name}}</span> </span> 
                 {% if project.titular_name %}
-                <button class="blue-button client-btn">Modificar</button>
+                <button class="small-btn blue-button client-btn">Modificar</button>
                 {% endif %}
                 <form style="display: none;" method="post" action="{% url 'modification' pk=project.pk %}">
                   {% csrf_token %}
@@ -70,7 +70,7 @@
               <div style="min-width: 280px; display: flex; flex-flow: row; justify-content: space-between;" >
                 <span> Telefono: <span class="client-span1">{{project.titular_phone}} </span></span>
                 {% if project.titular_name %}
-                <button class="blue-button client-btn">Modificar</button>
+                <button class="small-btn blue-button client-btn">Modificar</button>
                 {% endif %}
                 <form style="display: none;" method="post" action="{% url 'modification' pk=project.pk %}" >
                   {% csrf_token %}
@@ -123,7 +123,7 @@
         <form style="display: none;" method="post" action="{% url 'modification' pk=project.pk %}" id="proc-form">
           {% csrf_token %}
           <input required autocomplete="off" placeholder="N° Tramite" type="number" name="proc" />
-          <button class="blue-button" type="submit">Hecho</button>
+          <button class="small-btn blue-button" type="submit">Hecho</button>
         </form>
       </div>
 
@@ -137,7 +137,7 @@
             <option value="Folio">Folio</option>
             <option value="Matricula">Matricula</option>
           </select>
-          <button class="blue-button" type="submit">Hecho</button>
+          <button class="small-btn blue-button" type="submit">Hecho</button>
         </form>
       </div>
 
@@ -147,7 +147,7 @@
         <form style="display: none;" method="post" action="{% url 'modification' pk=project.pk %}" id="price-form">
           {% csrf_token %}
           <input required placeholder="Presupuesto" type="number" name="price" />
-          <button class="blue-button" type="submit">Hecho</button>
+          <button class="small-btn blue-button" type="submit">Hecho</button>
         </form>
       </div>
 
@@ -157,7 +157,7 @@
         <form style="display: none;" method="post" action="{% url 'modification' pk=project.pk %}" id="adv-form">
           {% csrf_token %}
           <input required placeholder="Nuevo adelanto" type="number" name="adv" />
-          <button class="blue-button" type="submit">Hecho</button>
+          <button class="small-btn blue-button" type="submit">Hecho</button>
         </form>
       </div>
 
@@ -167,7 +167,7 @@
         <form style="display: none;" method="post" action="{% url 'modification' pk=project.pk %}" id="gasto-form">
           {% csrf_token %}
           <input required placeholder="Nuevo gasto" type="number" name="gasto" />
-          <button class="blue-button" type="submit">Hecho</button>
+          <button class="small-btn blue-button" type="submit">Hecho</button>
         </form>
       </div>
       
