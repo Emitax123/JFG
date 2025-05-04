@@ -4,6 +4,7 @@ from os.path import basename
 class Client(models.Model):
     name = models.CharField(max_length=40, verbose_name='Nombre y apellido')
     phone = models.CharField(max_length=40, default="", verbose_name='Telefono')
+    flag = models.BooleanField(default=False, verbose_name='Fijo')
 
 class Project (models.Model):
     TYPE_CHOICES = (
@@ -65,9 +66,9 @@ class Project (models.Model):
         )
     inscription_type = models.CharField(null=True, max_length=30, default='', choices=INSC_CHOICES, verbose_name='Inscripcion')
     #Costos
-    price = models.DecimalField(default=0, decimal_places=2, max_digits=8, verbose_name='Presupuesto')
-    adv = models.DecimalField(default=0, decimal_places=2, max_digits=8, verbose_name='Anticipo')
-    gasto = models.DecimalField(default=0, decimal_places=2, max_digits=8, verbose_name='Gastos')
+    price = models.DecimalField(default=0, decimal_places=2, max_digits=10, verbose_name='Presupuesto')
+    adv = models.DecimalField(default=0, decimal_places=2, max_digits=10, verbose_name='Anticipo')
+    gasto = models.DecimalField(default=0, decimal_places=2, max_digits=10, verbose_name='Gastos')
     #Datos finales
     procedure = models.IntegerField(null=True, verbose_name='N° Tramite')
     #aprob = models.DateField(default=)

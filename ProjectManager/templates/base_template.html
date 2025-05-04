@@ -26,7 +26,8 @@
             <li><a href="{% url 'projects' %}">Proyectos</a></li>
             <li><a href="{% url 'balance' %}">Balances</a></li>
             <li><a href="{% url 'history' %}">Historial</a></li>  
-            <li><a href="{% url 'create' %}">Formulario</a></li> <!-- AGREGAMOS FORMULARIO AL NAVBAR QUE REDIRECCIONA AL FORMULARIO EN UNA NUEVA PAGINA -->
+            <li><a href="{% url 'create' %}">Formulario</a></li> 
+            <li><a href="{% url 'clients' %}">Clientes</a></li><!-- AGREGAMOS FORMULARIO AL NAVBAR QUE REDIRECCIONA AL FORMULARIO EN UNA NUEVA PAGINA -->
             <li>
               <form method="post" id="search-form" style="display: flex; flex-flow: row;" action="{% url 'projects' %}">
                 {% csrf_token %}

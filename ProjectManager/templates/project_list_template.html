@@ -5,7 +5,7 @@
 <div id="galeria-work" class="galeria-work">
   <div>
     {% if no_projects %}
-      <span>No se encontraron resultados</span>
+      <span style="font-weight: bold;">No se encontraron resultados</span>
     {% else %}
     {% for Project in projects %}
     <div>
@@ -25,7 +25,7 @@
     
   </div>    
 </div>
-{% if pages.number > 1 %}
+{% if pages.num_pages > 1 %}
 <div class="pagination-cont" >
   {% for page in pages.page_range %}
    <a href="?page={{page}}">{{page}}</a>
@@ -71,7 +71,7 @@
 a {
   text-decoration: none;
 }
-.cont-work {
+div.cont-work {
   width: 300px;
   height: 200px;
   padding: 20px;

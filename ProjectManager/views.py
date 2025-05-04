@@ -58,9 +58,11 @@ def generate_month_data(months, year):
 #add a delete project function
 def delete_view(request, pk):
     project = Project.objects.get(pk=pk)
+    event = Event.objects.filter(model_pk=pk).first()
     if request.method == 'POST':
         msg = "Se ha eliminado un proyecto"
         project.delete()
+        event.delete()
         save_in_history(pk, 3, msg)
         return redirect('projects')
     return redirect('index')
@@ -90,9 +92,11 @@ def balance(request):
     net = adv-gastos
     return render (request, 'balance_template.html', {'total':total, 'adv':adv, 'cant':cant, 'percent':percent, 'gastos':gastos, 'net':net, 'month':month_str(month), 'year':year})
 
-#Vista de los proyectos
+#Vista de los proyectos todos
 def projectlist_view(request):
+    print("paginas")
     if request.method == 'POST':
+        print("metodo post")
         if request.POST.get('search-input')!="":
             query = request.POST.get('search-input')
             projects = Project.objects.filter(
@@ -103,10 +107,11 @@ def projectlist_view(request):
             try:
                actual_pag = pages.get_page(num_page)
             except PageNotAnInteger:
-              actual_pag = pages.get_page(1)
+               actual_pag = pages.get_page(1)
             if not projects:
-                return render (request, 'project_list_template.html', {'no_projects':True})    
-        return render (request, 'project_list_template.html', {'projects':projects, 'pages':pages})
+                return render (request, 'project_list_template.html', {'no_projects':True})
+    
+        return render (request, 'project_list_template.html', {'projects':actual_pag, 'pages':pages})
     else:
         num_page = request.GET.get('page')
         pages = Paginator (Project.objects.all().order_by('-created'), 8)
@@ -114,8 +119,21 @@ def projectlist_view(request):
             actual_pag = pages.get_page(num_page)
         except PageNotAnInteger:
             actual_pag = pages.get_page(1)
+        print(pages.num_pages)
     return render (request, 'project_list_template.html', {'projects':actual_pag, 'pages':pages})
 
+#Lista de proyectos por cliente
+def alt_projectlist_view(request, pk):
+    projects = Project.objects.filter(client__pk__icontains=pk).order_by('-created')
+    num_page = request.GET.get('page')
+    pages = Paginator (projects, 8)
+    try:
+        actual_pag = pages.get_page(num_page)
+    except PageNotAnInteger:
+        actual_pag = pages.get_page(1)
+    if not projects:
+        return render (request, 'project_list_template.html', {'no_projects':True})   
+    return render (request, 'project_list_template.html', {'projects':actual_pag, 'pages':pages})
 
 def project_view(request,pk):
     project = Project.objects.get(pk=pk)
@@ -132,6 +150,9 @@ def create_view(request):
         form = ProjectForm(request.POST)    
         if form.is_valid():
             form_instance = form.save(commit=False)
+            if request.POST.get('client-pk'):
+                client_pk = request.POST.get('client-pk')
+                form_instance.client = Client.objects.get(pk=client_pk)
             if request.POST.get('client-list')!="":
                 client_pk = request.POST.get('client-list')
                 form_instance.client = Client.objects.get(pk=client_pk)
@@ -272,3 +293,41 @@ def file_view(request, pk):
     
     return render (request, 'files_template.html', {'files':files})   
 
+def create_client_view(request):
+    if request.method == 'POST':
+        if request.POST.get('name') != '':
+            client = Client.objects.create(name=request.POST.get('name'), phone=request.POST.get('phone'), flag = True)
+            client.save() 
+            return redirect('clients')
+    return render (request, 'create_client_template.html')
+
+def clients_view(request):
+    if request.method == 'POST':
+        if request.POST.get('client-name') != '':
+            client = Client.objects.create(name=request.POST.get('client-name'), dni=request.POST.get('client-dni'), phone=request.POST.get('client-phone'))
+            client.save()
+            return redirect('clients')
+    clients = Client.objects.filter(flag=True).order_by('name')
+    return render (request, 'clients_template.html', {'clients':clients})
+
+def create_for_client(request, pk):
+    if request.method == 'POST':
+        form = ProjectForm(request.POST)    
+        if form.is_valid():
+            form_instance = form.save(commit=False)
+            form_instance.client = Client.objects.get(pk=pk)
+            form_instance.save()#Se guarda la instancia 
+            msg = "Se ha creado un nuevo proyecto"   
+            save_in_history(pk, 2, msg)
+            if 'save_and_backhome' in request.POST:
+                    return redirect('projects')
+        else:
+            # Form data is not valid, handle the errors
+            errors = form.errors.as_data()
+            for field, error_list in errors.items():
+                for error in error_list:
+                    # Access the error message for each field
+                    error_message = error.message
+                    print(f"Error for field '{field}': {error_message}")    
+    form = ProjectForm()
+    return render (request, 'project_for_client.html', {'form':form})

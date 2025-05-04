@@ -1,0 +1,198 @@
+{% extends 'base_template.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block form %}
+  <div class="container-form">
+    <div class="form-location">
+      <form action="" method="POST" enctype="multipart/form-data">
+        <h2>Crear un nuevo proyecto</h2>
+        {% csrf_token %}
+        
+        <div class="form-group">
+          <!-- Content 1 -->
+          <div id="content1">
+            <div style="margin: 20px;" class="fields">
+              <h4>Proyecto</h4>
+              <div style="margin: 10px;" class="input-field">
+                <label for="{{ form.type.id_for_label }}">{{ form.type.label }}</label>
+                {{ form.type }}
+              </div>
+              <div style="margin: 10px;" class="input-field">
+                <label for="{{ form.mens.id_for_label }}">{{ form.mens.label }}</label>
+                {{ form.mens }}
+              </div>
+              <button type="button" class="blue-button" id="toggleButton1">Siguiente</button>
+            </div>
+          </div> <!-- End Content 1 -->
+          <!--Content 2 -->
+          <!-- End content 2 -->
+       
+          <!-- Content 3 -->      
+          <div id="content3">
+            <div class="nomen-cont fields" style="margin: 20px; width: 100%;">
+              <div style="order: 0;" class="partida">
+                <div style="margin: 10px;" class="input-field">
+                  <label for="{{ form.partido.id_for_label }}">{{ form.partido.label }}</label>
+                  {{ form.partido|attr:"placeholder:Partido"  }}
+
+                </div>
+                <div style="margin: 10px;" class="input-field">
+                  <label for="{{ form.partida.id_for_label }}">{{ form.partida.label }}</label>
+                  {{ form.partida|attr:"placeholder:Partida"  }}
+                </div>
+                <div style="margin: 10px;" class="input-field">
+                  <label for="{{ form.circuns.id_for_label }}">{{ form.circuns.label }}</label>
+                  {{ form.circuns|attr:"placeholder:Cricunscripcion"  }}
+                </div>
+                <div style="margin: 10px;" class="input-field">
+                  <label for="{{ form.seccion.id_for_label }}">{{ form.seccion.label }}</label>
+                    {{ form.seccion|attr:"placeholder:Seccion" }}
+                </div>
+              </div>
+
+              <div style="order: 0; margin-right: 10px;" class="secciones">
+                <div  class="input-field">
+                  <label for="">Chacra</label>
+                  <div class="sub-input">
+                    
+                    <input name="chacra_num" type="text" placeholder="Numero" maxlength="10" id="id_chacra_num" />
+                    <input name="chacra_letra" type="text" placeholder="Letra" maxlength="10" id="id_chacra_letra" />
+                  </div>
+                </div>
+                <div  class="input-field">
+                  <label for="">Quinta</label>
+                  <div class="sub-input">
+                    <input name="quinta_num" type="text" placeholder="Numero" maxlength="10" id="id_quinta_num" />
+                    <input name="quinta_letra" type="text" placeholder="Letra" maxlength="10" id="id_quinta_letra" />
+                  </div>
+                </div>
+                <div  class="input-field">
+                  <label for="">Fraccion</label>
+                  <div class="sub-input">
+                    <input name="fraccion_num" type="text" placeholder="Numero" maxlength="10" id="id_fraccion_num" />
+                    <input name="fraccion_letra" type="text" placeholder="Letra" maxlength="10" id="id_fraccion_letra" />
+                  </div>
+                </div>
+                <div  class="input-field">
+                  <label for="">Manzana</label>
+                  <div class="sub-input">
+                    <input name="manzana_num" type="text" placeholder="Numero" maxlength="10" id="id_manzana_num" />
+                    <input name="manzana_letra" type="text" placeholder="Letra" maxlength="10" id="id_manzana_letra" />
+                  </div>
+                </div>
+                <div  class="input-field">
+                    <label for="">Parcela</label>
+                    <div class="sub-input">
+                      <input name="parcela_num" type="text" placeholder="Numero" maxlength="10" id="id_parcela_num" />
+                      <input name="parcela_letra" type="text" placeholder="Letra" maxlength="10" id="id_parcela_letra" />
+                    </div>
+                </div>
+                <div class="input-field">
+                  <label for="">Subparcela</label>
+                  <div class="sub-input">
+                    
+                    <input name="subparcela" type="text" placeholder="Subparcela" maxlength="10" id="id_subparcela" />
+                  </div>
+                </div>
+              </div>
+              <div class="directions">
+                <div  class="input-field">
+                  <label for="">Direccion</label>
+                  <div class="sub-input">
+                    
+                    <input name="direction" type="text" placeholder="Direccion" maxlength="10" id="id_direction" />
+
+                  </div>
+                </div>
+                <div  class="input-field">
+                  <label for="">Piso</label>
+                  <div class="sub-input">
+                    
+                    <input name="floor" type="text" placeholder="Piso" maxlength="10" id="id_floor" />
+
+                  </div>
+                </div>
+                <div  class="input-field">
+                  <label for="">Departamento</label>
+                  <div class="sub-input">
+                    
+                    <input name="depto" type="text" placeholder="Departamento" maxlength="10" id="id_depto" />
+
+                  </div>
+                </div>
+              </div>          
+            </div>
+            <div class="container-button">
+              <button type="submit" class="blue-button next-bton" name="save_and_backhome">Guardar</button>
+              <button type="button" class="blue-button" id="return2">Regresar</button>
+            </div>      
+          </div>
+        </div> 
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const projectTypleSelect = document.getElementById('id_type');
+    projectTypleSelect.addEventListener('change', function () {
+      const mensElement = document.getElementById('id_mens');
+      if (this.value === 'Mensura') {
+        mensElement.disabled = false;
+      } else {
+        mensElement.value = ''; // Clear the value if not Mensura
+        mensElement.disabled = true;
+      }
+    });
+
+      // Function to display error messages
+      const showError = (field, errorText) => {
+        field.classList.add("error");
+        const errorElement = document.createElement("small");
+        errorElement.classList.add("error-text");
+        errorElement.innerText = errorText;
+        field.closest(".input-field").appendChild(errorElement);
+      }
+      const removeError = (field) => {
+        if (field.classList.contains("error")) {
+          field.classList.remove("error");
+          field.closest(".input-field").lastChild.remove();
+        }
+      };
+  
+      const toggleButton1 = document.getElementById('toggleButton1');
+      const return2 = document.getElementById('return2');
+      const content1 = document.getElementById('content1');
+      //collect all inputs of type=text inside clien-data
+      //const clientInputs = document.getElementById('clien-data').querySelectorAll('input');//exceptcheckox
+      const content3 = document.getElementById('content3');
+      const selectedOption = document.getElementById('id_type');
+      //JS for content1
+      selectedOption.addEventListener( 'change', () => {
+        if (selectedOption.value !== '') {
+          removeError(selectedOption);
+        }
+      });
+
+      toggleButton1.addEventListener('click', (event) => {
+        removeError(selectedOption);
+        if (selectedOption.value === '') {
+          event.preventDefault();
+          showError(selectedOption, "Elegir el tipo de proyecto");
+          return;
+          // Display an error message or provide visual feedback to the user
+        } else {
+          content1.style.transform = 'translateX(-100%)';
+          content3.style.transform = 'translateX(-116%)';
+        }
+      });
+      //JS for content2
+
+      return2.addEventListener('click', () => {
+        content3.style.transform = 'translateX(0%)'
+        content1.style.transform = 'translateX(0%)';
+      })
+
+   
+    </script>
+{% endblock %}
