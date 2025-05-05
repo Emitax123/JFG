@@ -80,6 +80,15 @@ class Project (models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    def formatted_price(self):
+        return f"{self.price:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+    def formatted_adv(self):
+        return f"{self.adv:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+    def formatted_gasto(self):
+        return f"{self.gasto:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
 class ProjectFiles (models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     files = models.FileField(null=True, upload_to='media/files')
