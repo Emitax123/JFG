@@ -54,6 +54,8 @@ INSTALLED_APPS = [
     'ProjectManager',
     'Accounting',
     'Users',
+    'cloudinary',
+    'cloudinary_storage',
 
 ]
 
@@ -103,6 +105,14 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }'''
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 USE_L10N = True
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
