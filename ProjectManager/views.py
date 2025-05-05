@@ -93,6 +93,7 @@ def balance(request):
     adv = f"{adv:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
     total = f"{total:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
     gastos = f"{gastos:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    net = f"{net:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
     return render (request, 'balance_template.html', {'total':total, 'adv':adv, 'cant':cant, 'percent':percent, 'gastos':gastos, 'net':net, 'month':month_str(month), 'year':year})
 
 #Vista de los proyectos todos
