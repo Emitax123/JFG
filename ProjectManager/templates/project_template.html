@@ -29,7 +29,6 @@
       {% else %}
       <div class="fix-show-box" style="" id="client-titular" >
       {% endif %}
-        <span class="slide-text">Cliente y titular </span>
         {% if not project.titular_name %}
         <div style="" class="fix-info-box">
         {% else %}
@@ -37,10 +36,11 @@
         {% endif %}
      
           <!-- Datos Cliente -->
-            <div class="client-box" id="client-data" >
+            <div style="min-width: 240px;" class="client-box" id="client-data" >
               <h5>Cliente</h5>
               <span>Nombre: {{project.client.name}} </span>
               <span>Telefono: {{project.client.phone}} </span>
+              <div style="flex-flow: wrap;">
               {% if not project.titular_name %}
               
                 <div style="display: flex; flex-flow: row; justify-content: left;">
@@ -51,6 +51,23 @@
                 </form>
                 </div>
               {%endif %}
+              {% if project.client.flag %}
+              {% if not project.contact_name %}
+              <div style="display: flex; flex-flow: row; justify-content: left;">
+                <button style="margin-top:6px; margin-bottom: 6px;" class="blue-button client-btn">Agregar Contacto</button>
+                <form style="display: none;" method="post" action="{% url 'modification' pk=project.pk %}">
+                  {% csrf_token %}
+                  <div style="flex-flow: column;">
+                    <input class="contact-input" required placeholder="Nombre de contacto" type="text" name="contact_name" />
+                    <input class="contact-input" required placeholder="Teléfono de contacto" type="tel" name="contact_phone" />
+                  </div>
+                  
+                  <button style="margin-left: 5px;" class="blue-button" type="submit">Hecho</button>
+                </form>
+              </div>
+              {% endif %}
+              {% endif %}
+            </div>
             </div>
             
             <!-- Datos Titular -->
@@ -80,6 +97,9 @@
               </div>
             </div>
             <!-- FIN Datos Titular -->
+            <!-- Datos contacto (solo si cliente es fijo) -->
+            
+            <!-- FIN Datos Contacto -->
         </div>
       </div>
       <div class="show-box" id="nomenclatura" >
@@ -118,6 +138,7 @@
         </div>
       </div>
       <div class="mini-div">
+        
         <span>N° de Tramite: {{ project.procedure }}</span>
         <button class="blue-button modify">Modificar</button>
         <form style="display: none;" method="post" action="{% url 'modification' pk=project.pk %}" id="proc-form">
@@ -170,8 +191,21 @@
           <button class="small-btn blue-button" type="submit">Hecho</button>
         </form>
       </div>
-      
+      <div class="contact-box">
+        {% if project.client.flag %}
+              {% if project.contact_name %}
+                <div >
+                  <h3>Contacto</h3>
+                  <div style="display: flex; flex-flow: column; justify-content: space-between;" >
+                    <span>Nombre: <span class="client-span1">{{project.contact_name}}</span> </span> 
+                    <span>Telefono: <span class="client-span1">{{project.contact_phone}}</span> </span> 
+                  </div>
+                </div>           
+              {% endif %}
+          {% endif %}
+      </div>
     </div>
+   
       <!-- Boton de carga de archivos
       <div class="mini-div">
         <a class="files-tag" style="color: black;" href="{% url 'files' pk=project.pk %}" title="Ver archivos" ><span>Archivos</span></a>
@@ -268,6 +302,22 @@
       flex-flow: column;
       margin-top: 0;
     }
+    div.contact-box {
+      opacity: 1; 
+      display: flex; 
+      position: relative;
+      margin-top: 10px;
+      padding-top: 10px;
+    }
+    div.contact-box::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 5%; /* Para centrarlo */
+      width: 90%;
+      border-top: 1px solid black;
+    }
+
     div.fix-info-box {
       opacity: 1; 
       display: flex; 

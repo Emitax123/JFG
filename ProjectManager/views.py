@@ -103,7 +103,7 @@ def projectlist_view(request):
                  Q(client__name__icontains=query) | Q(partido__icontains=query)
             ).order_by('-created')
             num_page = request.GET.get('page')
-            pages = Paginator (projects, 8)
+            pages = Paginator (projects, 10)
             try:
                actual_pag = pages.get_page(num_page)
             except PageNotAnInteger:
@@ -114,7 +114,7 @@ def projectlist_view(request):
         return render (request, 'project_list_template.html', {'projects':actual_pag, 'pages':pages})
     else:
         num_page = request.GET.get('page')
-        pages = Paginator (Project.objects.all().order_by('-created'), 8)
+        pages = Paginator (Project.objects.all().order_by('-created'), 10)
         try:
             actual_pag = pages.get_page(num_page)
         except PageNotAnInteger:
@@ -126,7 +126,7 @@ def projectlist_view(request):
 def alt_projectlist_view(request, pk):
     projects = Project.objects.filter(client__pk__icontains=pk).order_by('-created')
     num_page = request.GET.get('page')
-    pages = Paginator (projects, 8)
+    pages = Paginator (projects, 10)
     try:
         actual_pag = pages.get_page(num_page)
     except PageNotAnInteger:
@@ -200,6 +200,9 @@ def create_view(request):
 def mod_view(request, pk):
     if request.method == 'POST':
         instance = Project.objects.get(pk=pk)
+        if request.POST.get('contact_name'):
+            instance.contact_name = request.POST.get('contact_name')
+            instance.contact_phone = request.POST.get('contact_phone')        
         if request.POST.get('client-data') == '':
             instance.titular_name = instance.client.name
             instance.titular_phone = instance.client.phone

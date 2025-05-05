@@ -30,7 +30,11 @@ class Project (models.Model):
     
     #Titular, que puede o no puede ser el cliente
     titular_name = models.CharField(default="", max_length=30, verbose_name='Nombre y apellido')
-    titular_phone = models.CharField(max_length=40, verbose_name='Telefono')
+    titular_phone = models.CharField(default="", max_length=40, verbose_name='Telefono')
+
+    #Contacto, que puede o no puede ser el cliente
+    contact_name = models.CharField(default="", max_length=30, verbose_name='Nombre', null=True)
+    contact_phone = models.CharField(default="", max_length=40, verbose_name='Telefono', null=True)
     #Nomenclatura
     partido= models.CharField(max_length=30, blank=True, verbose_name='Partido')
     partida= models.CharField(max_length=30, blank=True, verbose_name='Partida')

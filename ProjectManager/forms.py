@@ -11,7 +11,7 @@ class ProjectForm(forms.ModelForm):
     class Meta:
         model = Project
         fields = '__all__'
-        exclude = ['client', 'inscription_type', 'price', 'adv', 'gasto', 'procedure', 'files']
+        exclude = ['client', 'inscription_type', 'price', 'adv', 'gasto', 'procedure', 'files', 'contact_name', 'contact_phone']
     def __init__(self, *args, **kwargs):
         super(ProjectForm, self).__init__(*args, **kwargs)
         self.fields['titular_name'].required = False
