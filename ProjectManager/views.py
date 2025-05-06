@@ -1,6 +1,6 @@
 
 from django.shortcuts import render, redirect
-from django.http import HttpResponseServerError, JsonResponse
+from django.http import JsonResponse
 from django.core.paginator import Paginator, PageNotAnInteger
 from .forms import ProjectForm, FileFieldForm, ProjectFullForm
 from .models import Project, Client, Event, ProjectFiles
@@ -148,19 +148,15 @@ def alt_projectlist_view(request, pk):
     return render (request, 'project_list_template.html', {'projects':actual_pag, 'pages':pages})
 
 def project_view(request,pk):
-    try:
-        project = Project.objects.get(pk=pk)
-        file = ProjectFiles.objects.filter(project_pk=pk).first()
-        if file:
-            file_url = file.url
-            return render(request, 'project_template.html', {'project':project, 'file_url':file_url})
-        else:
-            form = FileFieldForm()
-        return render(request, 'project_template.html', {'project':project, 'form':form})
-
-    except Exception as e:
-        logger.error(f"Error en project_detail para pk={pk}: {e}")
-        return HttpResponseServerError("Error interno del servidor.")
+    project = Project.objects.get(pk=pk)
+    file = ProjectFiles.objects.filter(project_pk=pk).first()
+    if file:
+        file_url = file.url
+        return render(request, 'project_template.html', {'project':project, 'file_url':file_url})
+    else:
+         form = FileFieldForm()
+    return render(request, 'project_template.html', {'project':project, 'form':form})
+    
 
 #Registro en historial
 def save_in_history(pk, type, msg):
