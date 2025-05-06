@@ -89,8 +89,8 @@ class Project (models.Model):
         return f"{self.gasto:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
 class ProjectFiles (models.Model):
-    project_pk = models.IntegerField(default=0, verbose_name='Proyecto')
-    url = models.URLField(max_length=200, verbose_name='URL')
+    project_pks = models.IntegerField(default=0, verbose_name='Proyecto')
+    urls = models.URLField(max_length=200, verbose_name='URL')
 
 class Event (models.Model):
     #Para modificaciones type=1
