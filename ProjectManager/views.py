@@ -2,6 +2,7 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.core.paginator import Paginator, PageNotAnInteger
+from .dropbox_client import get_dropbox_client
 from .forms import ProjectForm, FileFieldForm, ProjectFullForm
 from .models import Project, Client, Event, ProjectFiles
 from django.db.models import Q
@@ -303,7 +304,7 @@ def upload_files(request, pk):
             
             filename = f"{int(time.time())}_{file.name}"
             dropbox_path = f"/uploads/{filename}"
-            dbx = dropbox.Dropbox(settings.DROPBOX_ACCESS_TOKEN)
+            dbx = get_dropbox_client()
             dbx.files_upload(file.read(), dropbox_path, mode=dropbox.files.WriteMode.add)
            
             # Crear link de descarga
