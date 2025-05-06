@@ -204,21 +204,43 @@
               {% endif %}
           {% endif %}
       </div>
-    </div>
-   
-      
-      <div class="mini-div">
-        <a class="files-tag" style="color: black;" href="{% url 'files' pk=project.pk %}" title="Ver archivos" ><span>Archivos</span></a>
-        <button class="blue-button modify">Cargar</button>
+      {% if file_url%}
+      <div>
+        <button class="blue-button" onclick="window.open('{{ file_url }}', '_blank')">Descargar archivo</button>
+        
+      </div>
+      {% else %}
+      <div>
+        <button class="blue-button modify">Cargar archivo</button>
         <form enctype="multipart/form-data" style="display: none;" method="post" action="{% url 'upload' pk=project.pk %}" id="file-form">
           {% csrf_token %}
           {% for field in form %}
-            <label for="{{ field.id_for_label}}" id="file-label">Cargar</label>
-            {{field}}
+            <label for="id_file_field" id="file-label">Seleccionar</label>
+            <input type="file" name="file_field" required="" id="id_file_field">
+            <span style="font-size: 15px;" id="file-name"></span>
+            <script>
+
+            const fileInput = document.getElementById('id_file_field');
+            const fileNameSpan = document.getElementById('file-name');
+            if (fileInput && fileNameSpan) {
+              fileInput.addEventListener('change', function () {
+                if (fileInput.files.length > 0) {
+                  fileNameSpan.textContent = fileInput.files[0].name;
+                } else {
+                  fileNameSpan.textContent = "Ningún archivo seleccionado";
+                }
+              });
+            }
+            </script>
           {% endfor %}
           <input class="blue-button" type="submit" value="Guardar">
         </form>
       </div>
+      {% endif %}
+    </div>
+   
+      
+      
     </div>
     <div class="full-modify-btn-container">
 

@@ -13,6 +13,7 @@ urlpatterns = [
   path('delete/<int:pk>', views.delete_view, name = 'delete'),
   path('balance/', views.balance, name= 'balance'),
   path('upload/<int:pk>', views.upload_files, name= 'upload'),
+ # path('download/<int:file_pk>/', views.donwload_file, name='download'),
   path('filesview/<int:pk>', views.file_view, name = 'files'),
   path('project/<int:pk>',views.project_view, name= 'projectview'),
   path('project/mod/<int:pk>', views.mod_view, name= 'modification',),

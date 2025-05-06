@@ -1,5 +1,4 @@
 from django.db import models
-from os.path import basename
 # Create your models here.
 class Client(models.Model):
     name = models.CharField(max_length=40, verbose_name='Nombre y apellido')
@@ -90,10 +89,8 @@ class Project (models.Model):
         return f"{self.gasto:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
 class ProjectFiles (models.Model):
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    files = models.FileField(null=True, upload_to='media/files')
-    def filename(self):
-        return basename(self.files.name)
+    project_pk = models.IntegerField(default=0, verbose_name='Proyecto')
+    url = models.URLField(max_length=200, verbose_name='URL')
 
 class Event (models.Model):
     #Para modificaciones type=1

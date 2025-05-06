@@ -1,3 +1,4 @@
+
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.core.paginator import Paginator, PageNotAnInteger
@@ -6,8 +7,12 @@ from .models import Project, Client, Event, ProjectFiles
 from django.db.models import Q
 from decimal import Decimal as Dec
 from datetime import datetime
+import time
 from .functions import month_str
 from collections import defaultdict
+import dropbox
+from django.conf import settings
+
 # Create your views here.
 
 #Vista principal
@@ -141,7 +146,12 @@ def alt_projectlist_view(request, pk):
 
 def project_view(request,pk):
     project = Project.objects.get(pk=pk)
-    form = FileFieldForm()
+    file = ProjectFiles.objects.filter(project_pk=pk).first()
+    if file:
+        file_url = file.url
+        return render(request, 'project_template.html', {'project':project, 'file_url':file_url})
+    else:
+         form = FileFieldForm()
     return render(request, 'project_template.html', {'project':project, 'form':form})
 
 #Registro en historial
@@ -285,18 +295,26 @@ def upload_files(request, pk):
     if request.method == 'POST':
         form = FileFieldForm(request.POST, request.FILES)
         if form.is_valid():
-          
-          files = form.cleaned_data['file_field']
-          for f in files:
-              
-              file_instance = ProjectFiles(project = Project.objects.get(pk=pk), files = f)
-              file_instance.save()  
+            file = request.FILES['file_field']
+            
+            filename = f"{int(time.time())}_{file.name}"
+            dropbox_path = f"/uploads/{filename}"
+            dbx = dropbox.Dropbox(settings.DROPBOX_ACCESS_TOKEN)
+            dbx.files_upload(file.read(), dropbox_path, mode=dropbox.files.WriteMode.add)
+           
+            # Crear link de descarga
+            shared_link_metadata = dbx.sharing_create_shared_link_with_settings(dropbox_path)
+            download_url = shared_link_metadata.url.replace("?dl=0", "?dl=1")
+            
+            fiel_instance = ProjectFiles.objects.create(project_pk=pk, url=download_url)
+            fiel_instance.save()
+
 
     prev = request.META.get('HTTP_REFERER')
     return redirect(prev)
 
 def file_view(request, pk):
-    files = ProjectFiles.objects.filter(project__pk = pk)
+    files = ProjectFiles.objects.filter(project_pk = pk)
     
     return render (request, 'files_template.html', {'files':files})   
 

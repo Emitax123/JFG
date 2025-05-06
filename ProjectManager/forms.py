@@ -71,5 +71,5 @@ class MultipleFileField(forms.FileField):
 
 
 class FileFieldForm(forms.Form):
-    file_field = MultipleFileField()
+    file_field = forms.FileField()
 
