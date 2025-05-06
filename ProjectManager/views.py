@@ -12,6 +12,8 @@ import time
 from .functions import month_str
 from collections import defaultdict
 import dropbox
+import os
+
 from django.conf import settings
 import logging
 logger = logging.getLogger(__name__)
@@ -304,7 +306,12 @@ def upload_files(request, pk):
             
             filename = f"{int(time.time())}_{file.name}"
             dropbox_path = f"/uploads/{filename}"
-            dbx = get_dropbox_client()
+           
+            dbx = dropbox.Dropbox(
+                oauth2_refresh_token=os.environ['DROPBOX_REFRESH_TOKEN'],
+                app_key=os.environ['DROPBOX_APP_KEY'],
+                app_secret=os.environ['DROPBOX_APP_SECRET']
+            )
             dbx.files_upload(file.read(), dropbox_path, mode=dropbox.files.WriteMode.add)
            
             # Crear link de descarga
