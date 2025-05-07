@@ -12,10 +12,13 @@ from .functions import month_str
 from collections import defaultdict
 from .supabase_client import supabase
 import os
-from django.conf import settings
 import logging
 logger = logging.getLogger(__name__)
+from django.http import FileResponse
 
+import io
+from urllib.request import urlopen
+from urllib.error import URLError
 
 
 
@@ -74,38 +77,106 @@ def delete_view(request, pk):
         msg = "Se ha eliminado un proyecto"
         project.delete()
         event.delete()
+        file = ProjectFiles.objects.filter(project_pk=pk).first()
+        if file :
+            delete_file(request, pk)
         save_in_history(pk, 3, msg)
         return redirect('projects')
     return redirect('index')
 
+def balance_anual(request,monthly_data, monthly_totals, year):
+    year = datetime.now().year
+    projects = Project.objects.filter(created__year=year).exclude(price=None, adv=None, gasto=None)
+    if not projects:
+        non_exist = True
+        return render (request, 'balance_template.html', {'non_exist':non_exist})
+    # Create a list to store monthly data
+   
+
+    # Divide projects into months
+    for project in projects:
+        month = project.created.month - 1  # Subtract 1 since list indices start at 0
+        monthly_data[month].append(project)
+
+    # Calculate totals for each month
+  
+    for month_index, month_projects in enumerate(monthly_data):
+        if not month_projects:
+            monthly_totals.append({'total': 0, 'gastos': 0, 'cobro': 0, 'neto': 0, 'cant': 0, 'month_name': month_str(month_index + 1)})
+            continue
+            
+        month_name = month_str(month_projects[0].created.month)
+        cant = len(month_projects)
+        total = sum(p.price for p in month_projects)
+        gastos = sum(p.gasto for p in month_projects)
+        cobro = sum(p.adv for p in month_projects)
+        neto = cobro - gastos
+        monthly_totals.append({'total': total, 'gastos': gastos, 'cobro': cobro , 'neto': neto, 'cant': cant, 'month_name': month_name})
+    for month in monthly_totals:
+        print(month.get('total'))
+    
+    return (request,
+        monthly_data,
+        monthly_totals, 
+        year)
+
+
 #Vista del balance
 def balance(request):
     if request.method == 'POST':
+        #Aqui el user selecciona el mes y año
         date = request.POST.get('date')
         date_split = date.split("-")
         month = int(date_split[1])
         year = int(date_split[0])
     else:
+        #Si no selecciona nada, se toma el mes y año actual
         month = datetime.now().month
         year = datetime.now().year
+    
     projects = Project.objects.filter(created__month=month, created__year=year).exclude(price=None, adv=None, gasto=None)
     if not projects:
         non_exist = True
         return render (request, 'balance_template.html', {'non_exist':non_exist})
+    #Cant = cantidad de proyectos
     cant = projects.count()
+    #Total = suma de los presupuestos
     total = sum(item.price for item in projects)
+    #adv = suma de los anticipos
     adv = sum(item.adv for item in projects)
+    #gastos = suma de los gastos
     gastos = sum(item.gasto for item in projects)
     if total > 0:
         percent = round((adv/total)*100 , 2)
     else:
         percent = 0
+    #net = el neto, es decir los anticipos menos los gastos
     net = adv-gastos
+    #Formateamos los numeros a 2 decimales y cambiamos el punto por la coma
     adv = f"{adv:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
     total = f"{total:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
     gastos = f"{gastos:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
     net = f"{net:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-    return render (request, 'balance_template.html', {'total':total, 'adv':adv, 'cant':cant, 'percent':percent, 'gastos':gastos, 'net':net, 'month':month_str(month), 'year':year})
+
+    #Creamos la lista anual y la lista que sume los totales de cada mes
+    monthly_data = [[] for _ in range(12)]
+    monthly_totals = []
+    
+    balance_anual(request, monthly_data, monthly_totals, datetime.now().year)
+
+    return render (request, 'balance_template.html', {
+        'total':total, 
+        'adv':adv, 
+        'cant':cant, 
+        'percent':percent, 
+        'gastos':gastos, 
+        'net':net, 
+        'month':month_str(month), 
+        'year':year,
+        'monsths_list': monthly_data,
+        'monthly_totals': monthly_totals,
+        
+        })
 
 #Vista de los proyectos todos
 def projectlist_view(request):
@@ -298,11 +369,7 @@ def search(request):
     
     return JsonResponse({'results': results}, safe=False)
 
-from django.http import FileResponse
 
-import io
-from urllib.request import urlopen
-from urllib.error import URLError
 
 def download_file(request, pk):
     file = ProjectFiles.objects.get(project_pk=pk)

@@ -35,6 +35,63 @@
 </div>
 </div>
 {% endif %}
+
+<div>
+    <div class="monthly-summary">
+        <div class="title"><h2>Año</h2></div>
+        {% for total in monthly_totals %}
+        {% with currentMonth=forloop.counter %}
+        
+        <div class="month-data">
+            <div class="month-details title"><span>{{total.month_name}} </span><span>Proyectos</span><span>Ganancia Neta</span></div>
+            <div class="month-details"><span>Enero </span><span> {{total.cant}} </span><span style="font-weight: bold;"> ${{ total.neto }}</span></div>
+        {% endwith %}    
+            
+            
+        </div>
+        {% endfor %}
+    </div>
+
+    <style>
+    .monthly-summary {
+        display: flex;
+        flex-flow: column;
+
+        align-items: center;
+        padding: 15px;
+        background-color:white;
+        color: black;
+        min-width: 50em;
+        border-radius: 10px;
+        box-shadow: 2px 2px 10px black;
+        margin: 29px 0 20px 0;
+    }
+    .month-data {
+        display: flex;
+        flex-flow: column;
+        border: 1px solid #ddd;
+        padding: 10px;
+        border-radius: 5px;
+        min-width: 80%;
+        
+    }
+    .month-details {
+        display: flex;
+        flex-flow: row;
+        justify-content: space-between;
+        width: 100%;
+        padding: 5px 0;
+    }
+    .month-details.title {
+        font-weight: bold;
+        background-color: #f0f0f0;
+    }
+    .month-details span {
+        width: 33%;
+        text-align: center;
+    }
+    </style>
+</div>
 <!-- charts/templates/chart.html -->
 
 <style>
