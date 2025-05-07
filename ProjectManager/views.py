@@ -12,6 +12,10 @@ from .functions import month_str
 from collections import defaultdict
 from .supabase_client import supabase
 import os
+from django.conf import settings
+import logging
+logger = logging.getLogger(__name__)
+
 
 
 
@@ -295,17 +299,23 @@ def search(request):
     return JsonResponse({'results': results}, safe=False)
 
 from django.http import FileResponse
-import requests
+
 import io
+from urllib.request import urlopen
+from urllib.error import URLError
 
 def download_file(request, pk):
     file = ProjectFiles.objects.get(project_pk=pk)
     file_name = file.name
     bucket_name = os.getenv('SUPABASE_BUCKET')
     file_url = supabase.storage.from_(bucket_name).get_public_url(file_name)
-    response = requests.get(file_url)
-    file_content = io.BytesIO(response.content)
-    return FileResponse(file_content, as_attachment=True, filename=file_name)
+    try:
+        response = urlopen(file_url)
+        file_content = io.BytesIO(response.read())
+        return FileResponse(file_content, as_attachment=True, filename=file_name)
+    except URLError as e:
+        logger.error(f"Error downloading file: {str(e)}")
+        return JsonResponse({'error': 'Failed to download file'}, status=500)
 
 def upload_files(request, pk):
     if request.method == 'POST':
