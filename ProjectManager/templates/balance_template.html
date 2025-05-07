@@ -38,13 +38,13 @@
 
 <div>
     <div class="monthly-summary">
-        <div class="title"><h2>Año</h2></div>
+        <div class="title"><h2>{{year}} </h2></div>
         {% for total in monthly_totals %}
         {% with currentMonth=forloop.counter %}
         
         <div class="month-data">
-            <div class="month-details title"><span>{{total.month_name}} </span><span>Proyectos</span><span>Ganancia Neta</span></div>
-            <div class="month-details"><span>Enero </span><span> {{total.cant}} </span><span style="font-weight: bold;"> ${{ total.neto }}</span></div>
+            <div class="month-details title"><span>Mes</span><span>Proyectos</span><span>Ganancia Neta</span></div>
+            <div class="month-details"><span>{{total.month_name}} </span><span> {{total.cant}} </span><span style="font-weight: bold;"> ${{ total.neto }}</span></div>
         {% endwith %}    
             
             
