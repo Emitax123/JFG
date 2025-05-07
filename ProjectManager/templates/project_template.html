@@ -205,9 +205,19 @@
           {% endif %}
       </div>
       {% if file_url%}
-      <div>
-        <button class="blue-button" onclick="window.open('{{ file_url }}', '_blank')">Descargar archivo</button>
-        
+      <div style="display: flex; flex-flow: row;" >
+        <button class="blue-button" onclick="window.location.href='{% url "download" pk=project.pk %}'">Archivo</button>
+        <button style=
+            "background-color: #ff0000;
+            color: white;
+            border: none;
+            padding: 2px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-left: 10px;
+            " 
+            onclick="window.location.href='{% url "deletefile" pk=project.pk %}'">Eliminar</button>
       </div>
       {% else %}
       <div>

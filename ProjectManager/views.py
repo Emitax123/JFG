@@ -2,7 +2,6 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.core.paginator import Paginator, PageNotAnInteger
-from .dropbox_client import get_dropbox_client
 from .forms import ProjectForm, FileFieldForm, ProjectFullForm
 from .models import Project, Client, Event, ProjectFiles
 from django.db.models import Q
@@ -11,12 +10,9 @@ from datetime import datetime
 import time
 from .functions import month_str
 from collections import defaultdict
-import dropbox
+from .supabase_client import supabase
 import os
 
-from django.conf import settings
-import logging
-logger = logging.getLogger(__name__)
 
 
 # Create your views here.
@@ -298,30 +294,40 @@ def search(request):
     
     return JsonResponse({'results': results}, safe=False)
 
+from django.http import FileResponse
+import requests
+import io
+
+def download_file(request, pk):
+    file = ProjectFiles.objects.get(project_pk=pk)
+    file_name = file.name
+    bucket_name = os.getenv('SUPABASE_BUCKET')
+    file_url = supabase.storage.from_(bucket_name).get_public_url(file_name)
+    response = requests.get(file_url)
+    file_content = io.BytesIO(response.content)
+    return FileResponse(file_content, as_attachment=True, filename=file_name)
+
 def upload_files(request, pk):
     if request.method == 'POST':
         form = FileFieldForm(request.POST, request.FILES)
         if form.is_valid():
             file = request.FILES['file_field']
-            
-            filename = f"{int(time.time())}_{file.name}"
-            dropbox_path = f"/uploads/{filename}"
-           
-            dbx = dropbox.Dropbox(
-                oauth2_refresh_token=os.environ['DROPBOX_REFRESH_TOKEN'],
-                app_key=os.environ['DROPBOX_APP_KEY'],
-                app_secret=os.environ['DROPBOX_APP_SECRET']
-            )
-            dbx.files_upload(file.read(), dropbox_path, mode=dropbox.files.WriteMode.add)
-           
-            # Crear link de descarga
-            shared_link_metadata = dbx.sharing_create_shared_link_with_settings(dropbox_path)
-            download_url = shared_link_metadata.url.replace("?dl=0", "?dl=1")
-            
-            fiel_instance = ProjectFiles.objects.create(project_pk=pk, url=download_url)
-            fiel_instance.save()
+            file_content = file.read()
+            timestamp = int(time.time())
+            file_name = f"{pk}_{timestamp}_{file.name}"
+            bucket_name = os.getenv('SUPABASE_BUCKET')
+            supabase.storage.from_(bucket_name).upload(file_name, file_content)
+            file_url = supabase.storage.from_(bucket_name).get_public_url(file_name)
+            ProjectFiles.objects.create(project_pk=pk, name=file_name, url=file_url)
 
+    prev = request.META.get('HTTP_REFERER')
+    return redirect(prev)
 
+def delete_file(request, pk):
+    file = ProjectFiles.objects.get(project_pk=pk)
+    bucket_name = os.getenv('SUPABASE_BUCKET')
+    supabase.storage.from_(bucket_name).remove([file.name])
+    file.delete()
     prev = request.META.get('HTTP_REFERER')
     return redirect(prev)
 
