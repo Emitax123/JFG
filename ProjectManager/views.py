@@ -111,6 +111,7 @@ def balance_anual(request,monthly_data, monthly_totals, year):
         gastos = sum(p.gasto for p in month_projects)
         cobro = sum(p.adv for p in month_projects)
         neto = cobro - gastos
+        neto= f"{neto:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
         monthly_totals.append({'total': total, 'gastos': gastos, 'cobro': cobro , 'neto': neto, 'cant': cant, 'month_name': month_name})
     for month in monthly_totals:
         print(month.get('total'))
