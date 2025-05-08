@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login
 from django.shortcuts import redirect 
@@ -18,6 +19,6 @@ def login_view(request):
            
         else:
             error = True
-            return render(request, 'login.html', {'error': error})
+            return render(request, 'login.html', {'error': error, 'next': request.GET.get('next', '')})
     else:
-        return render(request, 'login.html')
+        return render(request, 'login.html',  {'next': request.GET.get('next', '')})
