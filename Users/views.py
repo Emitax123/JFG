@@ -11,8 +11,10 @@ def login_view(request):
         if user is not None:
             login(request, user)
             #redurict to the previus pag
-            prev = request.META.get('HTTP_REFERER')
-            return redirect(prev)
+            next_url = request.POST.get('next') or settings.LOGIN_REDIRECT_URL
+            return redirect(next_url)
+        
+
            
         else:
             error = True
