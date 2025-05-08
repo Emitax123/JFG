@@ -9,6 +9,8 @@ from .forms import CustomLoginForm
 class CustomLoginView(LoginView):
     template_name = 'templates/login.html'
     authentication_form = CustomLoginForm
+    def get_success_url(self):
+        return self.request.META.get('HTTP_REFERER', '/')
 
 def login_view(request):
     if request.method == 'POST':
