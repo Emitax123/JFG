@@ -10,7 +10,7 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            #redurict to the previus pag
+            #redurict to the previus pagE
             return redirect(request.META.get('HTTP_REFERER', '/'))
            
         else:
