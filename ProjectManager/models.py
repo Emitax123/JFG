@@ -7,6 +7,10 @@ class Client(models.Model):
     flag = models.BooleanField(default=False, verbose_name='Fijo')
     not_listed = models.BooleanField(default=False, verbose_name='No listado')
 
+    def __str__(self):
+        return self.name
+    
+
 class Project (models.Model):
     TYPE_CHOICES = (
         ('Estado Parcelario', 'Estado Parcelario'),
@@ -89,6 +93,10 @@ class Project (models.Model):
 
     def formatted_gasto(self):
         return f"{self.gasto:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    
+    def __str__(self):
+        namepk = str(self.pk) + " - " + self.type
+        return namepk
 
 class ProjectFiles (models.Model):
     project_pk= models.IntegerField(default=0)
