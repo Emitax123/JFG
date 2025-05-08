@@ -9,6 +9,8 @@ from .forms import CustomLoginForm
 class CustomLoginView(LoginView):
     template_name = 'login.html'
     authentication_form = CustomLoginForm
+    def form_invalid(self, form):
+        return self.render_to_response(self.get_context_data(form=form, error=True))
 
 def login_view(request):
     if request.method == 'POST':
