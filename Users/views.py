@@ -1,9 +1,15 @@
-from django.conf import settings
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login
 from django.shortcuts import redirect 
+from django.contrib.auth.views import LoginView
+from .forms import CustomLoginForm
 
 # Create your views here.
+
+class CustomLoginView(LoginView):
+    template_name = 'templates/login.html'
+    authentication_form = CustomLoginForm
+
 def login_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -12,11 +18,10 @@ def login_view(request):
         if user is not None:
             login(request, user)
             #redurict to the previus pagE
-            next_url = request.POST.get('next') or settings.LOGIN_REDIRECT_URL
-            return redirect(next_url)
-        else:
-            error = 'Credenciales inválidas'
-            return render(request, 'login.html', {'error': error, 'next': request.POST.get('next', '')})
+            return redirect(request.META.get('HTTP_REFERER', '/'))
            
+        else:
+            error = True
+            return render(request, 'login.html', {'error': error})
     else:
-        return render(request, 'login.html', {'next': request.GET.get('next', '')})
+        return render(request, 'login.html')

@@ -39,7 +39,7 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1:8000').split(',')
 CSRF_TRUSTED_ORIGINS = ['https://web-production-abe4.up.railway.app']
 
 LOGIN_URL = 'login'
-
+LOGIN_REDIRECT_URL = '/'
 # Application definition
 
 INSTALLED_APPS = [
