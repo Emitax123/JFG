@@ -3,20 +3,27 @@
 {% block form %}
 
 <div id="galeria-work" class="galeria-work">
-  <div>
+  <div style="width: 100%;">
     {% if no_projects %}
       <span style="font-weight: bold;">No se encontraron resultados</span>
     {% else %}
     {% for Project in projects %}
-    <div>
+    <div style="max-width: 25%; min-width: 25%;" >
       <a href="{% url 'projectview' pk=Project.pk %}">
         <div class="cont-work">
-                <h1>{{Project.type}}</h1> 
-                <span>
-                  <h5>Partida: {{Project.partida}}</h5>
-                  <h5>Cliente: {{Project.client.name}}</h5>
-                  <h5>Fecha: {{Project.created|date:"d/m/Y" }}</h5>
-                </span>
+                <h1>{{Project.type}}</h1>
+                <div>
+                  <span style="width: 50%;">
+                    <h5>Partida: {{Project.partida}}</h5>
+                    <h5>Cliente: {{Project.client.name}}</h5>
+                    <h5>Fecha: {{Project.created|date:"d/m/Y" }}</h5>
+                  </span>
+                  <div style="display: flex; justify-content: end; align-items:flex-end; width: 50%;">
+                    <h2>{{ Project.pk }} </h2>
+                  </div>
+                  
+                </div>
+                
         </div>
         </a>
     </div>
@@ -70,9 +77,10 @@
 
 a {
   text-decoration: none;
+  width: 100%;
 }
 div.cont-work {
-  width: 300px;
+  
   height: 200px;
   padding: 20px;
   margin: 0px 20px 20px;

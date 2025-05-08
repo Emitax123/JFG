@@ -5,6 +5,7 @@ class Client(models.Model):
     name = models.CharField(max_length=40, verbose_name='Nombre y apellido')
     phone = models.CharField(max_length=40, default="", verbose_name='Telefono')
     flag = models.BooleanField(default=False, verbose_name='Fijo')
+    not_listed = models.BooleanField(default=False, verbose_name='No listado')
 
 class Project (models.Model):
     TYPE_CHOICES = (

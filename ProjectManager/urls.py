@@ -9,6 +9,7 @@ from . import views
 urlpatterns = [
   path('', views.projectlist_view, name = 'projects'),
   path('listprojects/<int:pk>', views.alt_projectlist_view, name = 'projectslist'),
+  path('listprojectstype/<int:type>', views.projectlistfortype_view, name = 'projectslisttype'),
   path('create/', views.create_view, name = 'create'),
   path('delete/<int:pk>', views.delete_view, name = 'delete'),
   path('balance/', views.balance, name= 'balance'),
@@ -26,7 +27,7 @@ urlpatterns = [
   path('clients', views.clients_view, name='clients'),
   path('clients/create', views.create_client_view, name='clientcreate'),
   path('clients/projectcreate/<int:pk>', views.create_for_client, name='clientprojectcreate'),
-  
+  path('create/clientedislist/<int:pk>', views.clientedislist, name='clientedislist'),
 ]
 urlpatterns += staticfiles_urlpatterns()
 urlpatterns += static(settings.STATIC_URL,document_root=settings.STATICFILES_DIRS)

@@ -27,13 +27,49 @@
           </div> <!-- End Content 1 -->
           <!--Content 2 -->
           <div id="content2">
-            <div style="width: 100%; align-self: center; display: flex; justify-content: center;">
+            <div style="width: 100%; align-self: center; align-items: center; display: flex; justify-content: center; padding-left: 15%;">
               <select name="client-list" id="client-list">
                 <option value="">Elegir cliente</option>
                 {% for Client in clients %}
                   <option value="{{ Client.pk }}">{{ Client.name }}</option>
+
                 {% endfor %}
               </select>
+              <button type="button" class="delete-button" id="remove-client">Eliminar</button>
+              <style>
+                .delete-button {
+                  background-color: #ff4d4d;
+                  color: white;
+                  border: none;
+                  padding: 10px 20px;
+                  cursor: pointer;
+                  margin-left: 10px;
+                }
+                .delete-button:hover {
+                  background-color: #ff1a1a;
+                }
+              </style>
+              <script>
+                
+                const removeClientButton = document.getElementById('remove-client');
+                const clientList = document.getElementById('client-list');
+                removeClientButton.addEventListener('click', function () {
+                  const selectedClientId = clientList.value;
+                  if (selectedClientId) {
+                    fetch(`clientedislist/${selectedClientId}`)
+                    .then(response => {
+                      if (response.ok) {
+                        clientList.value = '';
+                        const optionToRemove = clientList.querySelector(`option[value="${selectedClientId}"]`);
+                        if (optionToRemove) {
+                            optionToRemove.remove();
+                        }
+                      }
+                    })
+                    .catch(error => console.error('Error:', error));
+                  }
+                });
+              </script>
             </div>
             <!-- Datos Cliente -->
             <div style="width: 100%; display: flex; justify-content: center; ">

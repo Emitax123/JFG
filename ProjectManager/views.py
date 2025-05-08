@@ -15,7 +15,7 @@ import os
 import logging
 logger = logging.getLogger(__name__)
 from django.http import FileResponse
-
+from django.contrib.auth.decorators import login_required
 import io
 from urllib.request import urlopen
 from urllib.error import URLError
@@ -84,7 +84,7 @@ def delete_view(request, pk):
         return redirect('projects')
     return redirect('index')
 
-def balance_anual(request,monthly_data, monthly_totals, year):
+def balance_anual(request,monthly_data, monthly_totals, year, neto_anual):
     year = datetime.now().year
     projects = Project.objects.filter(created__year=year).exclude(price=None, adv=None, gasto=None)
     if not projects:
@@ -111,18 +111,23 @@ def balance_anual(request,monthly_data, monthly_totals, year):
         gastos = sum(p.gasto for p in month_projects)
         cobro = sum(p.adv for p in month_projects)
         neto = cobro - gastos
-        neto= f"{neto:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        
         monthly_totals.append({'total': total, 'gastos': gastos, 'cobro': cobro , 'neto': neto, 'cant': cant, 'month_name': month_name})
-    for month in monthly_totals:
-        print(month.get('total'))
+    neto_anual = sum((d['neto']) for d in monthly_totals)
+    
+    neto_anual = f"{neto_anual:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    monthly_totals = [{**d, 'neto': f"{d['neto']:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")} for d in monthly_totals]
     
     return (request,
         monthly_data,
         monthly_totals, 
-        year)
+        year, neto_anual)
 
 
 #Vista del balance
+#login required
+
+@login_required
 def balance(request):
     if request.method == 'POST':
         #Aqui el user selecciona el mes y año
@@ -162,9 +167,9 @@ def balance(request):
     #Creamos la lista anual y la lista que sume los totales de cada mes
     monthly_data = [[] for _ in range(12)]
     monthly_totals = []
+    neto_anual = 0
+    _, monthly_data, monthly_totals, year, neto_anual = balance_anual(request, monthly_data, monthly_totals, datetime.now().year, neto_anual)
     
-    balance_anual(request, monthly_data, monthly_totals, datetime.now().year)
-
     return render (request, 'balance_template.html', {
         'total':total, 
         'adv':adv, 
@@ -176,7 +181,7 @@ def balance(request):
         'year':year,
         'monsths_list': monthly_data,
         'monthly_totals': monthly_totals,
-        
+        'neto_anual': neto_anual,
         })
 
 #Vista de los proyectos todos
@@ -190,7 +195,7 @@ def projectlist_view(request):
                  Q(client__name__icontains=query) | Q(partido__icontains=query)
             ).order_by('-created')
             num_page = request.GET.get('page')
-            pages = Paginator (projects, 10)
+            pages = Paginator (projects, 8)
             try:
                actual_pag = pages.get_page(num_page)
             except PageNotAnInteger:
@@ -201,7 +206,7 @@ def projectlist_view(request):
         return render (request, 'project_list_template.html', {'projects':actual_pag, 'pages':pages})
     else:
         num_page = request.GET.get('page')
-        pages = Paginator (Project.objects.all().order_by('-created'), 10)
+        pages = Paginator (Project.objects.all().order_by('-created'), 8)
         try:
             actual_pag = pages.get_page(num_page)
         except PageNotAnInteger:
@@ -213,7 +218,26 @@ def projectlist_view(request):
 def alt_projectlist_view(request, pk):
     projects = Project.objects.filter(client__pk__icontains=pk).order_by('-created')
     num_page = request.GET.get('page')
-    pages = Paginator (projects, 10)
+    pages = Paginator (projects, 8)
+    try:
+        actual_pag = pages.get_page(num_page)
+    except PageNotAnInteger:
+        actual_pag = pages.get_page(1)
+    if not projects:
+        return render (request, 'project_list_template.html', {'no_projects':True})   
+    return render (request, 'project_list_template.html', {'projects':actual_pag, 'pages':pages})
+
+def projectlistfortype_view(request, type):
+    #Mensuras
+    if type == 1:
+        projects = Project.objects.filter(type="Mensura").order_by('-created')
+    if type == 2:
+        projects = Project.objects.filter(type="Estado Parcelario").order_by('-created')
+    if type == 3:
+        projects = Project.objects.filter(type="Amojonamiento").order_by('-created')
+
+    num_page = request.GET.get('page')
+    pages = Paginator (projects, 8)
     try:
         actual_pag = pages.get_page(num_page)
     except PageNotAnInteger:
@@ -286,7 +310,7 @@ def create_view(request):
                     error_message = error.message
                     print(f"Error for field '{field}': {error_message}")    
     form = ProjectForm()
-    clients = Client.objects.all()
+    clients = Client.objects.all().filter(not_listed=False).order_by('name')
     return render (request, 'form.html', {'form':form, 'clients':clients})
 
 #vista de moficicacion
@@ -339,6 +363,7 @@ def full_mod_view(request, pk):
     return render (request, 'full_mod_template.html', {'form':form, 'project':instance})
 
 #Vista de historial
+@login_required
 def history_view(request):
     history = Event.objects.order_by('-time')
     grouped_objects_def = defaultdict(lambda: defaultdict(list))
@@ -452,3 +477,9 @@ def create_for_client(request, pk):
                     print(f"Error for field '{field}': {error_message}")    
     form = ProjectForm()
     return render (request, 'project_for_client.html', {'form':form})
+
+def clientedislist(request, pk):
+    client = Client.objects.get(pk=pk)
+    client.not_listed = True
+    client.save()
+    return redirect('clients')

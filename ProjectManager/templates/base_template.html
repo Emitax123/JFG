@@ -23,7 +23,61 @@
           </div>
         <div class="nav-list">
         <ul class="nav-dropdown">
-            <li><a href="{% url 'projects' %}">Proyectos</a></li>
+            <li><a href="{% url 'projects' %}">Proyectos</a>
+              <ul class="navbar-submenu">
+                <li><a href="{% url 'projectslisttype' type=1%}">Mensuras</a></li>
+                <li><a href="{% url 'projectslisttype' type=2%}">Est.Parcelarios</a></li>
+                <li><a href="{% url 'projectslisttype' type=3%}">Amojonamientos</a></li>
+              </ul>
+              <style>
+                .nav-dropdown > li {
+                  position: relative;
+                  cursor: pointer;
+                }
+                
+                .navbar-submenu {
+                  display: none;
+                  position: absolute;
+                  top: 100%;
+                  left: 0;
+                  background-color: white;
+                  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                
+                  border-radius: 4px;
+                }
+
+                .navbar-submenu li {
+                  width: 100%;
+                  white-space: nowrap;
+                }
+
+                .navbar-submenu li:hover {
+                  background-color: #f5f5f5;
+                }
+
+                .navbar-submenu.show {
+                  display: block;
+                }
+              </style>
+              <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                  const projectsLi = document.querySelector('.nav-dropdown > li');
+                  const submenu = projectsLi.querySelector('.navbar-submenu');
+                  
+                  projectsLi.addEventListener('click', function(e) {
+                    if (e.target === projectsLi) {
+                      submenu.classList.toggle('show');
+                    }
+                  });
+
+                  document.addEventListener('click', function(e) {
+                    if (!projectsLi.contains(e.target)) {
+                      submenu.classList.remove('show');
+                    }
+                  });
+                });
+              </script>
+            </li>
             <li><a href="{% url 'balance' %}">Balances</a></li>
             <li><a href="{% url 'history' %}">Historial</a></li>  
             <li><a href="{% url 'create' %}">Formulario</a></li> 

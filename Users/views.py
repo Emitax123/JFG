@@ -10,8 +10,11 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('projects')
+            #redurict to the previus pag
+            return redirect(request.META.get('HTTP_REFERER', '/'))
+           
         else:
-            return render(request, 'login.html', {'error': 'Contraseña o usuario incorrecto'})
+            error = True
+            return render(request, 'login.html', {'error': error})
     else:
         return render(request, 'login.html')
