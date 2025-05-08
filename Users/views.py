@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login
 from django.shortcuts import redirect 
@@ -11,10 +12,11 @@ def login_view(request):
         if user is not None:
             login(request, user)
             #redurict to the previus pagE
-            return redirect(request.META.get('HTTP_REFERER', '/'))
-           
+            next_url = request.POST.get('next') or settings.LOGIN_REDIRECT_URL
+            return redirect(next_url)
         else:
-            error = True
-            return render(request, 'login.html', {'error': error})
+            error = 'Credenciales inválidas'
+            return render(request, 'login.html', {'error': error, 'next': request.POST.get('next', '')})
+           
     else:
-        return render(request, 'login.html')
+        return render(request, 'login.html', {'next': request.GET.get('next', '')})
