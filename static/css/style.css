@@ -279,7 +279,7 @@ body {
 }
 
 /* Balance */
-.board {
+div.balance-cont div.board {
   display: flex;
   flex-flow: wrap;
   border-radius: 10px;
@@ -291,7 +291,7 @@ body {
 }
 
 div.board div {
-  width: 30%;
+  
   margin: 0 auto;
 }
 
@@ -428,7 +428,7 @@ div.board div {
   flex-flow: column;
 }
 
-.balance-info {
+div.balance-cont div.board div.balance-info {
   width: 70%;
   height: 100%;
   border-left: 1px solid gray;
@@ -445,7 +445,7 @@ div.board div {
   font-weight: bold;
 }
 
-.balance-info div.chart2-cont {
+div.balance-cont div.board div.balance-info div.chart2-cont {
   display: flex;
   align-items: center;
   justify-content: center;
