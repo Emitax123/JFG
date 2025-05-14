@@ -26,7 +26,7 @@ from urllib.error import URLError
 
 #Vista principal
 def index(request):
-    return render (request, 'index.html')
+    return render (request, 'Index.html')
 
 # charts/views.py
 
