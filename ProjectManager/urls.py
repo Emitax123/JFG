@@ -7,11 +7,13 @@ from django.contrib.auth import views as auth_views
 from . import views
 
 urlpatterns = [
-  path('', views.projectlist_view, name = 'projects'),
+  path('', views.index, name = 'index'),
+  path('projects/', views.projectlist_view, name = 'projects'),
   path('listprojects/<int:pk>', views.alt_projectlist_view, name = 'projectslist'),
   path('listprojectstype/<int:type>', views.projectlistfortype_view, name = 'projectslisttype'),
   path('create/', views.create_view, name = 'create'),
   path('delete/<int:pk>', views.delete_view, name = 'delete'),
+  path('close/<int:pk>', views.close_view, name = 'close'),
   path('balance/', views.balance, name= 'balance'),
   path('upload/<int:pk>', views.upload_files, name= 'upload'),
   path('download/<int:pk>/', views.download_file, name='download'),

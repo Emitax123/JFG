@@ -17,12 +17,13 @@
        <nav >
         <div class="navbar">
           <div id="logo">
-            <a href="{% url 'projects' %}">
+            <a href="{% url 'index' %}">
               <img src="{% static 'img/Logo.jpg' %}" >
             </a> 
           </div>
         <div class="nav-list">
         <ul class="nav-dropdown">
+           <li><a href="{% url 'index' %}">Inicio</a></li>
             <li><a href="{% url 'projects' %}">Proyectos</a>
               <ul class="navbar-submenu">
                 <li><a href="{% url 'projectslisttype' type=1%}">Mensuras</a></li>

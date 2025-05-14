@@ -10,7 +10,7 @@
     {% for Project in projects %}
     <div style="max-width: 25%; min-width: 25%;" >
       <a href="{% url 'projectview' pk=Project.pk %}">
-        <div class="cont-work">
+        <div {% if Project.closed %} style="background-color:rgb(183, 239, 184);"{% endif %} class="cont-work">
                 <h1>{{Project.type}}</h1>
                 <div>
                   <span style="width: 50%;">

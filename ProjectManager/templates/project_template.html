@@ -4,7 +4,7 @@
   <div class="cont-project-div">
     
 
-    <div class="project-div">
+    <div {% if project.closed %} style="border: 5px solid green;"  {% endif %}class="project-div">
       <!-- Delete button -->
       <div class="delete-container">
         <form method="post" action="{% url 'delete' pk=project.pk %}">
@@ -15,8 +15,8 @@
         </form>
       </div>
       <div>
-        
-        <div style="display: flex; flex-flow: wrap; align-items: flex-end;"><h1>{{ project.type }}</h1><h4 style="margin-left: 10px; padding-bottom: 6px;">{{project.created|date:"d/m/Y"}}</h4></div>
+       
+        <div style="display: flex; flex-flow: wrap; align-items: flex-end;"><h1>{{ project.type }}</h1><h4 style="margin-left: 10px; padding-bottom: 6px;">{{project.created|date:"d/m/Y"}}</h4><h3 style="font-weight: bold; margin-left: 10px; padding-bottom: 5px;">ID:{{project.pk}} </h3></div>
         
         {% if project.type == "Mensura" %}
           <h3>{{project.mens}}</h3>
@@ -37,7 +37,7 @@
      
           <!-- Datos Cliente -->
             <div style="min-width: 240px;" class="client-box" id="client-data" >
-              <h5>Cliente</h5>
+                <h3 style="text-decoration: underline;">Cliente</h3>
               <span>Nombre: {{project.client.name}} </span>
               <span>Telefono: {{project.client.phone}} </span>
               <div style="flex-flow: wrap;">
@@ -72,7 +72,7 @@
             
             <!-- Datos Titular -->
             <div class="client-box" id="titular-data" >
-              <h5>Titular</h5>
+             <h3 style="text-decoration: underline;">Titular</h3>
               <div style="min-width: 280px; display: flex; flex-flow: row; justify-content: space-between;" >
                 <span>Nombre: <span class="client-span1">{{project.titular_name}}</span> </span> 
                 {% if project.titular_name %}
@@ -102,31 +102,37 @@
             <!-- FIN Datos Contacto -->
         </div>
       </div>
+      <!-- Nomenclatura -->
       <div class="show-box" id="nomenclatura" >
-        <span class="slide-text">Nomenclatura </span>
-        <button class="arrow-button" >
+        <span style="font-size: 20px;text-decoration: underline;" class="slide-text">Nomenclatura </span>
+        <!--<button class="arrow-button" >
           <img src="{% static 'img/arrow-down-svgrepo-com.svg' %}" alt="down-arrow">
-        </button>
-        <div class="info-box" id="">
-          <div >
-            <span>Partido: {{project.partido}}</span>
-            <span>Partida: {{project.partida}}</span>
-            <span>Circuns.: {{project.circuns}}</span>
-            <span>Sección: {{project.seccion}}</span>
+        </button>-->
+        {% with p=project %}
+        <div class="info-box" >
+          <div class="mid-range"  >
+            <span>Partido: {{p.partido}}</span>
           </div>
-          <div class="cqfmp" >
-            {% with p=project %}
-            <div style="flex-flow: column;" >
-              <span>Chacra: {{p.chacra_num}} {{p.chacra_letra}} </span>
-              <span>Quinta: {{p.quinta_num}} {{p.quinta_letra}}</span>
-              <span>Fracción: {{p.fraccion_num}} {{p.fraccion_letra}} </span>
-            </div>
-            <div style="flex-flow: column;" >
-              <span>Manzana: {{p.manzana_num}} {{p.manzana_letra}} </span>
-              <span>Parcela: {{p.parcela_num}} {{p.parcela_letra}} </span>
-              <span>Subparcela: {{p.subparcela}} </span>
-            </div>
-            <div style="flex-flow: column;" >
+          <div style="padding-left: 97px;" class="mid-range" >
+            <span>Partida: {{p.partida}}</span>
+          </div>
+          <div style="width: 33%;" >
+             <span>Circuns.: {{p.circuns}}</span>
+             <span>Fracción: {{p.fraccion_num}} {{p.fraccion_letra}} </span>
+             <span>Quinta: {{p.quinta_num}} {{p.quinta_letra}}</span>
+          </div>
+          <div class="small-range" >
+            <span>Sección: {{p.seccion}}</span>
+            <span>Chacra: {{p.chacra_num}} {{p.chacra_letra}} </span>
+            
+            <span>Manzana: {{p.manzana_num}} {{p.manzana_letra}} </span>
+          </div>
+          <div class="small-range" >
+            <span>Parcela: {{p.parcela_num}} {{p.parcela_letra}} </span>
+            <span>Subparcela: {{p.subparcela}} </span>
+          </div>
+        
+            <div class="small-range" >
               <span>Dirección: {{p.direction}} </span>
               <span>Piso:{{p.floor}}</span>
               <span>Departamento:{{p.depto}} </span>
@@ -134,7 +140,6 @@
             
             {% endwith %}
         
-          </div>
         </div>
       </div>
       <div class="mini-div">
@@ -191,19 +196,21 @@
           <button class="small-btn blue-button" type="submit">Hecho</button>
         </form>
       </div>
+      {% if project.client.flag %}
+      {% if project.contact_name %}
       <div class="contact-box">
-        {% if project.client.flag %}
-              {% if project.contact_name %}
+        
                 <div >
-                  <h3>Contacto</h3>
+                  <span style="text-decoration: underline;">Contacto</span>
                   <div style="display: flex; flex-flow: column; justify-content: space-between;" >
                     <span>Nombre: <span class="client-span1">{{project.contact_name}}</span> </span> 
                     <span>Telefono: <span class="client-span1">{{project.contact_phone}}</span> </span> 
                   </div>
                 </div>           
-              {% endif %}
-          {% endif %}
+             
       </div>
+      {% endif %}
+      {% endif %}
       {% if file_url%}
       <div style="display: flex; flex-flow: row;" >
         <button class="blue-button" onclick="window.location.href='{% url "download" pk=project.pk %}'">Archivo</button>
@@ -220,7 +227,7 @@
             onclick="window.location.href='{% url "deletefile" pk=project.pk %}'">Eliminar</button>
       </div>
       {% else %}
-      <div>
+      <div class="file-box">
         <button class="blue-button modify">Cargar archivo</button>
         <form enctype="multipart/form-data" style="display: none;" method="post" action="{% url 'upload' pk=project.pk %}" id="file-form">
           {% csrf_token %}
@@ -252,24 +259,53 @@
       
       
     </div>
-    <div class="full-modify-btn-container">
+    <div style="display: flex; flex-flow: row; justify-content: center;width: 30%;">
+      <div class="end-btn-container">
 
-      <button class="blue-button" onclick="window.location.href='{% url 'fullmodification' pk=project.pk %}'" class="full-modify-btn">
+        <button class="blue-button" onclick="window.location.href='{% url 'fullmodification' pk=project.pk %}'" class="full-modify-btn">
         Modificación completa
-      </button>
+        </button>
+      </div>
+      {% if not project.closed %}
+      <div class="end-btn-container">
+
+        <button class="close-button" onclick="window.location.href='{% url 'close' pk=project.pk %}'" class="full-modify-btn">
+        Terminar
+        </button>
+      </div>
+      {% endif %}
     </div>
+    
 
     <style>
-      .full-modify-btn-container {
+
+
+      .end-btn-container {
         display: flex;
         justify-content: center;
         margin-top: 20px;
-        height: 40px;
-        width: 80px;
+        margin-bottom: 20px;
       }
-      .full-modify-btn-container button.blue-button {
+      .end-btn-container button {
         padding: 5px;
         font-weight: 700;
+        padding: 5px 10px;
+        margin: 0 5px 0 5px;
+      }
+      .close-button {
+        background-color: #28a745;
+        color: white;
+        padding: 5px 10px;
+        
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .close-button:hover {
+        background-color: #218838;
+        transform: scale(1.05);
+        transition: all 0.2s ease;
       }
       
       
@@ -329,7 +365,7 @@
       flex-flow: row;
     }
     div.info-box div {
-      display: none;
+      display: flex;
       flex-flow: column;
       margin-top: 0;
     }
@@ -339,8 +375,26 @@
       position: relative;
       margin-top: 10px;
       padding-top: 10px;
+      padding-bottom: 10px;
     }
     div.contact-box::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 5%; /* Para centrarlo */
+      width: 90%;
+      border-top: 1px solid black;
+      
+    }
+    div.file-box {
+      opacity: 1; 
+      display: flex; 
+      position: relative;
+      padding-top: 10px;
+      margin-top: 10px;
+    }
+
+    div.file-box::after {
       content: "";
       position: absolute;
       top: 0;
@@ -371,11 +425,38 @@
     }
     div.info-box {
       display: flex;
-      opacity: 0;
+      flex-flow: wrap;
+      opacity: 1;
       width: 100%;
+      position: relative;
+      padding-bottom: 10px;
+    }
+
+    div.info-box::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 5%; /* Para centrarlo */
+      width: 90%;
+      border-bottom: 1px solid black;
+      
     }
     div.show-box.marginb100 {
       margin-bottom: 1px;
+    }
+    div.mid-range {
+      width: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: start;
+    }
+    div.mid-range span {
+      font-size: 20px;
+      text-decoration: underline;
+    }
+    div.small-range {
+      width: 33%;
+      
     }
     .fix-show-box {
       
@@ -403,6 +484,7 @@
     }
     .show-box span.slide-text {
       margin-right: 10px;
+      margin-bottom: 10px;
     }
     div.expand {
       background-color: blueviolet;
@@ -456,7 +538,7 @@
 
   <script>
     
-    var buttonArrow = document.querySelectorAll('button.arrow-button');
+    /*var buttonArrow = document.querySelectorAll('button.arrow-button');
     
     buttonArrow.forEach(function (button){
       var flag = true;
@@ -485,7 +567,7 @@
           flag = true;
         }
       });
-    });
+    });*/
     
     var buttons = document.querySelectorAll('button.modify')
     buttons.forEach(function (button) {

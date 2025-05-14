@@ -22,7 +22,11 @@ class ProjectFullForm(forms.ModelForm):
     class Meta:
         model = Project
         fields = '__all__'
-        exclude = ['client','titular_name', 'titular_phone','inscription_type', 'price', 'adv', 'gasto', 'procedure', 'files']
+        exclude = [
+            'client','contact_name','contact_phone','titular_name', 
+            'titular_phone','inscription_type', 'price', 'adv', 'gasto', 
+            'procedure', 'files', 'closed'
+        ]
     
     def __init__(self, *args, **kwargs):
         super(ProjectFullForm, self).__init__(*args, **kwargs)

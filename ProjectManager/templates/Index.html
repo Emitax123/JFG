@@ -1,8 +1,18 @@
 {% extends 'base_template.html' %}
 {% load static %}
-{% block graph %}
-<div style="color: wheat;">
-   
-    <p></p>
-</div>
-{% endblock graph %}
+{% block form %}
+    <div class="index-container" >
+     
+            <div class="index-links-cont">
+                <div>
+                    <a href="{% url 'projectslisttype' type='1' %}" class="project-link">Mensuras</a>
+                </div>
+                <div>
+                    <a href="{% url 'projectslisttype' type='2' %}" class="project-link">Estados Parcelarios</a>
+                </div>
+                <div>
+                    <a href="{% url 'projectslisttype' type='3' %}" class="project-link">Amojonamientos</a>
+                </div>
+            </div> 
+    </div>
+{% endblock %}

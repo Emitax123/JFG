@@ -65,7 +65,7 @@ class Project (models.Model):
     subparcela = models.CharField(max_length=10, blank=True, verbose_name='Subparcela')
    
     
-    direction = models.CharField(max_length=50, blank=True, verbose_name='Direccion')
+    direction = models.CharField(max_length=100, blank=True, verbose_name='Direccion')
     floor = models.CharField(max_length=10, blank=True, verbose_name='Piso')
     depto = models.CharField(max_length=10, blank=True, verbose_name='Depto')
 
@@ -84,6 +84,8 @@ class Project (models.Model):
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+
+    closed = models.BooleanField(default=False, verbose_name='Cerrado')
 
     def formatted_price(self):
         return f"{self.price:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")

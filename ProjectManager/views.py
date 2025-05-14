@@ -26,8 +26,7 @@ from urllib.error import URLError
 
 #Vista principal
 def index(request):
-    projects = Project.objects.all()
-    return render (request, 'index.html', {'projects':projects})
+    return render (request, 'index.html')
 
 # charts/views.py
 
@@ -72,17 +71,29 @@ def generate_month_data(months, year):
 #add a delete project function
 def delete_view(request, pk):
     project = Project.objects.get(pk=pk)
-    event = Event.objects.filter(model_pk=pk).first()
+    Event.objects.filter(model_pk=pk).delete()
+    event = Event.objects.filter(model_pk=pk)
     if request.method == 'POST':
-        msg = "Se ha eliminado un proyecto"
+        msg = "Se ha eliminado un proyecto " + project.type + " de " + project.client.name
         project.delete()
         event.delete()
         file = ProjectFiles.objects.filter(project_pk=pk).first()
         if file :
             delete_file(request, pk)
         save_in_history(pk, 3, msg)
-        return redirect('projects')
+        return redirect('index')
     return redirect('index')
+
+#Archivado de proyectos
+def close_view(request, pk):
+    project = Project.objects.get(pk=pk)
+    project.closed = True
+    project.save()
+    msg = "Se ha cerrado un proyecto"
+    type = 1 #Modificacion
+    model_pk = pk
+    save_in_history(pk, 1, msg)
+    return redirect('projects')
 
 def balance_anual(request,monthly_data, monthly_totals, year, neto_anual):
     year = datetime.now().year
@@ -123,10 +134,7 @@ def balance_anual(request,monthly_data, monthly_totals, year, neto_anual):
         monthly_totals, 
         year, neto_anual)
 
-
 #Vista del balance
-#login required
-
 @login_required
 def balance(request):
     if request.method == 'POST':
@@ -186,16 +194,14 @@ def balance(request):
 
 #Vista de los proyectos todos
 def projectlist_view(request):
-    print("paginas")
     if request.method == 'POST':
-        print("metodo post")
         if request.POST.get('search-input')!="":
             query = request.POST.get('search-input')
             projects = Project.objects.filter(
                  Q(client__name__icontains=query) | Q(partido__icontains=query)
             ).order_by('-created')
             num_page = request.GET.get('page')
-            pages = Paginator (projects, 8)
+            pages = Paginator (projects, 12)
             try:
                actual_pag = pages.get_page(num_page)
             except PageNotAnInteger:
@@ -206,19 +212,19 @@ def projectlist_view(request):
         return render (request, 'project_list_template.html', {'projects':actual_pag, 'pages':pages})
     else:
         num_page = request.GET.get('page')
-        pages = Paginator (Project.objects.all().order_by('-created'), 8)
+        pages = Paginator (Project.objects.filter(closed=False).order_by('-created'), 12)
         try:
             actual_pag = pages.get_page(num_page)
         except PageNotAnInteger:
             actual_pag = pages.get_page(1)
-        print(pages.num_pages)
+        
     return render (request, 'project_list_template.html', {'projects':actual_pag, 'pages':pages})
 
 #Lista de proyectos por cliente
 def alt_projectlist_view(request, pk):
     projects = Project.objects.filter(client__pk__icontains=pk).order_by('-created')
     num_page = request.GET.get('page')
-    pages = Paginator (projects, 8)
+    pages = Paginator (projects, 12)
     try:
         actual_pag = pages.get_page(num_page)
     except PageNotAnInteger:
@@ -230,14 +236,14 @@ def alt_projectlist_view(request, pk):
 def projectlistfortype_view(request, type):
     #Mensuras
     if type == 1:
-        projects = Project.objects.filter(type="Mensura").order_by('-created')
+        projects = Project.objects.filter(type="Mensura", closed=False).order_by('-created')
     if type == 2:
-        projects = Project.objects.filter(type="Estado Parcelario").order_by('-created')
+        projects = Project.objects.filter(type="Estado Parcelario", closed=False).order_by('-created')
     if type == 3:
-        projects = Project.objects.filter(type="Amojonamiento").order_by('-created')
+        projects = Project.objects.filter(type="Amojonamiento", closed=False).order_by('-created')
 
     num_page = request.GET.get('page')
-    pages = Paginator (projects, 8)
+    pages = Paginator (projects, 12)
     try:
         actual_pag = pages.get_page(num_page)
     except PageNotAnInteger:
@@ -300,7 +306,8 @@ def create_view(request):
             save_in_history(pk, 2, msg)
 
             if 'save_and_backhome' in request.POST:
-                    return redirect('projects')
+                return redirect('projectview', pk=pk)
+                
         else:
             # Form data is not valid, handle the errors
             errors = form.errors.as_data()
@@ -310,7 +317,7 @@ def create_view(request):
                     error_message = error.message
                     print(f"Error for field '{field}': {error_message}")    
     form = ProjectForm()
-    clients = Client.objects.all().filter(not_listed=False).order_by('name')
+    clients = Client.objects.all().filter(flag=True, not_listed=False).order_by('name')
     return render (request, 'form.html', {'form':form, 'clients':clients})
 
 #vista de moficicacion
@@ -351,7 +358,6 @@ def full_mod_view(request, pk):
         instance = Project.objects.get(pk=pk)
         form = ProjectFullForm(request.POST, instance=instance) 
         if form.is_valid():
-            print("El formulario es valido")
             form.save()
             msg = "Se ha modificado un proyecto"   
             pk = instance.pk
