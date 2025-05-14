@@ -290,8 +290,8 @@ div.balance-cont div.board {
   box-shadow: 2px 2px 10px black;
 }
 
-div.board div {
-  
+div.board div.chart1-cont {
+  width: 30%;
   margin: 0 auto;
 }
 
