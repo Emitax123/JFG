@@ -1,56 +1,51 @@
 {% extends 'base_template.html' %}
 {% load static %}
 {% block form %}
-    
-<div class="container-form">
-    <div  class="form-location">
-        <form style="display:flex; flex-flow: column; justify-content: center;" action="" method="POST" enctype="multipart/form-data">
+  <div class="container-form">
+    <div class="form-location">
+      <form style="display:flex; flex-flow: column; justify-content: center;" action="" method="POST" enctype="multipart/form-data">
         <h2>Crear un nuevo proyecto</h2>
         {% csrf_token %}
         <div style="flex-flow: wrap;" class="form-group">
-        {% for field in form %}
-            
+          {% for field in form %}
             <div class="form-field">
-                <label for="{{field.id_for_label}}">{{field.label}} </label>
-                {{field}}  
+              <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field }}
             </div>
-        {% endfor %}
+          {% endfor %}
         </div>
-            <div class="form-field">
-                <button class="blue-button" type="submit" class="btn btn-primary">Guardar</button>
-            </div>
-        </form>
-        
+        <div class="form-field">
+          <button class="blue-button" type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+      </form>
     </div>
-</div>
-<style>
+  </div>
+  <style>
     .form-field {
-        width: 33%;
-        display: flex;
-        flex-flow: column;
-        padding: 5px;
-
+      width: 33%;
+      display: flex;
+      flex-flow: column;
+      padding: 5px;
     }
-</style>
-<script>
-    const projectTypleSelect = document.getElementById('id_type');
-    const mensElement = document.getElementById('id_mens');
-
-// Check initial state
+  </style>
+  <script>
+    const projectTypleSelect = document.getElementById('id_type')
+    const mensElement = document.getElementById('id_mens')
+    
+    // Check initial state
     if (projectTypleSelect.value === 'Mensura') {
-       mensElement.disabled = false;
+      mensElement.disabled = false
     } else {
-        mensElement.value = '';
-        mensElement.disabled = true;
+      mensElement.value = ''
+      mensElement.disabled = true
     }
     projectTypleSelect.addEventListener('change', function () {
-      
       if (this.value === 'Mensura') {
-        mensElement.disabled = false;
+        mensElement.disabled = false
       } else {
-        mensElement.value = ''; // Clear the value if not Mensura
-        mensElement.disabled = true;
+        mensElement.value = '' // Clear the value if not Mensura
+        mensElement.disabled = true
       }
-    });
-</script>
+    })
+  </script>
 {% endblock %}

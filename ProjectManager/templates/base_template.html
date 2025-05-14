@@ -14,7 +14,7 @@
   </head>
   <body>
         <!-- COMIENZO NAVBAR -->
-       <nav >
+      <nav >
         <div class="navbar">
           <div id="logo">
             <a href="{% url 'index' %}">
@@ -30,54 +30,6 @@
                 <li><a href="{% url 'projectslisttype' type=2%}">Est.Parcelarios</a></li>
                 <li><a href="{% url 'projectslisttype' type=3%}">Amojonamientos</a></li>
               </ul>
-              <style>
-                .nav-dropdown > li {
-                  position: relative;
-                  cursor: pointer;
-                }
-                
-                .navbar-submenu {
-                  display: none;
-                  position: absolute;
-                  top: 100%;
-                  left: 0;
-                  background-color: white;
-                  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-                
-                  border-radius: 4px;
-                }
-
-                .navbar-submenu li {
-                  width: 100%;
-                  white-space: nowrap;
-                }
-
-                .navbar-submenu li:hover {
-                  background-color: #f5f5f5;
-                }
-
-                .navbar-submenu.show {
-                  display: block;
-                }
-              </style>
-              <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                  const projectsLi = document.querySelector('.nav-dropdown > li');
-                  const submenu = projectsLi.querySelector('.navbar-submenu');
-                  
-                  projectsLi.addEventListener('click', function(e) {
-                    if (e.target === projectsLi) {
-                      submenu.classList.toggle('show');
-                    }
-                  });
-
-                  document.addEventListener('click', function(e) {
-                    if (!projectsLi.contains(e.target)) {
-                      submenu.classList.remove('show');
-                    }
-                  });
-                });
-              </script>
             </li>
             <li><a href="{% url 'balance' %}">Balances</a></li>
             <li><a href="{% url 'history' %}">Historial</a></li>  
@@ -92,10 +44,10 @@
                 <img style="width: 25px; height: 25px;" src="{% static 'img/search-alt-1-svgrepo-com (1).svg' %}" alt="Submit">
               </button>
               <div id="search-results">
-                
+                <!-- This div will be populated with search results -->
               </div>
               </form>
-              
+
               <div id="results-cont" class="results-cont">
                 
               </div>
@@ -103,9 +55,8 @@
           </ul>
         </div>
         </div>
-        </nav>
-
-        <!-- FIN NAVBAR -->
+      </nav>
+      <!-- FIN NAVBAR -->
   <div class="container">  
     <div class="fila">
     {% block form %}{% endblock  %}
@@ -115,6 +66,24 @@
   </body>
 
 <script>
+  // JavaScript for the navbar submenu
+  document.addEventListener('DOMContentLoaded', function() {
+    const projectsLi = document.querySelector('.nav-dropdown > li');
+    const submenu = projectsLi.querySelector('.navbar-submenu');
+                  
+    projectsLi.addEventListener('click', function(e) {
+      if (e.target === projectsLi) {
+        submenu.classList.toggle('show');
+      }
+    });
+
+    document.addEventListener('click', function(e) {
+    if (!projectsLi.contains(e.target)) {
+      submenu.classList.remove('show');
+    }
+    });
+  });
+  
   // JavaScript for search functionality
   // This script handles the search input, fetches results from the server, and displays them in a dropdown.
   // It also includes debouncing to optimize performance and event listeners for user interactions.

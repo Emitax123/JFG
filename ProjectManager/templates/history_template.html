@@ -1,73 +1,28 @@
 {% extends 'base_template.html' %}
 {% load static %}
 {% block form %}
+  {% for year, months in yearlist.items %}
+    {% for month, items in months.items %}
+      <div class="history-cont">
+        <div class="history-cont-header" >
+          <p style="margin-right: 10px;">{{ year }}</p>
+          <p>{{ month }}</p>
+        </div>
 
-    
-      
-        {% for year, months in yearlist.items %}
-        
-            
-            {% for month, items in months.items %}
-            <div class="history-cont">
-                <div style="display: flex; flex-flow: row; justify-content: center; align-items: center;">
-                    <p style="margin-right: 10px;">{{year}}</p>
-                    <p>{{month}}</p>
-                </div>
-               
-                
-                {% for i in items %}
-                    <div class="history-item" >
-                    
-                        {% if i.type == 3 %}
-                            
-                            <span> {{ i.time|date:"d/m/Y" }} </span>
-                            <span style="padding-left: 4px;">{{ i.msg }}</span>
-                            
-                        {% else %}
-                            <a href="{% url 'projectview' pk=i.model_pk %}">
-                                <span> {{ i.time|date:"d/m/Y" }} </span>
-                                <span>{{ i.msg }}</span>
-                            </a>
-                        {% endif %}
-                        
-                    </div>
-                {% endfor %}
-            </div>
-            {% endfor %}
-        
+        {% for i in items %}
+          <div class="history-item">
+            {% if i.type == 3 %}
+              <span>{{ i.time|date:'d/m/Y' }}</span>
+              <span style="padding-left: 4px;">{{ i.msg }}</span>
+            {% else %}
+              <a href="{% url 'projectview' pk=i.model_pk %}">
+                <span>{{ i.time|date:'d/m/Y' }}</span>
+                <span>{{ i.msg }}</span>
+              </a>
+            {% endif %}
+          </div>
         {% endfor %}
-    
-
-<style>
-    .history-cont p {
-        font-weight: bold;
-    }
-    .history-cont {
-        width: 40%;
-        margin-bottom: 30px;
-        border-radius: 20px;
-        color: black;
-        background-color: white;
-        padding: 40px 20px;
-        box-shadow: 2px 2px 10px black;
-    }
-    .history-item {
-        margin-top: 10px;
-        padding-top: 10px;
-        border-top: 1px solid gray;
-        display: flex;
-        align-items: center;
-        
-    }
-    .history-item a {
-        text-decoration: none;
-        color: black;
-    }
-    .history-item span {
-        margin-left: 60px;
-        margin-right: 20px;
-        font-weight: 600;
-    }
-</style>
-
+      </div>
+    {% endfor %}
+  {% endfor %}
 {% endblock %}

@@ -8,7 +8,6 @@
       <form action="" method="POST" enctype="multipart/form-data">
         <h2>Crear un nuevo proyecto</h2>
         {% csrf_token %}
-        
         <div class="form-group">
           <!-- Content 1 -->
           <div id="content1">
@@ -24,55 +23,22 @@
               </div>
               <button type="button" class="blue-button" id="toggleButton1">Siguiente</button>
             </div>
-          </div> <!-- End Content 1 -->
-          <!--Content 2 -->
+          </div> 
+          <!-- End Content 1 -->
+          <!-- Content 2 -->
           <div id="content2">
-            <div style="width: 100%; align-self: center; align-items: center; display: flex; justify-content: center; padding-left: 15%;">
+            <div class="client-list-cont">
               <select name="client-list" id="client-list">
                 <option value="">Elegir cliente</option>
                 {% for Client in clients %}
                   <option value="{{ Client.pk }}">{{ Client.name }}</option>
-
                 {% endfor %}
               </select>
               <button type="button" class="delete-button" id="remove-client">Eliminar</button>
-              <style>
-                .delete-button {
-                  background-color: #ff4d4d;
-                  color: white;
-                  border: none;
-                  padding: 10px 20px;
-                  cursor: pointer;
-                  margin-left: 10px;
-                }
-                .delete-button:hover {
-                  background-color: #ff1a1a;
-                }
-              </style>
-              <script>
-                
-                const removeClientButton = document.getElementById('remove-client');
-                const clientList = document.getElementById('client-list');
-                removeClientButton.addEventListener('click', function () {
-                  const selectedClientId = clientList.value;
-                  if (selectedClientId) {
-                    fetch(`clientedislist/${selectedClientId}`)
-                    .then(response => {
-                      if (response.ok) {
-                        clientList.value = '';
-                        const optionToRemove = clientList.querySelector(`option[value="${selectedClientId}"]`);
-                        if (optionToRemove) {
-                            optionToRemove.remove();
-                        }
-                      }
-                    })
-                    .catch(error => console.error('Error:', error));
-                  }
-                });
-              </script>
+              <script></script>
             </div>
             <!-- Datos Cliente -->
-            <div style="width: 100%; display: flex; justify-content: center; ">
+            <div class="client-data-cont">
               <div id="clien-data" style="margin: 20px;" class="fields">
                 <h4>Datos cliente</h4>
                 <div style="margin-top:10px; height: 80px;" class="input-field">
@@ -84,8 +50,8 @@
                   <input type="text" name="client-phone" id="client-phone" />
                 </div>
               </div>
-            <!-- Datos Titular dentro de content 2 -->
-            <!--
+              <!-- Datos Titular dentro de content 2 -->
+              <!--   
               <div id="titular-data" style="margin: 20px;" class="fields">
                 <h4>Datos titular</h4>
                 <div style="margin-top:10px; height: 80px;" class="input-field">
@@ -100,242 +66,228 @@
                 <label for="{{ form.titular_phone.id_for_label }}">{{ form.titular_phone.label }}</label>
                 {{ form.titular_phone }}
                 </div>
-              </div>-->
+              </div>   -->
             </div>
             <button type="button" class="blue-button" id="toggleButton2">Siguiente</button>
             <button type="button" class="blue-button" id="return1">Regresar</button>
-          </div>  <!-- End content 2 -->
-       
-          <!-- Content 3 -->      
+          </div> <!-- End content 2 -->
+
+          <!-- Content 3 -->
           <div id="content3">
-            <div class="nomen-cont fields" style="margin: 20px; width: 100%;">
+            <div class="nomen-cont fields">
               <div style="order: 0;" class="partida">
                 <div style="margin: 10px;" class="input-field">
                   <label for="{{ form.partido.id_for_label }}">{{ form.partido.label }}</label>
-                  {{ form.partido|attr:"placeholder:Partido"  }}
-
+                  {{ form.partido|attr:'placeholder:Partido' }}
                 </div>
                 <div style="margin: 10px;" class="input-field">
                   <label for="{{ form.partida.id_for_label }}">{{ form.partida.label }}</label>
-                  {{ form.partida|attr:"placeholder:Partida"  }}
+                  {{ form.partida|attr:'placeholder:Partida' }}
                 </div>
                 <div style="margin: 10px;" class="input-field">
                   <label for="{{ form.circuns.id_for_label }}">{{ form.circuns.label }}</label>
-                  {{ form.circuns|attr:"placeholder:Cricunscripcion"  }}
+                  {{ form.circuns|attr:'placeholder:Cricunscripcion' }}
                 </div>
                 <div style="margin: 10px;" class="input-field">
                   <label for="{{ form.seccion.id_for_label }}">{{ form.seccion.label }}</label>
-                    {{ form.seccion|attr:"placeholder:Seccion" }}
+                  {{ form.seccion|attr:'placeholder:Seccion' }}
                 </div>
               </div>
 
               <div style="order: 0; margin-right: 10px;" class="secciones">
-                <div  class="input-field">
+                <div class="input-field">
                   <label for="">Chacra</label>
                   <div class="sub-input">
-                    
                     <input name="chacra_num" type="text" placeholder="Numero" maxlength="10" id="id_chacra_num" />
                     <input name="chacra_letra" type="text" placeholder="Letra" maxlength="10" id="id_chacra_letra" />
                   </div>
                 </div>
-                <div  class="input-field">
+                <div class="input-field">
                   <label for="">Quinta</label>
                   <div class="sub-input">
                     <input name="quinta_num" type="text" placeholder="Numero" maxlength="10" id="id_quinta_num" />
                     <input name="quinta_letra" type="text" placeholder="Letra" maxlength="10" id="id_quinta_letra" />
                   </div>
                 </div>
-                <div  class="input-field">
+                <div class="input-field">
                   <label for="">Fraccion</label>
                   <div class="sub-input">
                     <input name="fraccion_num" type="text" placeholder="Numero" maxlength="10" id="id_fraccion_num" />
                     <input name="fraccion_letra" type="text" placeholder="Letra" maxlength="10" id="id_fraccion_letra" />
                   </div>
                 </div>
-                <div  class="input-field">
+                <div class="input-field">
                   <label for="">Manzana</label>
                   <div class="sub-input">
                     <input name="manzana_num" type="text" placeholder="Numero" maxlength="10" id="id_manzana_num" />
                     <input name="manzana_letra" type="text" placeholder="Letra" maxlength="10" id="id_manzana_letra" />
                   </div>
                 </div>
-                <div  class="input-field">
-                    <label for="">Parcela</label>
-                    <div class="sub-input">
-                      <input name="parcela_num" type="text" placeholder="Numero" maxlength="10" id="id_parcela_num" />
-                      <input name="parcela_letra" type="text" placeholder="Letra" maxlength="10" id="id_parcela_letra" />
-                    </div>
+                <div class="input-field">
+                  <label for="">Parcela</label>
+                  <div class="sub-input">
+                    <input name="parcela_num" type="text" placeholder="Numero" maxlength="10" id="id_parcela_num" />
+                    <input name="parcela_letra" type="text" placeholder="Letra" maxlength="10" id="id_parcela_letra" />
+                  </div>
                 </div>
                 <div class="input-field">
                   <label for="">Subparcela</label>
                   <div class="sub-input">
-                    
                     <input name="subparcela" type="text" placeholder="Subparcela" maxlength="10" id="id_subparcela" />
                   </div>
                 </div>
               </div>
               <div class="directions">
-                <div  class="input-field">
+                <div class="input-field">
                   <label for="">Direccion</label>
                   <div class="sub-input">
-                    
                     <input name="direction" type="text" placeholder="Direccion" id="id_direction" />
-
                   </div>
                 </div>
-                <div  class="input-field">
+                <div class="input-field">
                   <label for="">Piso</label>
                   <div class="sub-input">
-                    
                     <input name="floor" type="text" placeholder="Piso" maxlength="10" id="id_floor" />
-
                   </div>
                 </div>
-                <div  class="input-field">
+                <div class="input-field">
                   <label for="">Departamento</label>
                   <div class="sub-input">
-                    
                     <input name="depto" type="text" placeholder="Departamento" maxlength="10" id="id_depto" />
-
                   </div>
                 </div>
-              </div>          
+              </div>
             </div>
             <div class="container-button">
               <button type="submit" class="blue-button next-bton" name="save_and_backhome">Guardar</button>
               <button type="button" class="blue-button" id="return2">Regresar</button>
-            </div>      
+            </div>
           </div>
-        </div> 
+        </div>
       </form>
     </div>
   </div>
 
   <script>
-    // Disable the inputs when the select option is changed
-    // and enable them when the select option is empty
-
-   
-  </script>
-
-  <script>
+    const projectTypleSelect = document.getElementById('id_type')
     
-   
-  </script>
-
-  <script>
-
-    const projectTypleSelect = document.getElementById('id_type');
-
     projectTypleSelect.addEventListener('change', function () {
-      const mensElement = document.getElementById('id_mens');
+      const mensElement = document.getElementById('id_mens')
       if (this.value === 'Mensura') {
-        mensElement.disabled = false;
+        mensElement.disabled = false
       } else {
-        mensElement.value = ''; // Clear the value if not Mensura
-        mensElement.disabled = true;
+        mensElement.value = '' // Clear the value if not Mensura
+        mensElement.disabled = true
       }
-    });
-
-
-
-      // Function to display error messages
-      const showError = (field, errorText) => {
-        field.classList.add("error");
-        const errorElement = document.createElement("small");
-        errorElement.classList.add("error-text");
-        errorElement.innerText = errorText;
-        field.closest(".input-field").appendChild(errorElement);
-      }
-      const removeError = (field) => {
-        if (field.classList.contains("error")) {
-          field.classList.remove("error");
-          field.closest(".input-field").lastChild.remove();
-        }
-      };
-  
-      
-      
-      const toggleButton1 = document.getElementById('toggleButton1');
-      const toggleButton2 = document.getElementById('toggleButton2');
-      const return1 = document.getElementById('return1');
-      const return2 = document.getElementById('return2');
-      const content1 = document.getElementById('content1');
-      //collect all inputs of type=text inside clien-data
-      const content2 = document.getElementById('content2');
-      const clientInputs = document.getElementById('clien-data').querySelectorAll('input[type="text"]');
-      //const clientInputs = document.getElementById('clien-data').querySelectorAll('input');//exceptcheckox
-
-
-      
-      const content3 = document.getElementById('content3');
-      const selectedOption = document.getElementById('id_type');
-      //JS for content1
-      selectedOption.addEventListener( 'change', () => {
-        if (selectedOption.value !== '') {
-          removeError(selectedOption);
-        }
-      });
-
-      toggleButton1.addEventListener('click', (event) => {
-        removeError(selectedOption);
-        if (selectedOption.value === '') {
-          event.preventDefault();
-          showError(selectedOption, "Elegir el tipo de proyecto");
-          return;
-          // Display an error message or provide visual feedback to the user
-        } else {
-          content1.style.transform = 'translateX(-100%)';
-          content2.style.transform = 'translateX(-112%)';
-        }
-      });
-      //JS for content2
-
-      toggleButton2.addEventListener('click', (event) => {
-        const clientList = document.getElementById('client-list');
-        const clientInputs = document.getElementById('clien-data').querySelectorAll('input[type="text"]');
-
-        // Remove any existing errors first
-        clientInputs.forEach(input => removeError(input));
-
-        if (clientList.value === '') {
-          // Check each input in client-data
-          let isValid = true;
-          clientInputs.forEach(input => {
-            if (input.value.trim() === '') {
-              isValid = false;
-              showError(input, "Este campo es requerido");
-            }
-          });
-          if (!isValid) {
-            event.preventDefault();
-            return;
-          }
-        }
-        content2.style.transform = 'translateX(-224%)'
-        content3.style.transform = 'translateX(-226%)'
-      })
-      return1.addEventListener('click', () => {
-        content1.style.transform = 'translateX(0%)'
-        content2.style.transform = 'translateX(0%)'
-      })
-      return2.addEventListener('click', () => {
-        content2.style.transform = 'translateX(-112%)'
-        content3.style.transform = 'translateX(0%)'
-      })
-
-
-    const selectElement = document.getElementById('client-list');
-    selectElement.addEventListener('change', function () {
-      clientInputs.forEach(input => input.disabled = selectElement.value !== '');
-      clientInputs.forEach(input => {
-        removeError(input);
-      });
-    });
-
-   
-    </script>
-  <style>
+    })
     
-  </style>
+    // Function to display error messages
+    const showError = (field, errorText) => {
+      field.classList.add('error')
+      const errorElement = document.createElement('small')
+      errorElement.classList.add('error-text')
+      errorElement.innerText = errorText
+      field.closest('.input-field').appendChild(errorElement)
+    }
+    const removeError = (field) => {
+      if (field.classList.contains('error')) {
+        field.classList.remove('error')
+        field.closest('.input-field').lastChild.remove()
+      }
+    }
+    
+    const toggleButton1 = document.getElementById('toggleButton1')
+    const toggleButton2 = document.getElementById('toggleButton2')
+    const return1 = document.getElementById('return1')
+    const return2 = document.getElementById('return2')
+    const content1 = document.getElementById('content1')
+    //collect all inputs of type=text inside clien-data
+    const content2 = document.getElementById('content2')
+    const clientInputs = document.getElementById('clien-data').querySelectorAll('input[type="text"]')
+    //const clientInputs = document.getElementById('clien-data').querySelectorAll('input');//exceptcheckox
+    
+    const content3 = document.getElementById('content3')
+    const selectedOption = document.getElementById('id_type')
+    //JS for content1
+    selectedOption.addEventListener('change', () => {
+      if (selectedOption.value !== '') {
+        removeError(selectedOption)
+      }
+    })
+    
+    toggleButton1.addEventListener('click', (event) => {
+      removeError(selectedOption)
+      if (selectedOption.value === '') {
+        event.preventDefault()
+        showError(selectedOption, 'Elegir el tipo de proyecto')
+        return
+        // Display an error message or provide visual feedback to the user
+      } else {
+        content1.style.transform = 'translateX(-100%)'
+        content2.style.transform = 'translateX(-112%)'
+      }
+    })
+    //JS for content2
+    
+    toggleButton2.addEventListener('click', (event) => {
+      const clientList = document.getElementById('client-list')
+      const clientInputs = document.getElementById('clien-data').querySelectorAll('input[type="text"]')
+    
+      // Remove any existing errors first
+      clientInputs.forEach((input) => removeError(input))
+    
+      if (clientList.value === '') {
+        // Check each input in client-data
+        let isValid = true
+        clientInputs.forEach((input) => {
+          if (input.value.trim() === '') {
+            isValid = false
+            showError(input, 'Este campo es requerido')
+          }
+        })
+        if (!isValid) {
+          event.preventDefault()
+          return
+        }
+      }
+      content2.style.transform = 'translateX(-224%)'
+      content3.style.transform = 'translateX(-226%)'
+    })
+    return1.addEventListener('click', () => {
+      content1.style.transform = 'translateX(0%)'
+      content2.style.transform = 'translateX(0%)'
+    })
+    return2.addEventListener('click', () => {
+      content2.style.transform = 'translateX(-112%)'
+      content3.style.transform = 'translateX(0%)'
+    })
+    
+    const selectElement = document.getElementById('client-list')
+    selectElement.addEventListener('change', function () {
+      clientInputs.forEach((input) => (input.disabled = selectElement.value !== ''))
+      clientInputs.forEach((input) => {
+        removeError(input)
+      })
+    })
+    
+    // Script to handle the removal of clients
+    const removeClientButton = document.getElementById('remove-client')
+    const clientList = document.getElementById('client-list')
+    removeClientButton.addEventListener('click', function () {
+      const selectedClientId = clientList.value
+      if (selectedClientId) {
+        fetch(`clientedislist/${selectedClientId}`)
+          .then((response) => {
+            if (response.ok) {
+              clientList.value = ''
+              const optionToRemove = clientList.querySelector(`option[value="${selectedClientId}"]`)
+              if (optionToRemove) {
+                optionToRemove.remove()
+              }
+            }
+          })
+          .catch((error) => console.error('Error:', error))
+      }
+    })
+  </script>
 {% endblock %}

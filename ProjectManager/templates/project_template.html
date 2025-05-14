@@ -4,7 +4,7 @@
   <div class="cont-project-div">
     
 
-    <div {% if project.closed %} style="border: 5px solid green;"  {% endif %}class="project-div">
+    <div {% if project.closed %} style="border: 5px solid green;"  {% endif %} class="project-div">
       <!-- Delete button -->
       <div class="delete-container">
         <form method="post" action="{% url 'delete' pk=project.pk %}">
@@ -214,17 +214,10 @@
       {% if file_url%}
       <div class="file-box">
         <button class="blue-button" onclick="window.location.href='{% url "download" pk=project.pk %}'">Archivo</button>
-        <button style=
-            "background-color: #ff0000;
-            color: white;
-            border: none;
-            padding: 2px;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-left: 10px;
-            " 
-            onclick="window.location.href='{% url "deletefile" pk=project.pk %}'">Eliminar</button>
+        <button class="delete-file-button" 
+          onclick="window.location.href='{% url "deletefile" pk=project.pk %}'">
+          Eliminar
+        </button>
       </div>
       {% else %}
       <div class="file-box">
@@ -237,17 +230,7 @@
             <span style="font-size: 15px;" id="file-name"></span>
             <script>
 
-            const fileInput = document.getElementById('id_file_field');
-            const fileNameSpan = document.getElementById('file-name');
-            if (fileInput && fileNameSpan) {
-              fileInput.addEventListener('change', function () {
-                if (fileInput.files.length > 0) {
-                  fileNameSpan.textContent = fileInput.files[0].name;
-                } else {
-                  fileNameSpan.textContent = "Ningún cliente seleccionado";
-                }
-              });
-            }
+            
             </script>
           {% endfor %}
           <input class="blue-button" type="submit" value="Guardar">
@@ -275,266 +258,11 @@
       </div>
       {% endif %}
     </div>
-    
-
-    <style>
-
-
-      .end-btn-container {
-        display: flex;
-        justify-content: center;
-        margin-top: 20px;
-        margin-bottom: 20px;
-      }
-      .end-btn-container button {
-        padding: 5px;
-        font-weight: 700;
-        padding: 5px 10px;
-        margin: 0 5px 0 5px;
-      }
-      .close-button {
-        background-color: #28a745;
-        color: white;
-        padding: 5px 10px;
-        
-        border-radius: 5px;
-        font-weight: bold;
-        cursor: pointer;
-      }
-
-      .close-button:hover {
-        background-color: #218838;
-        transform: scale(1.05);
-        transition: all 0.2s ease;
-      }
-      
-      
-
-    
-    </style>
   </div>
 
-  <style>
-    .visually-hidden {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      border: 0;
-    }
-    .project-div {
-      position: relative;
-    }
-    .delete-container {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-    }
-  </style>
-  <style>
-    .delete-button {
-      background-color: #ff0000;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-bottom: 20px;
-      width: 130px;
-      height: 40px;
-    }
-    .delete-button:hover {
-      background-color: #cc0000;
-      transform: scale(1.05);
-      transition: all 0.2s ease;
-    }
-    .delete-container {
-      display: flex;
-      justify-content: flex-end;
-    }
-  </style>
-  <style>
-     div.info-box div.cqfmp span {
-      font-size: small;
-     }
-    div.info-box div.cqfmp {
-      flex-flow: row;
-    }
-    div.info-box div {
-      display: flex;
-      flex-flow: column;
-      margin-top: 0;
-    }
-    div.contact-box {
-      opacity: 1; 
-      display: flex; 
-      position: relative;
-      margin-top: 10px;
-      padding-top: 10px;
-      padding-bottom: 10px;
-    }
-    div.contact-box::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 5%; /* Para centrarlo */
-      width: 90%;
-      border-top: 1px solid black;
-      
-    }
-    div.file-box {
-      opacity: 1; 
-      display: flex; 
-      position: relative;
-      padding-top: 10px;
-      margin-top: 10px;
-    }
-
-    div.file-box::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 5%; /* Para centrarlo */
-      width: 90%;
-      border-top: 1px solid black;
-    }
-
-    div.fix-info-box {
-      opacity: 1; 
-      display: flex; 
-      position: relative;
-      
-    }
-    div.fix-info-box::after {
-      content: "";
-      position: absolute;
-      bottom: 0;
-      left: 5%; /* Para centrarlo */
-      width: 90%;
-      border-bottom: 1px solid black;
-    }
-
-    div.fix-info-box div {
-      display: flex;
-      flex-flow: column;
-      
-    }
-    div.info-box {
-      display: flex;
-      flex-flow: wrap;
-      opacity: 1;
-      width: 100%;
-      position: relative;
-      padding-bottom: 10px;
-    }
-
-    div.info-box::after {
-      content: "";
-      position: absolute;
-      bottom: 0;
-      left: 5%; /* Para centrarlo */
-      width: 90%;
-      border-bottom: 1px solid black;
-      
-    }
-    div.show-box.marginb100 {
-      margin-bottom: 1px;
-    }
-    div.mid-range {
-      width: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: start;
-    }
-    div.mid-range span {
-      font-size: 20px;
-      text-decoration: underline;
-    }
-    div.small-range {
-      width: 33%;
-      
-    }
-    .fix-show-box {
-      
-      width: 100%;
-      padding: 0;
-      min-width: 400px;
-      margin-top: 10px;
-      transition: margin-bottom 1s ease;
-      display: flex; flex-flow: column;
-    }
-    .show-box {
-      padding: 0;
-      
-      margin-top: 10px;
-      transition: display 0.2s ease;
-      display: flex; flex-flow: wrap;
-    }
-    .show-box button.arrow-button{
-      background-color: transparent; border: none; cursor: pointer;
-    }
-    .show-box button.arrow-button img {
-      padding-bottom: 2px;
-      height: 25px; 
-      width: 30px;
-    }
-    .show-box span.slide-text {
-      margin-right: 10px;
-      margin-bottom: 10px;
-    }
-    div.expand {
-      background-color: blueviolet;
-      transition: 3s;
-    }
-    div.expand:hover{
-      height: 100px;
-    }
-    .project-div {
-      min-width: 650px;
-      max-width: 650px;
-      padding: 20px;
-      background-color: white;
-      color: black;
-      box-shadow: 2px 2px 10px black;
-      border-radius: 10px;
-      display: flex;
-      flex-flow: column;
-    }
-    .project-div div.mini-div {
-      display: flex;
-      flex-flow: row;
-      max-height: 20px;
-      margin-right: 20px;
-      margin-top: 10px;
-    }
-    .project-div div span {
-      margin-right: 20px;
-      font-weight: 600;
-    }
-    input#id_file_field {
-      background-color: white;
-    }
-    input[type="file"] {
-      display: none;
-    }
-    #file-label {
-      border: 2px solid black;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding-bottom: 2px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-      width: 100px;
-      margin-right: 20px;
-      font-size: 12px;
-    }
-  </style>
+ 
+ 
+ 
 
   <script>
     
@@ -568,6 +296,20 @@
         }
       });
     });*/
+
+    const fileInput = document.getElementById('id_file_field');
+            const fileNameSpan = document.getElementById('file-name');
+            if (fileInput && fileNameSpan) {
+              fileInput.addEventListener('change', function () {
+                if (fileInput.files.length > 0) {
+                  fileNameSpan.textContent = fileInput.files[0].name;
+                } else {
+                  fileNameSpan.textContent = "Ningún cliente seleccionado";
+                }
+              });
+            }
+
+
     
     var buttons = document.querySelectorAll('button.modify')
     buttons.forEach(function (button) {

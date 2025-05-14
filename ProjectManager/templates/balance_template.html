@@ -15,22 +15,21 @@
 {% else %}
 
 <div class="board">
-    <div style="width: 30%; margin: 0 auto;">
+    <div>
         <canvas id="myChart"></canvas>
     </div>
     <div class="balance-info">
         <h3><span>{{month}} - {{year}}</span></h3>
         <div>
-            <span>Presupuestos: <span style="font-weight: bold;">{{ cant }}</span></span><br>
-            <span>Total a cobrar: <span style="font-weight: bold;">${{ total }}</span></span><br>
-            <span>Cobrados: <span style="font-weight: bold;">${{ adv }}</span>, un {{percent}}% del total.</span></span><br>
-            <span>Gastos ingresados: <span style="font-weight: bold;">${{ gastos }}</span>.</span><br>
-            <span>Ganancia neta:  <span style="font-weight: bold;">${{ net }}</span>.</span>
+            <span>Presupuestos: <span>{{ cant }}</span></span><br>
+            <span>Total a cobrar: <span>${{ total }}</span></span><br>
+            <span>Cobrados: <span>${{ adv }}</span>, un {{percent}}% del total.</span></span><br>
+            <span>Gastos ingresados: <span>${{ gastos }}</span>.</span><br>
+            <span>Ganancia neta:  <span>${{ net }}</span>.</span>
         </div>
-        <div  style="display: flex; align-items: center; justify-content: center; width: 80%; height: 50%; ">
+        <div class="chart2-cont">
             <canvas id="myChart2"></canvas>
         </div>
-        
     </div>
 </div>
 </div>
@@ -41,85 +40,16 @@
         <div class="title"><h2>{{year}} - Neto Anual $ {{neto_anual}} </h2></div>
         {% for total in monthly_totals %}
         {% with currentMonth=forloop.counter %}
-        
         <div class="month-data">
             <div class="month-details title"><span>Mes</span><span>Proyectos</span><span>Ganancia Neta</span></div>
             <div class="month-details"><span>{{total.month_name}} </span><span> {{total.cant}} </span><span style="font-weight: bold;"> ${{ total.neto }}</span></div>
         {% endwith %}    
-            
-            
         </div>
         {% endfor %}
     </div>
-
-    <style>
-    .monthly-summary {
-        display: flex;
-        flex-flow: column;
-
-        align-items: center;
-        padding: 15px;
-        background-color:white;
-        color: black;
-        min-width: 50em;
-        border-radius: 10px;
-        box-shadow: 2px 2px 10px black;
-        margin: 29px 0 20px 0;
-    }
-    .month-data {
-        display: flex;
-        flex-flow: column;
-        border: 1px solid #ddd;
-        padding: 10px;
-        border-radius: 5px;
-        min-width: 80%;
-        
-    }
-    .month-details {
-        display: flex;
-        flex-flow: row;
-        justify-content: space-between;
-        width: 100%;
-        padding: 5px 0;
-    }
-    .month-details.title {
-        font-weight: bold;
-        background-color: #f0f0f0;
-    }
-    .month-details span {
-        width: 33%;
-        text-align: center;
-    }
-    </style>
 </div>
 <!-- charts/templates/chart.html -->
 
-<style>
-    .balance-cont {
-        display: flex;
-        align-items: center;
-        flex-flow: column;
-    }
-    .balance-info {
-        width: 70%; 
-        height: 100%;
-        border-left: 1px solid gray;
-        color: black;
-        font-weight: 500;
-        padding: 20px;
-        display: flex;
-        flex-flow: column;
-        justify-content: space-between;
-        align-items: center;
-    }
-    .month-selector form {
-        display: flex;
-        flex-flow: row;
-    }
-    .month-selector {
-        margin: 0 0 20px 0;
-    }
-</style>
 <script>
     
     document.addEventListener('DOMContentLoaded', function () {
