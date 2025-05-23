@@ -86,7 +86,24 @@
                             hoverOffset: 4
                         }]
                     },
-                   
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Proyectos por mes'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
                 });
                 } else {
                     console.error('Incomplete or empty data received.');
