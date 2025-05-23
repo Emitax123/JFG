@@ -1026,6 +1026,8 @@ div.cont-work {
 
 .cont-work h1 {
   text-decoration: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 
