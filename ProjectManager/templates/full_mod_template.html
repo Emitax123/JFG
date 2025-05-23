@@ -4,17 +4,139 @@
   <div class="container-form">
     <div class="form-location">
       <form style="display:flex; flex-flow: column; justify-content: center;" action="" method="POST" enctype="multipart/form-data">
-        <h2>Crear un nuevo proyecto</h2>
+        <span style="font-size: 30px; font-weight: bold;">Crear un nuevo proyecto</span>
         {% csrf_token %}
-        <div style="flex-flow: wrap;" class="form-group">
-          {% for field in form %}
-            <div class="form-field">
-              <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-              {{ field }}
+        <div class="form-group mod-form">
+          <div>
+            <span style="width: 100%;">Proyecto</span>
+            <div class="mini-gp">
+              <div>
+                <label for="id_type">Tipo de proyecto</label>
+              {{ form.type }}
+              </div>
+              
             </div>
-          {% endfor %}
+            <div class="mini-gp">
+              <div>
+                <label for="id_mens">Mensura</label>
+                {{ form.mens }}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <span style="width: 100%;">Nomenclatura</span>
+            <div class="mini-gp">
+              <div>
+                <label for="id_partido">Partido</label>
+                {{ form.partido }}
+              </div>
+              <div>
+                <label for="id_partida">Partida</label>
+                {{ form.partida }}
+              </div>
+            </div>
+            <div class="mini-gp">
+              <div>
+                <label for="id_circuns">Circunscripción</label>
+                {{ form.circuns }}
+              </div>
+              <div>
+                <label for="id_seccion">Sección</label>
+                {{ form.seccion }}
+              </div>
+            </div>
+         </div>
+
+          <div class="data-gp"><!-- div 2 -->
+            <span style="width: 100%;">Otros datos</span>
+            <div class="inside-data"  >
+                <div class="mini-gp">
+                  <div>
+                    <label for="id_chacra_num">Chacra Numero</label>
+                    {{ form.chacra_num }}
+                  </div>
+                  <div>
+                    <label for="id_chacra_letra">Chacra Letra</label>
+                    {{ form.chacra_letra }}
+                  </div>
+                </div>
+                <div class="mini-gp">
+                    <div>
+                       <label for="id_quinta_num">Quinta Numero</label>
+                    {{ form.quinta_num }}
+                    </div>
+
+                    <div>
+                       <label for="id_quinta_letra">Quinta Letra</label>
+                      {{ form.quinta_letra }}
+                    </div>
+                </div>
+                <div class="mini-gp">
+                  <div>
+                    <label for="id_fraccion_num">Fraccion Numero</label>
+                    {{ form.fraccion_num }}
+                  </div>
+                  <div>
+                    <label for="id_fraccion_letra">Fraccion Letra</label>
+                    {{ form.fraccion_letra }}
+                  </div>
+                    
+                </div>
+            </div>
+            
+            <div class="inside-data">
+              <div class="mini-gp">
+                <div>
+                  <label for="id_manzana_num">Manzana Numero</label>
+                {{ form.manzana_num }}
+                </div>
+                <div>
+                  <label for="id_manzana_letra">Manzana Letra</label>
+                {{ form.manzana_letra }}
+                </div>
+                
+              </div>
+              <div class="mini-gp">
+                <div>
+                  <label for="id_parcela_num">Parcela Numero</label>
+                {{ form.parcela_num }}
+                </div>
+                <div>
+                  <label for="id_parcela_letra">Parcela Letra</label>
+                {{ form.parcela_letra }}
+                </div>
+                
+              </div>
+              <div class="mini-gp">
+                <div>
+                  <label for="id_subparcela">Subparcela</label>
+                {{ form.subparcela }}
+                </div>
+                
+              </div>
+            </div><!-- fin mini div 2 -->
+          </div><!-- fin div 2 -->
+
+          <div><!-- div 3 -->
+              <span style="width: 100%;">Direccion</span>
+              <div class="mini-gp">
+                <div>
+                  <label for="id_direction">Direccion</label>
+                  {{ form.direction }}
+                </div>
+                <div>
+                  <label for="id_floor">Piso</label>
+                  {{ form.floor }}
+                </div>
+                <div>
+                  <label for="id_depto">Departamento</label>
+                  {{ form.depto }}
+                </div>
+              </div>
+          </div>
         </div>
-        <div class="form-field">
+        <div class="form-field btn">
           <button class="blue-button" type="submit" class="btn btn-primary">Guardar</button>
         </div>
       </form>
@@ -25,8 +147,56 @@
       width: 33%;
       display: flex;
       flex-flow: column;
-      padding: 5px;
+      
     }
+    div.form-group.mod-form{
+      display: flex;
+      flex-flow: column;
+      
+    }
+    div.form-group.mod-form span {
+      width: 100%;
+      font-size: 20px;
+      font-weight: 500;
+      text-decoration: underline;
+    }
+    div.form-group.mod-form div {
+      display: flex;
+      flex-flow: wrap;
+      padding-bottom: 10px;
+    }
+    div.form-group.mod-form > div::after {
+      content: '';
+      display: block;
+      border-bottom: 2px solid #ccc;
+      width: 100%;
+      margin: 0 auto;
+      width: 90%;
+    }
+     div.form-group div.mini-gp {
+      display: flex;
+      flex-flow: wrap;
+      padding: 5px;
+      
+    }
+    div.form-group div.mini-gp div {
+      display: flex;
+      flex-flow: column;
+      padding:5px;
+      
+    }
+    div.form-group div.data-gp {
+      display: flex;
+      flex-flow: column;
+      padding: 5px;
+      
+    }
+    div.data-gp div.inside-data {
+      display: flex;
+      flex-flow: column;
+     
+    }
+   
   </style>
   <script>
     const projectTypleSelect = document.getElementById('id_type')
