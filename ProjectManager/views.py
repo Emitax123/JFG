@@ -242,6 +242,7 @@ def projectlist_view(request):
                 return render (request, 'project_list_template.html', {'no_projects':True})
         actual_pag, pages = paginate_queryset(request, projects)
         return render (request, 'project_list_template.html', {'projects':actual_pag, 'pages':pages})
+        
     else:
         actual_pag, pages = paginate_queryset(request, Project.objects.filter(closed=False).order_by('-created'))
     return render (request, 'project_list_template.html', {'projects':actual_pag, 'pages':pages})
