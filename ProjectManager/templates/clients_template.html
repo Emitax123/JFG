@@ -7,7 +7,10 @@
   <div class="client-list-cont">
     {% for client in clients %}
       <div class="client-container">
-        <h2>{{ client.name }}</h2>
+        <div style="width: 60%;">
+          <h2>{{ client.name }}</h2>
+        </div>
+        
         <div class="client-buttons">
           <div>
             <a href="{% url 'projectslist' pk=client.pk %}" class="button">Ver proyectos</a>
