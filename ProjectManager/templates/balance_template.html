@@ -86,23 +86,6 @@
                             hoverOffset: 4
                         }]
                     },
-                    
-     options: {
-        plugins: {
-            tooltip: {
-                callbacks: {
-                    title: function(context) {
-                        // Show the label for the hovered bar
-                        return context[0].label;
-                    },
-                    label: function(context) {
-                        // Show the value for the hovered bar
-                        return 'Valor: ' + context.parsed.y;
-                    }
-                }
-            }
-        }
-    }
                    
                 });
                 } else {

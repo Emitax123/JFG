@@ -306,7 +306,6 @@ def create_view(request):
                     if not client:
                         client = Client.objects.create(
                             name=client_name,
-                            dni=request.POST.get('client-dni'),
                             phone=request.POST.get('client-phone')
                         )
                 form_instance.client = client
@@ -488,7 +487,7 @@ def create_client_view(request):
 def clients_view(request):
     if request.method == 'POST':
         if request.POST.get('client-name') != '':
-            client = Client.objects.create(name=request.POST.get('client-name'), dni=request.POST.get('client-dni'), phone=request.POST.get('client-phone'))
+            client = Client.objects.create(name=request.POST.get('client-name'), phone=request.POST.get('client-phone'))
             client.save()
             return redirect('clients')
     clients = Client.objects.filter(flag=True).order_by('name')
