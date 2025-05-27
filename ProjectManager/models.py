@@ -113,4 +113,4 @@ class Event (models.Model):
     type = models.IntegerField(default=0)
     time = models.DateTimeField(auto_now_add=True)
     model_pk = models.IntegerField(default=0)
-    msg = models.CharField(max_length=50, null=True)
+    msg = models.CharField(max_length=100, null=True)
