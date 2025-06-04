@@ -240,24 +240,26 @@ def balance(request):
         adv=Sum('adv'),
         gastos=Sum('gasto')
     )
-    total = sums['total'] or 0
+    totalEstimatedAmount = sums['total'] or 0
     adv = sums['adv'] or 0
     gastos = sums['gastos'] or 0
+    pending = totalEstimatedAmount - adv - gastos
     cant = projects.count()
     cant_actual_month = projects.filter(created__month=month).count()
-    cant_previus_months = projects.exclude(created__month=month).count()
+    cant_previus_months = projects.exclude(created__month=month, closed=True).count()
 
-    if total > 0:
-        percent = round((adv/total)*100 , 2)
+    if totalEstimatedAmount > 0:
+        percent = round((adv/totalEstimatedAmount)*100 , 2)
     else:
         percent = 0
     #net = el neto, es decir los anticipos menos los gastos
     net = adv-gastos
     #Formateamos los numeros a 2 decimales y cambiamos el punto por la coma
     adv = format_currency(adv)
-    total = format_currency(total)
+    totalEstimatedAmount = format_currency(totalEstimatedAmount)
     gastos = format_currency(gastos)
     net = format_currency(net)
+    pending = format_currency(pending)
     
     #Creamos la lista anual y la lista que sume los totales de cada mes
     data = balance_anual(year)
@@ -267,8 +269,9 @@ def balance(request):
     
     return render (request, 'balance_template.html', {
         'non_exist':non_exist,
-        'total':total, 
+        'total':totalEstimatedAmount, 
         'adv':adv, 
+        'pending':pending,
         'cant':cant,
         'cant_actual_month':cant_actual_month,
         'cant_previus_months':cant_previus_months,
