@@ -13,25 +13,28 @@
 {% if non_exist %}
     <p>No existen registros en la fecha indicada</p>
 {% else %}
-
-<div class="board">
-    <div class="chart1-cont">
-        <canvas id="myChart"></canvas>
-    </div>
-    <div class="balance-info">
-        <h3><span>{{month}} - {{year}}</span></h3>
-        <div>
-            <span>Presupuestos: <span>{{ cant }}</span></span><br>
-            <span>Total a cobrar: <span>${{ total }}</span></span><br>
-            <span>Cobrados: <span>${{ adv }}</span>, un {{percent}}% del total.</span></span><br>
-            <span>Gastos ingresados: <span>${{ gastos }}</span>.</span><br>
-            <span>Ganancia neta:  <span>${{ net }}</span>.</span>
+<div class="board-container" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
+    <div class="board" style="margin-right: 20px;">
+        
+        <div class="balance-info">
+            <h3 style="margin-bottom: 20px;"><span>{{month}} - {{year}}</span></h3>
+            <div style="margin-bottom: 20px;">
+                <span>Presupuestos: <span>{{ cant }}</span></span><br>
+                <span>Total a cobrar: <span>${{ total }}</span></span><br>
+                <span>Cobrados: <span>${{ adv }}</span>, un {{percent}}% del total.</span></span><br>
+                <span>Gastos ingresados: <span>${{ gastos }}</span>.</span><br>
+                <span>Ganancia neta:  <span>${{ net }}</span>.</span>
+            </div>
+            <div class="chart2-cont">
+                <canvas id="myChart2"></canvas>
+            </div>
         </div>
-        <div class="chart2-cont">
-            <canvas id="myChart2"></canvas>
+    </div>
+    <div class="board">
+        <div class="chart1-cont">
+            <canvas id="myChart"></canvas>
         </div>
     </div>
-</div>
 </div>
 {% endif %}
 
@@ -56,37 +59,60 @@
         fetch('/chart-data/')
             .then(response => response.json())
             .then(data => {
-                if (data && data.labels && data.values && data.chart_type && data.label) {
-                    // Circle chart
+                if (data && data.labels1 && data.values1 && data.chart_type && data.label1) {
+                    // Circle chart (doughnut or pie)
                 const ctx = document.getElementById('myChart').getContext('2d');
                 
                 new Chart(ctx, {
-                    type: data.chart_type,
+                    type: 'pie', // or 'doughnut'
                     data: {
-                        labels: data.labels,
+                        labels: data.labels2, // e.g. ['Est.Parcelario', ...]
                         datasets: [{
-                            label: data.label,
-                            data: data.values,
-                            backgroundColor: ['#2997D6', '#CB372B', '#2FCA06'],
+                            label: data.label2, // e.g. 'Ganancias por tipo'
+                            data: data.values2, // e.g. [net_estado_parcelario, ...]
+                            backgroundColor: ['#2997D6', '#CB372B', '#2FCA06', '#F2C94C', '#9B51E0'],
                             hoverOffset: 4
                         }]
                     },
-                   
+                    options: {
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: data.label2
+                            }
+                        }
+                    }
                 });
                 const ctxx = document.getElementById('myChart2').getContext('2d');
                 // Bar Chart
                 new Chart(ctxx, {
                     type: 'bar',
                     data: {
-                        labels: data.labels,
+                        labels: data.labels1, // Use the correct labels for the bar chart
                         datasets: [{
-                            label: data.label,
-                            data: data.values,
-                            backgroundColor: ['#2997D6', '#CB372B', '#2FCA06'],
+                            label: '', // Show label in legend
+                            data: data.values1,
+                            backgroundColor: [
+                                '#6366F1', // Indigo
+                                '#F59E42', // Orange
+                                '#F43F5E'  // Rose
+                            ],
                             hoverOffset: 4
                         }]
                     },
-                   
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: true, // Show legend
+                                position: false,
+                            },
+                            title: {
+                                display: true,
+                                text: data.label1
+                            }
+                        }
+                    }
                 });
                 } else {
                     console.error('Incomplete or empty data received.');

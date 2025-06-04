@@ -1,10 +1,9 @@
-
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.core.paginator import Paginator, PageNotAnInteger
 from .forms import ProjectForm, FileFieldForm, ProjectFullForm
 from .models import Project, Client, Event, ProjectFiles
-from django.db.models import Q, Sum, Count
+from django.db.models import Q, Sum, Count, ExpressionWrapper, F, FloatField
 from django.db.models.functions import ExtractMonth
 from decimal import Decimal as Dec
 from datetime import datetime
@@ -54,18 +53,64 @@ def chart_data(request):
            gastos=Sum('gasto'),
            cobro=Sum('adv')
        )
+    
     total = sums['total'] or 0
     gastos = sums['gastos'] or 0
     cobro = sums['cobro'] or 0
     labels = ['Total', 'Gastos', 'Cobro']
     values = [total, gastos, cobro]
     backg = ['red', 'blue', 'green']
+
+    projects = Project.objects.filter(
+        created__month=month, created__year=year).exclude(price=None, adv=None, gasto=None)
+
+    # Annotate each project with its net price
+    projects = projects.annotate(
+        net_price=ExpressionWrapper(
+            F('price') - F('adv') - F('gasto'),
+            output_field=FloatField()
+        )
+    )
+
+    # Aggregate net price by type
+    net_by_type = projects.values('type').annotate(
+        net_sum=Sum('net_price')
+    )
+
+    # Ensure all variables are always defined, even if not present in net_by_type
+    net_estado_parcelario = 0
+    net_mensura = 0
+    net_amojonamiento = 0
+    net_relevamiento = 0
+    net_legajo_parcelario = 0
+
+    for entry in net_by_type:
+        if entry['type'] == 'Estado Parcelario':
+            net_estado_parcelario = entry['net_sum'] or 0
+        elif entry['type'] == 'Mensura':
+            net_mensura = entry['net_sum'] or 0
+        elif entry['type'] == 'Amojonamiento':
+            net_amojonamiento = entry['net_sum'] or 0
+        elif entry['type'] == 'Relevamiento':
+            net_relevamiento = entry['net_sum'] or 0
+        elif entry['type'] == 'Legajo Parcelario':
+            net_legajo_parcelario = entry['net_sum'] or 0
+
+    labels2 = ['Est.Parcelario', 'Amojonamiento', 'Relevamiento', 'Mensura', 'Legajo Parcelario']
+    values2 = [net_estado_parcelario, net_amojonamiento, net_relevamiento, net_mensura, net_legajo_parcelario]
+    backg2 = ['red', 'blue', 'green', 'orange', 'purple']
+
     chart_data = {
-        'label': 'Balance',
-        'labels': labels,
-        'values': values,
+        'label1': 'Balance',
+        'label2': 'Ganancias por tipo',
+        
+        'labels2': labels2,
+        'values2': values2,
+        'labels1': labels,
+        'values1': values,
         'chart_type': 'doughnut',
         'barckgroundColor':backg,
+        'barckgroundColor2':backg2,
     }
     
     return JsonResponse(chart_data)
@@ -188,10 +233,7 @@ def balance(request):
         year = datetime.now().year
     
     projects = Project.objects.filter(created__month=month, created__year=year).exclude(price=None, adv=None, gasto=None)
-    if not projects.exists():
-        non_exist = True
-        return render (request, 'balance_template.html', {'non_exist':non_exist})
-    
+   
     sums = projects.aggregate(
         total=Sum('price'),
         adv=Sum('adv'),
@@ -212,10 +254,15 @@ def balance(request):
     total = format_currency(total)
     gastos = format_currency(gastos)
     net = format_currency(net)
-
+    
     #Creamos la lista anual y la lista que sume los totales de cada mes
     data = balance_anual(year)
+    non_exist = False
+    if not projects.exists():
+        non_exist = True
+    
     return render (request, 'balance_template.html', {
+        'non_exist':non_exist,
         'total':total, 
         'adv':adv, 
         'cant':cant, 
