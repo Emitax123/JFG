@@ -245,7 +245,7 @@ def balance(request):
     gastos = sums['gastos'] or 0
     cant = projects.count()
     cant_actual_month = projects.filter(created__month=month).count()
-    cant_previus_months = projects.exclude(created__month=month)
+    cant_previus_months = projects.exclude(created__month=month).count()
 
     if total > 0:
         percent = round((adv/total)*100 , 2)
