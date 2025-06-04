@@ -227,12 +227,13 @@ def balance(request):
         date_split = date.split("-")
         month = int(date_split[1])
         year = int(date_split[0])
+        projects = Project.objects.filter(created__month=month, created__year=year).exclude(price=None, adv=None, gasto=None)
     else:
         #Si no selecciona nada, se toma el mes y año actual
         month = datetime.now().month
         year = datetime.now().year
+        projects = Project.objects.filter(created__year_gte=year-1).exclude(price=None, adv=None, gasto=None, closed=True)
     
-    projects = Project.objects.filter(created__month=month, created__year=year).exclude(price=None, adv=None, gasto=None)
    
     sums = projects.aggregate(
         total=Sum('price'),
@@ -243,6 +244,9 @@ def balance(request):
     adv = sums['adv'] or 0
     gastos = sums['gastos'] or 0
     cant = projects.count()
+    cant_actual_month = projects.filter(created__month=month).count()
+    cant_previus_months = projects.exclude(created__month=month)
+
     if total > 0:
         percent = round((adv/total)*100 , 2)
     else:
@@ -265,7 +269,9 @@ def balance(request):
         'non_exist':non_exist,
         'total':total, 
         'adv':adv, 
-        'cant':cant, 
+        'cant':cant,
+        'cant_actual_month':cant_actual_month,
+        'cant_previus_months':cant_previus_months,
         'percent':percent, 
         'gastos':gastos, 
         'net':net, 

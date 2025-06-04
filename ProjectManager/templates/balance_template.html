@@ -19,7 +19,11 @@
         <div class="balance-info">
             <h3 style="margin-bottom: 20px;"><span>{{month}} - {{year}}</span></h3>
             <div style="margin-bottom: 20px;">
-                <span>Presupuestos: <span>{{ cant }}</span></span><br>
+                <span>Presupuestos {{month}}: <span>{{ cant_actual_month }}</span></span><br>
+                {% if cant_previus_months %}
+                <span>Presupuestos anteriores: <span>{{ cant_previus_months }}</span></span><br>
+                {% endif %}
+                
                 <span>Total a cobrar: <span>${{ total }}</span></span><br>
                 <span>Cobrados: <span>${{ adv }}</span>, un {{percent}}% del total.</span></span><br>
                 <span>Gastos ingresados: <span>${{ gastos }}</span>.</span><br>
