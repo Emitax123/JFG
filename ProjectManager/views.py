@@ -249,7 +249,7 @@ def balance(request):
     cant_previus_months = projects.filter(closed=False).exclude(created__month=month).count()
 
     if totalEstimatedAmount > 0:
-        percent = round((adv/totalEstimatedAmount)*100 , 2)
+        percent = round(adv/(totalEstimatedAmount-gastos)*100 , 2)#adv/totalestimated-gastos ARRREGLARRRRR
     else:
         percent = 0
     #net = el neto, es decir los anticipos menos los gastos
