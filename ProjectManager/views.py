@@ -246,7 +246,7 @@ def balance(request):
     pending = totalEstimatedAmount - adv - gastos
     cant = projects.count()
     cant_actual_month = projects.filter(created__month=month).count()
-    cant_previus_months = projects.exclude(created__month=month, closed=True).count()
+    cant_previus_months = projects.filter(closed=False).exclude(created__month=month).count()
 
     if totalEstimatedAmount > 0:
         percent = round((adv/totalEstimatedAmount)*100 , 2)
