@@ -232,7 +232,7 @@ def balance(request):
         #Si no selecciona nada, se toma el mes y año actual
         month = datetime.now().month
         year = datetime.now().year
-        projects = Project.objects.filter(created__year_gte=year-1).exclude(price=None, adv=None, gasto=None, closed=True)
+        projects = Project.objects.filter(created__year__gte=year-1).exclude(price=None, adv=None, gasto=None, closed=True)
     
    
     sums = projects.aggregate(
