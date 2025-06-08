@@ -243,8 +243,7 @@ def balance(request):
         year = datetime.now().year
         #Obtengo los proyectos del mes y año actual, pero solo los que no estan cerrados
         projects = Project.objects.filter(created__year=year, closed=False).exclude(price=None, adv=None, gasto=None)
-    project_ids = projects.values_list('id', flat=True)
-    accounts = Account.objects.filter(project__id__in=project_ids, created__month=month)
+    accounts = Account.objects.filter(created__month=month)
     sums_acc = accounts.aggregate(
         adv=Sum('advance'),
         exp=Sum('expenses'),
