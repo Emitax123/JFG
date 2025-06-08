@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.core.paginator import Paginator, PageNotAnInteger
+
+from Accounting.models import Account
 from .forms import ProjectForm, FileFieldForm, ProjectFullForm
 from .models import Project, Client, Event, ProjectFiles
 from django.db.models import Q, Sum, Count, ExpressionWrapper, F, FloatField
@@ -20,6 +22,7 @@ import io
 from urllib.request import urlopen
 from urllib.error import URLError
 from django.db import DatabaseError, transaction
+from Accounting.views import create_acc_entry, create_account
 
 #Manejo de paginacion
 def paginate_queryset(request, queryset, per_page=12):
@@ -46,35 +49,36 @@ def chart_data(request):
     else:
         month = datetime.now().month
         year = datetime.now().year
-    sums = Project.objects.filter(created__month=month, created__year=year)\
-       .exclude(price=None, adv=None, gasto=None)\
-       .aggregate(
-           total=Sum('price'),
-           gastos=Sum('gasto'),
-           cobro=Sum('adv')
-       )
+        
+    accounts = Account.objects.filter(
+        project__created__month=month, 
+        project__created__year=year
+    ).select_related('project')
+
+    sums = accounts.aggregate(
+        total_estimated=Sum('estimated'),
+        total_advance=Sum('advance'),
+        total_expenses=Sum('expenses')
+    )
     
-    total = sums['total'] or 0
-    gastos = sums['gastos'] or 0
-    cobro = sums['cobro'] or 0
+    total_estimated = sums['total_estimated'] or 0
+    print(total_estimated)
+    total_advance = sums['total_advance'] or 0
+    total_expenses = sums['total_expenses'] or 0
     labels = ['Total', 'Gastos', 'Cobro']
-    values = [total, gastos, cobro]
+    values = [total_estimated, total_advance, total_expenses]
     backg = ['red', 'blue', 'green']
 
-    projects = Project.objects.filter(
-        created__month=month, created__year=year).exclude(price=None, adv=None, gasto=None)
+   
 
     # Annotate each project with its net price
-    projects = projects.annotate(
-        net_price=ExpressionWrapper(
-            F('price') - F('adv') - F('gasto'),
-            output_field=FloatField()
-        )
-    )
 
     # Aggregate net price by type
-    net_by_type = projects.values('type').annotate(
-        net_sum=Sum('net_price')
+    net_by_type = (
+        accounts
+        .values('project__type')
+        .annotate(net_sum=Sum('netWorth'))
+        .order_by('project__type')
     )
 
     # Ensure all variables are always defined, even if not present in net_by_type
@@ -85,17 +89,18 @@ def chart_data(request):
     net_legajo_parcelario = 0
 
     for entry in net_by_type:
-        if entry['type'] == 'Estado Parcelario':
+        project_type = entry['project__type']
+        if project_type == 'Estado Parcelario':
             net_estado_parcelario = entry['net_sum'] or 0
-        elif entry['type'] == 'Mensura':
+        elif project_type == 'Mensura':
             net_mensura = entry['net_sum'] or 0
-        elif entry['type'] == 'Amojonamiento':
+        elif project_type == 'Amojonamiento':
             net_amojonamiento = entry['net_sum'] or 0
-        elif entry['type'] == 'Relevamiento':
+        elif project_type == 'Relevamiento':
             net_relevamiento = entry['net_sum'] or 0
-        elif entry['type'] == 'Legajo Parcelario':
+        elif project_type == 'Legajo Parcelario':
             net_legajo_parcelario = entry['net_sum'] or 0
-
+    
     labels2 = ['Est.Parcelario', 'Amojonamiento', 'Relevamiento', 'Mensura', 'Legajo Parcelario']
     values2 = [net_estado_parcelario, net_amojonamiento, net_relevamiento, net_mensura, net_legajo_parcelario]
     backg2 = ['red', 'blue', 'green', 'orange', 'purple']
@@ -227,37 +232,46 @@ def balance(request):
         date_split = date.split("-")
         month = int(date_split[1])
         year = int(date_split[0])
+        #Obtengo los proyectos del mes y año seleccionado
+        
         projects = Project.objects.filter(created__month=month, created__year=year).exclude(price=None, adv=None, gasto=None)
+       
+
     else:
         #Si no selecciona nada, se toma el mes y año actual
         month = datetime.now().month
         year = datetime.now().year
+        #Obtengo los proyectos del mes y año actual, pero solo los que no estan cerrados
         projects = Project.objects.filter(created__year__gte=year-1).exclude(price=None, adv=None, gasto=None, closed=True)
-    
-   
+    project_ids = projects.values_list('id', flat=True)
+    accounts = Account.objects.filter(project__id__in=project_ids)
+    sums_acc = accounts.aggregate(
+        adv=Sum('advance'),
+        exp=Sum('expenses'),
+        net=Sum('netWorth'),
+    )
     sums = projects.aggregate(
         total=Sum('price'),
-        adv=Sum('adv'),
-        gastos=Sum('gasto')
+        
     )
     totalEstimatedAmount = sums['total'] or 0
-    adv = sums['adv'] or 0
-    gastos = sums['gastos'] or 0
-    pending = totalEstimatedAmount - adv - gastos
+    adv = sums_acc['adv'] or 0
+    exp = sums_acc['exp'] or 0
+    pending = totalEstimatedAmount - adv - exp
     cant = projects.count()
     cant_actual_month = projects.filter(created__month=month).count()
     cant_previus_months = projects.filter(closed=False).exclude(created__month=month).count()
 
     if totalEstimatedAmount > 0:
-        percent = round(adv/(totalEstimatedAmount-gastos)*100 , 2)#adv/totalestimated-gastos ARRREGLARRRRR
+        percent = round(adv/(totalEstimatedAmount-exp)*100 , 2)#adv/totalestimated-exp ARRREGLARRRRR
     else:
         percent = 0
     #net = el neto, es decir los anticipos menos los gastos
-    net = adv-gastos
+    net = adv-exp
     #Formateamos los numeros a 2 decimales y cambiamos el punto por la coma
     adv = format_currency(adv)
     totalEstimatedAmount = format_currency(totalEstimatedAmount)
-    gastos = format_currency(gastos)
+    exp = format_currency(exp)
     net = format_currency(net)
     pending = format_currency(pending)
     
@@ -276,7 +290,7 @@ def balance(request):
         'cant_actual_month':cant_actual_month,
         'cant_previus_months':cant_previus_months,
         'percent':percent, 
-        'gastos':gastos, 
+        'gastos':exp, 
         'net':net, 
         'month':month_str(month), 
         'year':year,
@@ -345,12 +359,10 @@ def save_in_history(pk, type, msg):
 
 #Vista formulario de creacion
 def create_view(request):
-    
     if request.method == 'POST':
         form = ProjectForm(request.POST)    
         if form.is_valid():
             with transaction.atomic():
-                
                 form_instance = form.save(commit=False)
                 client = None
                 client_pk = request.POST.get('client-pk') or request.POST.get('client-list')
@@ -370,6 +382,7 @@ def create_view(request):
                 msg = "Se ha creado un nuevo proyecto"   
                 pk = form_instance.pk
                 save_in_history(pk, 2, msg)
+                create_account(pk)
                 if 'save_and_backhome' in request.POST:
                     return redirect('projectview', pk=pk)
                 
@@ -389,6 +402,7 @@ def create_view(request):
 def mod_view(request, pk):
     if request.method == 'POST':
         instance = Project.objects.get(pk=pk)
+        msg = "" 
         if request.POST.get('contact_name'):
             instance.contact_name = request.POST.get('contact_name')
             instance.contact_phone = request.POST.get('contact_phone')        
@@ -405,21 +419,42 @@ def mod_view(request, pk):
             instance.inscription_type = request.POST.get('insctype')
         if request.POST.get('price'):
             try:
+                previous_price = instance.price
                 instance.price = Dec(request.POST.get('price'))
+                msg = "Se establecio el presupuesto del proyecto " + str(instance.pk)
+                create_acc_entry(instance.pk, 'est', previous_price, Dec(request.POST.get('price')))
             except:
                 instance.price = Dec("0,00")
         if request.POST.get('adv'):
             try:
+                previous_adv = instance.adv
                 instance.adv = instance.adv + Dec(request.POST.get('adv'))
+                msg = "Se cobraron $" + request.POST.get('adv') + " del proyecto " + str(instance.pk)
+                create_acc_entry(instance.pk, 'adv', previous_adv, Dec(request.POST.get('adv')))
             except:
                 instance.adv = Dec("0.00")
         if request.POST.get('gasto'):
             try:
+                previous_gasto = instance.gasto or Dec("0.00")
                 instance.gasto = instance.gasto + Dec(request.POST.get('gasto'))
+                msg = "Se debitaron $" + request.POST.get('gasto') + " al proyecto " + str(instance.pk)
+                create_acc_entry(instance.pk, 'exp', previous_gasto, Dec(request.POST.get('gasto')))
             except:
                 instance.gasto = Dec("0.00")
+        if not Project.objects.filter(pk=pk).exists():
+            # If the instance doesn't exist in the database, save it
+            try:
+                instance.save()
+                msg = "Se ha creado un proyecto nuevo"
+                save_in_history(pk, 2, msg)  # Use type 2 for creation
+                prev = request.META.get('HTTP_REFERER')
+                return redirect(prev)
+            except Exception as e:
+                print(f"Error saving new project: {str(e)}")
+                
         instance.save()
-        msg = "Se ha modificado un proyecto"   
+        if msg == "":
+            msg = "Se ha modificado un proyecto"
         pk = instance.pk
         save_in_history(pk, 1, msg)
 
@@ -448,10 +483,15 @@ def history_view(request):
     history = Event.objects.order_by('-time')[:100]
     grouped_objects_def = defaultdict(lambda: defaultdict(list))
     for h in history:
+        h.link = False
+        if Project.objects.filter(pk=h.model_pk).exists():
+            h.link = True
         year = h.time.year
         month = h.time.month
+        print(h.link)
         grouped_objects_def[year][month].append(h)
-    for obj in grouped_objects_def:            
+        
+    for obj in grouped_objects_def:
        grouped_objects_def[obj].default_factory = None
     grouped_objects = dict(grouped_objects_def)
     return render (request, 'history_template.html', {'yearlist':grouped_objects})
@@ -546,7 +586,16 @@ def clients_view(request):
             client = Client.objects.create(name=request.POST.get('client-name'), phone=request.POST.get('client-phone'))
             client.save()
             return redirect('clients')
-    clients = Client.objects.filter(flag=True).order_by('name')
+    if request.GET.get('flagc') != "":
+        query = request.GET.get('flagc')
+        if query == 'True':
+            flag= True
+            clients = Client.objects.filter(flag=flag).order_by('name')
+        else:
+            flag= False
+            clients = Client.objects.filter(flag=flag).order_by('name')
+        context = {'clients': clients, 'flag': flag}
+        return render (request, 'clients_template.html', context)
     return render (request, 'clients_template.html', {'clients':clients})
 
 #Creacion de proyecto a partir de un cliente

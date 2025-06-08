@@ -197,18 +197,23 @@
           <button class="small-btn blue-button" type="submit">Hecho</button>
         </form>
       </div>
+      <div class="mini-div">
+        <form method="post" action="{% url 'accounting_display' pk=project.pk %}" id="gasto-form">
+          {% csrf_token %}
+          <button class="small-btn blue-button" type="submit">Ver Detalle</button>
+        </form>
+      </div>
       {% if project.client.flag %}
       {% if project.contact_name %}
       <div class="contact-box">
-        
-                <div >
-                  <span style="text-decoration: underline;">Contacto</span>
-                  <div style="display: flex; flex-flow: column; justify-content: space-between;" >
-                    <span>Nombre: <span class="client-span1">{{project.contact_name}}</span> </span> 
-                    <span>Telefono: <span class="client-span1">{{project.contact_phone}}</span> </span> 
-                  </div>
-                </div>           
-             
+        <div >
+          <span style="text-decoration: underline;">Contacto</span>
+          <div style="display: flex; flex-flow: column; justify-content: space-between;" >
+            <span>Nombre: <span class="client-span1">{{project.contact_name}}</span> </span> 
+            <span>Telefono: <span class="client-span1">{{project.contact_phone}}</span> </span> 
+          </div>
+        </div>           
+
       </div>
       {% endif %}
       {% endif %}

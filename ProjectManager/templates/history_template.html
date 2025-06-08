@@ -4,7 +4,7 @@
   {% for year, months in yearlist.items %}
     {% for month, items in months.items %}
       <div class="history-cont">
-        <div class="history-cont-header" >
+        <div class="history-cont-header">
           <p style="margin-right: 10px;">{{ year }}</p>
           <p>{{ month }}</p>
         </div>
@@ -15,10 +15,15 @@
               <span>{{ i.time|date:'d/m/Y' }}</span>
               <span style="padding-left: 4px;">{{ i.msg }}</span>
             {% else %}
-              <a href="{% url 'projectview' pk=i.model_pk %}">
+              {% if i.link %}
+                <a href="{% url 'projectview' pk=i.model_pk %}">
+                  <span>{{ i.time|date:'d/m/Y' }}</span>
+                  <span>{{ i.msg }}</span>
+                </a>
+              {% else %}
                 <span>{{ i.time|date:'d/m/Y' }}</span>
                 <span>{{ i.msg }}</span>
-              </a>
+              {% endif %}
             {% endif %}
           </div>
         {% endfor %}

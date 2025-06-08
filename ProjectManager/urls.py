@@ -26,10 +26,12 @@ urlpatterns = [
   path('chart-data/', views.chart_data, name='chartdata'),
   path('search/', views.search, name='search'),
   path('users/', include ('Users.urls')),
-  path('clients', views.clients_view, name='clients'),
+  
+  path('clients/', views.clients_view, name='clients'),
   path('clients/create', views.create_client_view, name='clientcreate'),
   path('clients/projectcreate/<int:pk>', views.create_for_client, name='clientprojectcreate'),
   path('create/clientedislist/<int:pk>', views.clientedislist, name='clientedislist'),
+  path('accounting/', include('Accounting.urls')),
 ]
 urlpatterns += staticfiles_urlpatterns()
 urlpatterns += static(settings.STATIC_URL,document_root=settings.STATICFILES_DIRS)

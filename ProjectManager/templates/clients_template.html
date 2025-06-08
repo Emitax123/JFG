@@ -1,16 +1,18 @@
 {% extends 'base_template.html' %}
 {% load static %}
 {% block form %}
-  <div class="create-client-cont">
-    <a href="{% url 'clientcreate' %}" class="button">Crear cliente</a>
-  </div>
+  {% if flag %}
+    <div class="create-client-cont">
+      <a href="{% url 'clientcreate' %}" class="button">Crear cliente</a>
+    </div>
+  {% endif %}
   <div class="client-list-cont">
     {% for client in clients %}
       <div class="client-container">
         <div style="width: 60%;">
           <h2>{{ client.name }}</h2>
         </div>
-        
+
         <div class="client-buttons">
           <div>
             <a href="{% url 'projectslist' pk=client.pk %}" class="button">Ver proyectos</a>

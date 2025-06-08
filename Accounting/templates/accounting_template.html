@@ -1,0 +1,155 @@
+{% extends 'base_template.html' %}
+{% load static %}
+{% block form %}
+  <style>
+    .acc-global-cont {
+      display: flex;
+      flex-flow: column;
+      width: 80%;
+    }
+    .date-select-cont {
+      display: flex;
+      flex-flow: row wrap;
+      justify-content: start;
+      width: 100%;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+    .date-select-cont label {
+      margin-right: 10px;
+      display: flex;
+      align-items: end;
+      font-size: 14px;
+    }
+    .date-select-cont input {
+      margin-right: 10px;
+      padding: 2px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    .date-select-cont button {
+      padding: 5px 10px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+    }
+    .acc-container {
+      flex-direction: column;
+      width: 100%;
+      margin-bottom: 20px;
+      background-color: white;
+      border-radius: 20px;
+      color: black;
+      padding: 20px;
+    }
+    .acc-data-cont {
+      display: flex;
+      flex-flow: column;
+      width: 100%;
+      border-color: #ccc;
+      border-style: solid;
+      border-width: 1px 0px 0px 0px;
+    }
+    .first.acc-row {
+      font-weight: bold;
+    }
+    
+    .acc-row {
+      display: flex; /* Permite que las filas se expandan */
+      justify-content: space-between;
+      flex-flow: row wrap; /* Permite que las filas se ajusten */
+      width: 100%;
+      border-color: #ccc;
+      border-style: solid;
+      border-width: 0px 0px 1px 1px;
+    }
+    .acc-row span.acc-data {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 8px;
+      margin: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      border-color: #ccc;
+      border-style: solid;
+      border-width: 0px 1px 0px 0px;
+    }
+    .acc-row span.first.acc-data {
+      flex: 2;
+    }
+    .acc-row span.acc-data.link {
+      padding: 10px;
+    }
+  </style> <div class="acc-global-cont">
+    <div style="display: flex; flex-flow: row wrap; justify-content: space-between; width: 100%; margin-bottom: 10px;">
+      {% if project_id %}
+        <div style="margin-bottom: 10px;">
+          <a href="{% url 'accounting_display' %}" class="white-button" style="padding: 3px;">Ver todos los movimientos</a>
+        </div>
+      {% endif %}
+
+      <div>
+        {% if project_id %}
+          <a href="{% url 'projectview' pk=project_id %}" style="text-decoration: none; color: inherit;"><h3>Movimientos del Proyecto {{ project_id }}</h3></a>
+        {% endif %}
+      </div>
+    </div>
+    <div class="date-select-cont">
+      <form id="date-filter-form" method="GET" action="" style="display: flex; flex-flow: row; align-items: flex-end;">
+        <input type="hidden" name="filter" value="true" />
+        <label for="start-date">Fecha de inicio:</label>
+        <input type="date" id="start-date" name="start-date" value="{{ start_date }}" />
+        <label for="end-date">Fecha de fin:</label>
+        <input type="date" id="end-date" name="end-date" value="{{ end_date }}" />
+        <button class="white-button" type="submit">Filtrar</button>
+      </form>
+      <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          // Script simplified since form structure has been improved
+          const startDateInput = document.getElementById('start-date')
+          const endDateInput = document.getElementById('end-date')
+        
+          // Add event listener to validate dates if needed
+          endDateInput.addEventListener('change', function () {
+            if (startDateInput.value && endDateInput.value) {
+              // Make sure end date is not before start date
+              if (new Date(endDateInput.value) < new Date(startDateInput.value)) {
+                alert('La fecha de fin no puede ser anterior a la fecha de inicio')
+                endDateInput.value = ''
+              }
+            }
+          })
+        })
+      </script>
+    </div>
+    <div class="acc-container">
+      <div class="acc-data-cont">
+        <div class="first acc-row">
+          <span class="first acc-data">Proyecto</span>
+          <span class="acc-data">Cliente</span>
+          <span class="acc-data">Movimiento</span>
+          <span class="acc-data">Monto</span>
+          <span class="acc-data">Fecha</span>
+        </div>
+        {% for accountm in accounts_mov %}
+          <div class="acc-row">
+            <span class="first acc-data"><a href="{% url 'projectview' pk=accountm.project.pk %}" style="display: inline-block;
+width: auto;text-decoration: none; color: inherit;">{{ accountm.project.pk }}</a></span>
+            <span class="acc-data">{{ accountm.project.client.name }}</span>
+            {% if accountm.movement_type == 'ADV' %}
+              <span class="acc-data"><span style="font-weight: bold; min-width: 80%; padding: 5px; background-color: lightgreen; border-radius: 5px;">Anticipo</span></span>
+            {% else %}
+              <span class="acc-data"><span style="font-weight: bold; min-width: 80%; padding: 5px; background-color: lightcoral; border-radius: 5px;">Gasto</span></span>
+            {% endif %}
+            <span class="acc-data">${{ accountm.amount }}</span>
+            <span class="acc-data">{{ accountm.created_at|date:'d/m/Y' }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,183 +1,210 @@
 <html>
   <head>
     {% load static %}
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/x-icon" href="{% static 'img/favicon/favicon.ico' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">;
-    <meta charset="utf-8" />
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="{% static 'img/favicon/favicon.ico' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet" />;<meta charset="utf-8" />
     <title>JF GESTION</title>
   </head>
   <body>
-        <!-- COMIENZO NAVBAR -->
-      <nav >
-        <div class="navbar">
-          <div id="logo">
-            <a href="{% url 'index' %}">
-              <img src="{% static 'img/Logo.jpg' %}" >
-            </a> 
-          </div>
+    <!-- COMIENZO NAVBAR -->
+    <nav>
+      <div class="navbar">
+        <div id="logo">
+          <a href="{% url 'index' %}"><img src="{% static 'img/Logo.jpg' %}" /></a>
+        </div>
         <div class="nav-list">
-        <ul class="nav-dropdown">
-           <li><a href="{% url 'index' %}">Inicio</a></li>
-            <li><a href="{% url 'projects' %}">Proyectos</a>
+          <ul class="nav-dropdown">
+            <li>
+              <a href="{% url 'index' %}">Inicio</a>
+            </li>
+            <li>
+              <a href="{% url 'projects' %}">Proyectos</a>
               <ul class="navbar-submenu">
-                <li><a href="{% url 'projectslisttype' type=1%}">Mensuras</a></li>
-                <li><a href="{% url 'projectslisttype' type=2%}">Est.Parcelarios</a></li>
-                <li><a href="{% url 'projectslisttype' type=3%}">Amojonamientos</a></li>
+                <li>
+                  <a href="{% url 'projectslisttype' type=1 %}">Mensuras</a>
+                </li>
+                <li>
+                  <a href="{% url 'projectslisttype' type=2 %}">Est.Parcelarios</a>
+                </li>
+                <li>
+                  <a href="{% url 'projectslisttype' type=3 %}">Amojonamientos</a>
+                </li>
               </ul>
             </li>
-            <li><a href="{% url 'balance' %}">Balances</a></li>
-            <li><a href="{% url 'history' %}">Historial</a></li>  
-            <li><a href="{% url 'create' %}">Formulario</a></li> 
-            <li><a href="{% url 'clients' %}">Clientes</a></li><!-- AGREGAMOS FORMULARIO AL NAVBAR QUE REDIRECCIONA AL FORMULARIO EN UNA NUEVA PAGINA -->
+            <li>
+              <a href="{% url 'balance' %}">Balances</a>
+              <ul class="navbar-submenu">
+                <li>
+                  <a href="{% url 'accounting_display' %}">Cobranzas</a>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <a href="{% url 'history' %}">Historial</a>
+            </li>
+            <li>
+              <a href="{% url 'create' %}">Formulario</a>
+            </li>
+            <li>
+              <a>Clientes</a>
+              <ul class="navbar-submenu">
+                <li>
+                  <a href="{% url 'clients' %}?flagc=True">Fijos</a>
+                </li>
+                <li>
+                  <a href="{% url 'clients' %}?flagc=False">Particulares</a>
+                </li>
+              </ul>
+            </li>
+            <!-- AGREGAMOS FORMULARIO AL NAVBAR QUE REDIRECCIONA AL FORMULARIO EN UNA NUEVA PAGINA -->
             <li>
               <form method="post" id="search-form" style="display: flex; flex-flow: row;" action="{% url 'projects' %}">
                 {% csrf_token %}
-              <input autocomplete="off" type="text" id="search-input" name="search-input">
-              <input type="hidden" id="project-link" data-url="{% url 'projectview' pk=0 %}">
-              <button class="search-button"  id="search-button">
-                <img style="width: 25px; height: 25px;" src="{% static 'img/search-alt-1-svgrepo-com (1).svg' %}" alt="Submit">
-              </button>
-              <div id="search-results">
-                <!-- This div will be populated with search results -->
-              </div>
+                <input autocomplete="off" type="text" id="search-input" name="search-input" />
+                <input type="hidden" id="project-link" data-url="{% url 'projectview' pk=0 %}" />
+                <button class="search-button" id="search-button"><img style="width: 25px; height: 25px;" src="{% static 'img/search-alt-1-svgrepo-com (1).svg' %}" alt="Submit" /></button>
+                <div id="search-results">
+                  <!-- This div will be populated with search results -->
+                </div>
               </form>
 
-              <div id="results-cont" class="results-cont">
-                
-              </div>
+              <div id="results-cont" class="results-cont"></div>
             </li>
           </ul>
         </div>
-        </div>
-      </nav>
-      <!-- FIN NAVBAR -->
-  <div class="container">  
-    <div class="fila">
-    {% block form %}{% endblock  %}
-    {% block graph %}{% endblock graph %}
+      </div>
+    </nav>
+    <!-- FIN NAVBAR -->
+    <div class="container">
+      <div class="fila">
+        {% block form %}
+
+        {% endblock %}
+        {% block graph %}
+
+        {% endblock %}
+      </div>
     </div>
-  </div>
   </body>
 
-<script>
-  // JavaScript for the navbar submenu
-  document.addEventListener('DOMContentLoaded', function() {
-    const projectsLi = document.querySelector('.nav-dropdown > li');
-    const submenu = projectsLi.querySelector('.navbar-submenu');
-                  
-    projectsLi.addEventListener('click', function(e) {
-      if (e.target === projectsLi) {
-        submenu.classList.toggle('show');
-      }
-    });
-
-    document.addEventListener('click', function(e) {
-    if (!projectsLi.contains(e.target)) {
-      submenu.classList.remove('show');
-    }
-    });
-  });
-  
-  // JavaScript for search functionality
-  // This script handles the search input, fetches results from the server, and displays them in a dropdown.
-  // It also includes debouncing to optimize performance and event listeners for user interactions.
-  // The search results are displayed in a dropdown below the input field, and clicking outside the dropdown closes it.
-  document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('search-input');
-    const resultsContainer = document.getElementById('results-cont');
-    const searchForm = document.getElementById('search-form');
-    const projectLinkUrl = document.getElementById('project-link').dataset.url;
-    let searchTimeout;
-    let isSearchActive = false;
-
+  <script>
+    // JavaScript for the navbar submenu
+    document.addEventListener('DOMContentLoaded', function () {
+      const projectsLi = document.querySelector('.nav-dropdown > li')
+      const submenu = projectsLi.querySelector('.navbar-submenu')
     
-    searchInput.addEventListener('keyup', () => {
-      const query = searchInput.value.trim();
-      if (!query) {
-        clearResults();
-        isSearchActive = false;
-        return;
-      }
-
-      clearTimeout(searchTimeout);
-      searchTimeout = setTimeout(() => {
-        clearResults();
-        performSearch(query);
-      }, 300);
-    });
-
-    // Click handlers
-    searchInput.addEventListener('click', () => {
-      if (isSearchActive) {
-        resultsContainer.classList.add('show');
-      }
-    });
-
-    document.addEventListener('click', (event) => {
-      if (!searchInput.contains(event.target) && !resultsContainer.contains(event.target)) {
-        resultsContainer.classList.remove('show');
-      }
-    });
-
-    // Search functionality
-    async function performSearch(query) {
-      try {
-        const response = await fetch(`/search/?query=${encodeURIComponent(query)}`);
-        if (!response.ok) throw new Error('Search failed');
-        
-        const data = await response.json();
-        if (data.results?.length) {
-          isSearchActive = true;
-          displayResults(data.results);
-        } else {
-          isSearchActive = false;
-          clearResults();
+      projectsLi.addEventListener('click', function (e) {
+        if (e.target === projectsLi) {
+          submenu.classList.toggle('show')
         }
-      } catch (error) {
-        console.error('Search error:', error);
-        isSearchActive = false;
+      })
+    
+      document.addEventListener('click', function (e) {
+        if (!projectsLi.contains(e.target)) {
+          submenu.classList.remove('show')
+        }
+      })
+    })
+    
+    // JavaScript for search functionality
+    // This script handles the search input, fetches results from the server, and displays them in a dropdown.
+    // It also includes debouncing to optimize performance and event listeners for user interactions.
+    // The search results are displayed in a dropdown below the input field, and clicking outside the dropdown closes it.
+    document.addEventListener('DOMContentLoaded', function () {
+      const searchInput = document.getElementById('search-input')
+      const resultsContainer = document.getElementById('results-cont')
+      const searchForm = document.getElementById('search-form')
+      const projectLinkUrl = document.getElementById('project-link').dataset.url
+      let searchTimeout
+      let isSearchActive = false
+    
+      searchInput.addEventListener('keyup', () => {
+        const query = searchInput.value.trim()
+        if (!query) {
+          clearResults()
+          isSearchActive = false
+          return
+        }
+    
+        clearTimeout(searchTimeout)
+        searchTimeout = setTimeout(() => {
+          clearResults()
+          performSearch(query)
+        }, 300)
+      })
+    
+      // Click handlers
+      searchInput.addEventListener('click', () => {
+        if (isSearchActive) {
+          resultsContainer.classList.add('show')
+        }
+      })
+    
+      document.addEventListener('click', (event) => {
+        if (!searchInput.contains(event.target) && !resultsContainer.contains(event.target)) {
+          resultsContainer.classList.remove('show')
+        }
+      })
+    
+      // Search functionality
+      async function performSearch(query) {
+        try {
+          const response = await fetch(`/search/?query=${encodeURIComponent(query)}`)
+          if (!response.ok) throw new Error('Search failed')
+    
+          const data = await response.json()
+          if (data.results?.length) {
+            isSearchActive = true
+            displayResults(data.results)
+          } else {
+            isSearchActive = false
+            clearResults()
+          }
+        } catch (error) {
+          console.error('Search error:', error)
+          isSearchActive = false
+        }
       }
-    }
-
-    function displayResults(results) {
-      clearResults();
-      
-      const fragment = document.createDocumentFragment();
-      
-      results.forEach(result => {
-        const link = document.createElement('a');
-        link.href = projectLinkUrl.replace('0', result.id);
-        
-        const titleSpan = document.createElement('span');
-        titleSpan.textContent = result.type;
-        
-        const dateSpan = document.createElement('span');
-        dateSpan.textContent = result.datecreated;
-        dateSpan.classList.add('date-search');
-        
-        link.append(titleSpan, dateSpan);
-        fragment.appendChild(link);
-      });
-
-      const seeMoreButton = document.createElement('button');
-      seeMoreButton.className = 'search-button see-more';
-      seeMoreButton.textContent = 'Ver más';
-      seeMoreButton.onclick = () => searchForm.submit();
-      fragment.appendChild(seeMoreButton);
-      resultsContainer.appendChild(fragment);
-      resultsContainer.classList.add('show');
-    }
-
-    function clearResults() {
-      resultsContainer.innerHTML = '';
-      resultsContainer.classList.remove('show');
-    }
-  });
-</script>
+    
+      function displayResults(results) {
+        clearResults()
+    
+        const fragment = document.createDocumentFragment()
+    
+        results.forEach((result) => {
+          const link = document.createElement('a')
+          link.href = projectLinkUrl.replace('0', result.id)
+    
+          const titleSpan = document.createElement('span')
+          titleSpan.textContent = result.type
+    
+          const dateSpan = document.createElement('span')
+          dateSpan.textContent = result.datecreated
+          dateSpan.classList.add('date-search')
+    
+          link.append(titleSpan, dateSpan)
+          fragment.appendChild(link)
+        })
+    
+        const seeMoreButton = document.createElement('button')
+        seeMoreButton.className = 'search-button see-more'
+        seeMoreButton.textContent = 'Ver más'
+        seeMoreButton.onclick = () => searchForm.submit()
+        fragment.appendChild(seeMoreButton)
+        resultsContainer.appendChild(fragment)
+        resultsContainer.classList.add('show')
+      }
+    
+      function clearResults() {
+        resultsContainer.innerHTML = ''
+        resultsContainer.classList.remove('show')
+      }
+    })
+  </script>
 </html>

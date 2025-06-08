@@ -19,16 +19,18 @@
         <div class="balance-info">
             <h3 style="margin-bottom: 20px;"><span>{{month}} - {{year}}</span></h3>
             <div style="margin-bottom: 20px;">
-                <span>Presupuestos {{month}}: <span>{{ cant_actual_month }}</span></span><br>
+                <span>• Presupuestos de {{month}}: <span>{{ cant_actual_month }}</span></span><br>
                 {% if cant_previus_months %}
-                <span>Presupuestos anteriores: <span>{{ cant_previus_months }}</span></span><br>
+                <span>• Presupuestos previos:  <span>{{ cant_previus_months }}</span></span><br>
+                {% else %}
+                <span>• Presupuestos previos: 0</span><br>
                 {% endif %}
-                <span>Suma presupuestada: <span>${{ total }}</span></span><br>
-                <span>Gastos ingresados: <span>${{ gastos }}</span>.</span><br>
-                <span>Total a cobrar: <span>${{ pending }}</span></span><br>
-                <span>Cobrados: <span>${{ adv }}</span>, un {{percent}}% del total,</span></span><br>
-                <span>teniendo en cuenta los gastos ingresados.</span>
-                <span>Ganancia neta:  <span>${{ net }}</span>.</span>
+                <span>• La suma de presupuestos previos y actuales es un: <span>${{ total }}</span></span><br>
+                <span>• Los gastos ingresados este mes son: <span>${{ gastos }}</span>.</span><br>
+                <span>• Durante {{month}} se cobraron: <span>${{ adv }}.</span><br>
+            
+                <span>• Ganancia neta de {{month}}:  <span>${{ net }}</span>.</span><br>
+                <span>• Resto por cobrar: <span>${{ pending }}</span></span>
             </div>
             <div class="chart2-cont">
                 <canvas id="myChart2"></canvas>
