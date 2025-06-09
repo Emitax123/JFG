@@ -490,7 +490,10 @@ def mod_view(request, pk):
             try:
                 previous_adv = instance.adv
                 instance.adv = instance.adv + Dec(request.POST.get('adv'))
-                msg = "Se cobraron $" + request.POST.get('adv') + " del proyecto " + str(instance.pk)
+                if request.POST.get('adv') < "0":
+                    msg = "Se devolvieron $" + request.POST.get('adv') + " del proyecto " + str(instance.pk)
+                else:
+                    msg = "Se cobraron $" + request.POST.get('adv') + " del proyecto " + str(instance.pk)
                 create_acc_entry(instance.pk, 'adv', previous_adv, Dec(request.POST.get('adv')))
             except:
                 instance.adv = Dec("0.00")
@@ -498,7 +501,10 @@ def mod_view(request, pk):
             try:
                 previous_gasto = instance.gasto or Dec("0.00")
                 instance.gasto = instance.gasto + Dec(request.POST.get('gasto'))
-                msg = "Se debitaron $" + request.POST.get('gasto') + " al proyecto " + str(instance.pk)
+                if request.POST.get('gasto') < "0":
+                    msg = "Se redujo $" + request.POST.get('gasto') + " el gasto del proyecto " + str(instance.pk)
+                else:
+                    msg = "Se debitaron $" + request.POST.get('gasto') + " al proyecto " + str(instance.pk)
                 create_acc_entry(instance.pk, 'exp', previous_gasto, Dec(request.POST.get('gasto')))
             except:
                 instance.gasto = Dec("0.00")
