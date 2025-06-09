@@ -130,6 +130,7 @@
       <div class="acc-data-cont">
         <div class="first acc-row">
           <span class="first acc-data">Proyecto</span>
+          <span class="acc-data">Tipo</span>
           <span class="acc-data">Cliente</span>
           <span class="acc-data">Movimiento</span>
           <span class="acc-data">Monto</span>
@@ -139,11 +140,20 @@
           <div class="acc-row">
             <span class="first acc-data"><a href="{% url 'projectview' pk=accountm.project.pk %}" style="display: inline-block;
 width: auto;text-decoration: none; color: inherit;">{{ accountm.project.pk }}</a></span>
+            <span class="acc-data">{{ accountm.project.type }}</span>
             <span class="acc-data">{{ accountm.project.client.name }}</span>
             {% if accountm.movement_type == 'ADV' %}
-              <span class="acc-data"><span style="font-weight: bold; min-width: 80%; padding: 5px; background-color: lightgreen; border-radius: 5px;">Anticipo</span></span>
+              {% if accountm.amount < 0 %}
+                <span class="acc-data"><span style="font-weight: bold; min-width: 80%; padding: 5px; background-color: lightyellow; border-radius: 5px;">Modificacion A</span></span>
+              {% else %}
+                <span class="acc-data"><span style="font-weight: bold; min-width: 80%; padding: 5px; background-color: lightgreen; border-radius: 5px;">Anticipo</span></span>
+              {% endif %}
             {% else %}
-              <span class="acc-data"><span style="font-weight: bold; min-width: 80%; padding: 5px; background-color: lightcoral; border-radius: 5px;">Gasto</span></span>
+              {% if accountm.amount < 0 %}
+                <span class="acc-data"><span style="font-weight: bold; min-width: 80%; padding: 5px; background-color: lightyellow; border-radius: 5px;">Modificion G</span></span>
+              {% else %}
+                <span class="acc-data"><span style="font-weight: bold; min-width: 80%; padding: 5px; background-color: lightcoral; border-radius: 5px;">Gasto</span></span>
+              {% endif %}
             {% endif %}
             <span class="acc-data">${{ accountm.amount }}</span>
             <span class="acc-data">{{ accountm.created_at|date:'d/m/Y' }}</span>

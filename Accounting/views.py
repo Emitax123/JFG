@@ -35,11 +35,18 @@ def create_acc_entry(project_id, field, old_value, new_value):
 
             account, created = Account.objects.get_or_create(project=project)
             if field == 'adv':
+                
                 account.advance = old_value + new_value
-                acc_mov_description=f"Se cobraron ${new_value}"
+                if new_value < 0:
+                    acc_mov_description=f"Se devolvieron ${abs(new_value)}"
+                else:
+                    acc_mov_description=f"Se cobraron ${new_value}"
             elif field == 'exp':
                 account.expenses = old_value + new_value
-                acc_mov_description=f"Se ingreso el gasto de ${new_value}"
+                if new_value < 0:
+                    acc_mov_description=f"Se redujo el gasto en ${abs(new_value)}"
+                else:
+                    acc_mov_description=f"Se ingreso el gasto de ${new_value}"
             elif field == 'est':
                 account.estimated = new_value
                 acc_mov_description=f"Se ingreso costo final de ${new_value}"
