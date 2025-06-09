@@ -62,7 +62,28 @@
 <script>
     
     document.addEventListener('DOMContentLoaded', function () {
-        fetch('/chart-data/')
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            }
+        function fetchChartData() {
+        // Get the current date from the form or use current date
+        const dateInput = document.getElementById('date-input');
+        const formData = new FormData();
+        
+        // Add date to form data if it exists
+        if (dateInput && dateInput.value) {
+            formData.append('date', dateInput.value);
+        }
+        // Fetch chart data from the server
+        fetch('/chart-data/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: formData
+        })
             .then(response => response.json())
             .then(data => {
                 if (data && data.labels1 && data.values1 && data.chart_type && data.label1) {
@@ -126,7 +147,7 @@
                 }
                 
             });
-            
+        fetchChartData();
     });
     
     document.getElementById('submit-date').addEventListener('click', () => {

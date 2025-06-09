@@ -41,7 +41,7 @@ def index(request):
 
 # charts/views.py
 def chart_data(request):
-    if request.POST.get ('date'):
+    if request.method == 'POST':
         date = request.POST.get('date')
         date_split = date.split("-")
         month = int(date_split[1])
