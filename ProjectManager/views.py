@@ -41,12 +41,12 @@ def index(request):
 
 # charts/views.py
 def chart_data(request):
-    if request.method == 'POST':
+    if request.POST.get ('date'):
         date = request.POST.get('date')
         date_split = date.split("-")
         month = int(date_split[1])
         year = int(date_split[0])
-        accounts = Account.objects.filter(project__closed=False,
+        accounts = Account.objects.filter(
         created__month=month, 
         created__year=year
         ).select_related('project')
@@ -68,7 +68,7 @@ def chart_data(request):
     print(total_estimated)
     total_advance = sums['total_advance'] or 0
     total_expenses = sums['total_expenses'] or 0
-    labels = ['Total', 'Gastos', 'Cobro']
+    labels = ['Total', 'Cobro', 'Gastos']
     values = [total_estimated, total_advance, total_expenses]
     backg = ['red', 'blue', 'green']
 
