@@ -41,27 +41,45 @@ def index(request):
 
 # charts/views.py
 def chart_data(request):
+    print(f"====== Chart Data Request ======")
     print(f"Request method: {request.method}")
     
     try:
         if request.method == 'POST':
+            # Check all possible sources of data
             print(f"POST data: {request.POST}")
+            print(f"POST body: {request.body[:100] if request.body else 'Empty'}")
+            
+            # Try to get date from POST data
             date = request.POST.get('date')
             print(f"Date from POST: {date}")
             
+            # If we got a date and it's in YYYY-MM format
             if date and '-' in date:
-                date_split = date.split("-")
-                month = int(date_split[1])
-                year = int(date_split[0])
-                print(f"Using month: {month}, year: {year}")
-                
-                # Get accounts created in this month/year
-                projects = Project.objects.filter(
-                    created__month=month, 
-                    created__year=year
-                ).exclude(price=None, adv=None, gasto=None)
-                project_ids = projects.values_list('id', flat=True)
-                accounts = Account.objects.filter(project__id__in=project_ids)
+                try:
+                    date_split = date.split("-")
+                    if len(date_split) >= 2:
+                        month = int(date_split[1])
+                        year = int(date_split[0])
+                        print(f"Successfully parsed date: month={month}, year={year}")
+                        
+                        # Get projects for this month/year
+                        projects = Project.objects.filter(
+                            created__month=month, 
+                            created__year=year
+                        ).exclude(price=None, adv=None, gasto=None)
+                        project_ids = projects.values_list('id', flat=True)
+                        accounts = Account.objects.filter(project__id__in=project_ids)
+                        print(f"Found {accounts.count()} accounts for {month}/{year}")
+                    else:
+                        raise ValueError(f"Invalid date format: {date}")
+                except Exception as e:
+                    print(f"Error parsing date: {e}")
+                    month = datetime.now().month
+                    year = datetime.now().year
+                    projects = Project.objects.filter(created__month=month, created__year=year).exclude(price=None, adv=None, gasto=None, closed=True)
+                    project_ids = projects.values_list('id', flat=True)
+                    accounts = Account.objects.filter(project__id__in=project_ids)
             else:
                 print("No valid date in POST, using current date")
                 month = datetime.now().month
@@ -317,8 +335,7 @@ def balance(request):
     non_exist = False
     if not projects.exists():
         non_exist = True
-    
-    return render (request, 'balance_template.html', {
+      return render (request, 'balance_template.html', {
         'non_exist':non_exist,
         'total':totalEstimatedAmount, 
         'adv':adv, 
@@ -329,7 +346,8 @@ def balance(request):
         'percent':percent, 
         'gastos':exp, 
         'net':net, 
-        'month':month_str(month), 
+        'month':month_str(month),
+        'month_number': month,  # Pass the numeric month as well 
         'year':year,
         'monthly_totals': data['monthly_totals'],
         'monthly_list': data['monthly_data'],
