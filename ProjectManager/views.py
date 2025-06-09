@@ -46,14 +46,17 @@ def chart_data(request):
         date_split = date.split("-")
         month = int(date_split[1])
         year = int(date_split[0])
+        accounts = Account.objects.filter(project__closed=False,
+        created__month=month, 
+        created__year=year
+        ).select_related('project')
     else:
         month = datetime.now().month
         year = datetime.now().year
-        
-    accounts = Account.objects.filter(
-        created__month=month, 
-        created__year=year
-    ).select_related('project')
+        projects = Project.objects.filter(created__month=month, created__year=year).exclude(price=None, adv=None, gasto=None, closed=True)
+        project_ids = projects.values_list('id', flat=True)
+        accounts = Account.objects.filter(project__id__in=project_ids)
+
 
     sums = accounts.aggregate(
         total_estimated=Sum('estimated'),
