@@ -335,7 +335,7 @@ def balance(request):
     non_exist = False
     if not projects.exists():
         non_exist = True
-      return render (request, 'balance_template.html', {
+        return render (request, 'balance_template.html', {
         'non_exist':non_exist,
         'total':totalEstimatedAmount, 
         'adv':adv, 
