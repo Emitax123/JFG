@@ -146,11 +146,11 @@ width: auto;text-decoration: none; color: inherit;">{{ accountm.project.pk }}</a
               {% if accountm.amount < 0 %}
                 <span class="acc-data"><span style="font-weight: bold; min-width: 80%; padding: 5px; background-color: rgb(241, 246, 95); border-radius: 5px;">Modificacion A</span></span>
               {% else %}
-                <span class="acc-data"><span style="font-weight: bold; min-width: 80%; padding: 5px; background-color: rgb(241, 246, 95); border-radius: 5px;">Anticipo</span></span>
+                <span class="acc-data"><span style="font-weight: bold; min-width: 80%; padding: 5px; background-color: lightgreen; border-radius: 5px;">Anticipo</span></span>
               {% endif %}
             {% else %}
               {% if accountm.amount < 0 %}
-                <span class="acc-data"><span style="font-weight: bold; min-width: 80%; padding: 5px; background-color: lightyellow; border-radius: 5px;">Modificion G</span></span>
+                <span class="acc-data"><span style="font-weight: bold; min-width: 80%; padding: 5px; background-color: rgb(241, 246, 95); border-radius: 5px;">Modificion G</span></span>
               {% else %}
                 <span class="acc-data"><span style="font-weight: bold; min-width: 80%; padding: 5px; background-color: lightcoral; border-radius: 5px;">Gasto</span></span>
               {% endif %}

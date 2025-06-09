@@ -317,7 +317,10 @@ def balance(request):
     pending = totalEstimatedAmount - adv - exp
     cant = projects.count()
     cant_actual_month = projects.filter(created__month=month).count()
-    cant_previus_months = projects.filter(closed=False).exclude(created__month=month).count()
+    # Fix: Query previous months' projects separately, looking for projects from earlier months/years with closed=False
+    cant_previus_months = Project.objects.filter(closed=False).exclude(
+        Q(created__month=month, created__year=year)
+    ).exclude(price=None, adv=None, gasto=None).count()
 
     if totalEstimatedAmount > 0:
         percent = round(adv/(totalEstimatedAmount-exp)*100 , 2)#adv/totalestimated-exp ARRREGLARRRRR
