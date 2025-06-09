@@ -41,28 +41,62 @@ def index(request):
 
 # charts/views.py
 def chart_data(request):
-    if request.method == 'POST':
-        date = request.POST.get('date')
-        date_split = date.split("-")
-        month = int(date_split[1])
-        year = int(date_split[0])
-        accounts = Account.objects.filter(
-        created__month=month, 
-        created__year=year
-        ).select_related('project')
-    else:
-        month = datetime.now().month
-        year = datetime.now().year
-        projects = Project.objects.filter(created__month=month, created__year=year).exclude(price=None, adv=None, gasto=None, closed=True)
-        project_ids = projects.values_list('id', flat=True)
-        accounts = Account.objects.filter(project__id__in=project_ids)
+    print(f"Request method: {request.method}")
+    
+    try:
+        if request.method == 'POST':
+            print(f"POST data: {request.POST}")
+            date = request.POST.get('date')
+            print(f"Date from POST: {date}")
+            
+            if date and '-' in date:
+                date_split = date.split("-")
+                month = int(date_split[1])
+                year = int(date_split[0])
+                print(f"Using month: {month}, year: {year}")
+                
+                # Get accounts created in this month/year
+                projects = Project.objects.filter(
+                    created__month=month, 
+                    created__year=year
+                ).exclude(price=None, adv=None, gasto=None)
+                project_ids = projects.values_list('id', flat=True)
+                accounts = Account.objects.filter(project__id__in=project_ids)
+            else:
+                print("No valid date in POST, using current date")
+                month = datetime.now().month
+                year = datetime.now().year
+                projects = Project.objects.filter(created__month=month, created__year=year).exclude(price=None, adv=None, gasto=None, closed=True)
+                project_ids = projects.values_list('id', flat=True)
+                accounts = Account.objects.filter(project__id__in=project_ids)
+        else:
+            month = datetime.now().month
+            year = datetime.now().year
+            projects = Project.objects.filter(created__month=month, created__year=year).exclude(price=None, adv=None, gasto=None, closed=True)
+            project_ids = projects.values_list('id', flat=True)
+            accounts = Account.objects.filter(project__id__in=project_ids)
 
-
-    sums = accounts.aggregate(
-        total_estimated=Sum('estimated'),
-        total_advance=Sum('advance'),
-        total_expenses=Sum('expenses')
-    )
+        # Continue only if we have accounts to analyze
+        if accounts.exists():
+            sums = accounts.aggregate(
+                total_estimated=Sum('estimated'),
+                total_advance=Sum('advance'),
+                total_expenses=Sum('expenses')
+            )
+            
+            total_estimated = sums['total_estimated'] or 0
+            total_advance = sums['total_advance'] or 0 
+            total_expenses = sums['total_expenses'] or 0
+        else:
+            total_estimated = 0
+            total_advance = 0
+            total_expenses = 0
+    except Exception as e:
+        print(f"Error in chart_data: {e}")
+        # Fall back to default values if there's an error
+        total_estimated = 0
+        total_advance = 0 
+        total_expenses = 0
     
     total_estimated = sums['total_estimated'] or 0
     print(total_estimated)
