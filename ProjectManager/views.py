@@ -51,8 +51,8 @@ def chart_data(request):
         year = datetime.now().year
         
     accounts = Account.objects.filter(
-        project__created__month=month, 
-        project__created__year=year
+        created__month=month, 
+        created__year=year
     ).select_related('project')
 
     sums = accounts.aggregate(
