@@ -488,24 +488,26 @@ def mod_view(request, pk):
                 instance.price = Dec("0,00")
         if request.POST.get('adv'):
             try:
+                newadv_asdecimal = Dec(request.POST.get('adv'))
                 previous_adv = instance.adv
-                instance.adv = instance.adv + Dec(request.POST.get('adv'))
-                if request.POST.get('adv') < "0":
-                    msg = "Se devolvieron $" + request.POST.get('adv') + " del proyecto " + str(instance.pk)
+                instance.adv = instance.adv + newadv_asdecimal
+                if newadv_asdecimal < 0:
+                    msg = "Se devolvieron $" + str(abs(newadv_asdecimal)) + " del proyecto " + str(instance.pk)
                 else:
-                    msg = "Se cobraron $" + request.POST.get('adv') + " del proyecto " + str(instance.pk)
-                create_acc_entry(instance.pk, 'adv', previous_adv, Dec(request.POST.get('adv')))
+                    msg = "Se cobraron $" + str(newadv_asdecimal) + " del proyecto " + str(instance.pk)
+                create_acc_entry(instance.pk, 'adv', previous_adv, newadv_asdecimal)
             except:
                 instance.adv = Dec("0.00")
         if request.POST.get('gasto'):
             try:
+                newgasto_asdecimal = Dec(request.POST.get('gasto'))
                 previous_gasto = instance.gasto or Dec("0.00")
-                instance.gasto = instance.gasto + Dec(request.POST.get('gasto'))
-                if request.POST.get('gasto') < "0":
-                    msg = "Se redujo $" + request.POST.get('gasto') + " el gasto del proyecto " + str(instance.pk)
+                instance.gasto = instance.gasto + newgasto_asdecimal
+                if newgasto_asdecimal < 0:
+                    msg = "Se redujo $" + str(abs(newgasto_asdecimal)) + " el gasto del proyecto " + str(instance.pk)
                 else:
-                    msg = "Se debitaron $" + request.POST.get('gasto') + " al proyecto " + str(instance.pk)
-                create_acc_entry(instance.pk, 'exp', previous_gasto, Dec(request.POST.get('gasto')))
+                    msg = "Se debitaron $" + str(newgasto_asdecimal) + " al proyecto " + str(instance.pk)
+                create_acc_entry(instance.pk, 'exp', previous_gasto, newgasto_asdecimal)
             except:
                 instance.gasto = Dec("0.00")
         if not Project.objects.filter(pk=pk).exists():
