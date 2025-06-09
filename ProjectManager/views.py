@@ -282,6 +282,7 @@ def balance_anual(year):
 @login_required
 def balance(request):
     if request.method == 'POST':
+        
         #Aqui el user selecciona el mes y año
         date = request.POST.get('date')
         date_split = date.split("-")
@@ -294,6 +295,7 @@ def balance(request):
 
     else:
         #Si no selecciona nada, se toma el mes y año actual
+        method_post = False
         month = datetime.now().month
         year = datetime.now().year
         #Obtengo los proyectos del mes y año actual, pero solo los que no estan cerrados
@@ -336,6 +338,7 @@ def balance(request):
     if not projects.exists():
         non_exist = True
     return render (request, 'balance_template.html', {
+        'method_post':method_post,
         'non_exist':non_exist,
         'total':totalEstimatedAmount, 
         'adv':adv, 
