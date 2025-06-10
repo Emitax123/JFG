@@ -35,8 +35,8 @@ def create_acc_entry(project_id, field, old_value, new_value):
 
             account, created = Account.objects.get_or_create(project=project)
             monthly_summary, createdm = MonthlyFinancialSummary.objects.get_or_create(
-                year=timezone.now().year,
-                month=timezone.now().month
+                year=int(timezone.now().year),
+                month=int(timezone.now().month)
             )
             if field == 'adv':
 
