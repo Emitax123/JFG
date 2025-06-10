@@ -209,9 +209,9 @@ def create_month_summary(request):
         for account in accounts:
             # Get the creation date of the associated project
             if account.project and account.project.created:
-                year = account.created.year
-                month = account.created.month
-                
+                year = account.project.created.year
+                month = account.project.created.month
+
                 # Create entry for this month if it doesn't exist
                 if (year, month) not in monthly_data:
                     monthly_data[(year, month)] = {
