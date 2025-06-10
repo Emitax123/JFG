@@ -183,188 +183,103 @@ def accounting_mov_display(request, pk=None):
     
     return render(request, 'accounting_template.html', context)
 
-def copy_projects_to_accounting(request):
-    """
-    Copy all projects to the accounting system.
-    """
-    projects = Project.objects.all()
-    for project in projects:
-        account = create_account(project.id)
-        account.estimated = project.price
-        account.advance = project.adv
-        account.expenses = project.gasto
-        account.netWorth = project.adv - project.gasto
-        account.created = project.created
-        account.save()
-    return render(request, 'good.html', {'message': 'All projects copied to accounting.'})
 
-def process_accounts_for_month(accounts, year, month, summaries):
-    """
-    Process a set of accounts for a specific month and year.
-    Updates the summaries dictionary with the processed data.
-    """
-    from decimal import Decimal
-    
-    # Key for storing in the summaries dictionary
-    summary_key = f"{year}-{month}"
-    
-    # Get or create a summary for this year/month
-    if summary_key not in summaries:
-        summary, created = MonthlyFinancialSummary.objects.get_or_create(
-            year=year,
-            month=month
-        )
-        
-        # Reset all values to zero for this summary
-        summary.total_advance = Decimal('0.00')
-        summary.total_expenses = Decimal('0.00')
-        summary.total_networth = Decimal('0.00')
-        summary.total_net_mensura = Decimal('0.00')
-        summary.total_net_est_parc = Decimal('0.00')
-        summary.total_net_amoj = Decimal('0.00')
-        summary.total_net_relev = Decimal('0.00')
-        summary.total_net_leg = Decimal('0.00')
-        
-        summaries[summary_key] = summary
-    else:
-        summary = summaries[summary_key]
-    
-    # Process each account and add to the summary
-    for acc in accounts:
-        # Update the overall totals
-        summary.total_advance += acc.advance or Decimal('0.00')
-        summary.total_expenses += acc.expenses or Decimal('0.00')
-        
-        # Calculate net worth for this account
-        acc_net = (acc.advance or Decimal('0.00')) - (acc.expenses or Decimal('0.00'))
-        
-        # Update project type specific net worth
-        project_type = acc.project.type if acc.project and hasattr(acc.project, 'type') else None
-        
-        if project_type == 'Mensura':
-            summary.total_net_mensura += acc_net
-        elif project_type == 'Estado Parcelario':
-            summary.total_net_est_parc += acc_net
-        elif project_type == 'Amojonamiento':
-            summary.total_net_amoj += acc_net
-        elif project_type == 'Relevamiento':
-            summary.total_net_relev += acc_net
-        elif project_type == 'Legajo Parcelario':
-            summary.total_net_leg += acc_net
-    
-    # Update the total net worth for this month
-    summary.total_networth = summary.total_advance - summary.total_expenses
 
 def create_month_summary(request):
     """
-    Create monthly financial summaries for all months with account data.
+    Create monthly financial summaries
+    It takes the Accounts models that are already created and groups its data by month/year.
     Also calculates net worth for each project type (Mensura, Estado Parcelario, etc.)
+    Currently, the only months that are has Accounts created are April, May and June 2025.
     """
-    from decimal import Decimal
-    from datetime import datetime
-    
     try:
-        # Dictionary to store all monthly summaries we'll be working with
-        summaries = {}
+        # Track counts for reporting
         created_count = 0
         updated_count = 0
         
-        # Check if we need to create specific month summaries
-        target_year = request.GET.get('year')
-        target_month = request.GET.get('month')
-        
-        # If specific year/month is requested, create only that summary
-        if target_year and target_month:
-            try:
-                year = int(target_year)
-                month = int(target_month)
-                print(f"Creating specific summary for {month}/{year}")
-                
-                # Find accounts for this month/year
-                month_accounts = Account.objects.filter(
-                    created__year=year, 
-                    created__month=month
-                ).select_related('project')
-                
-                if month_accounts.exists():
-                    process_accounts_for_month(month_accounts, year, month, summaries)
-                    print(f"Processed {month_accounts.count()} accounts for {month}/{year}")
-                else:
-                    # If no accounts found but specific month requested, create empty summary
-                    summary, created = MonthlyFinancialSummary.objects.get_or_create(
-                        year=year,
-                        month=month
-                    )
-                    if created:
-                        print(f"Created empty summary for {month}/{year}")
-                        created_count += 1
-                    else:
-                        print(f"Using existing summary for {month}/{year}")
-                        updated_count += 1
-                    summaries[f"{year}-{month}"] = summary
-                
-                # Calculate and save this specific summary
-                for summary_key, summary in summaries.items():
-                    summary.total_networth = summary.total_advance - summary.total_expenses
-                    summary.save()
-                    print(f"Saved summary for {summary_key}: Net={summary.total_networth}")
-                
-                message = f"Successfully processed summary for {month}/{year}."
-                print(message)
-                return render(request, 'good.html', {'message': message})
-            except ValueError as e:
-                return render(request, 'good.html', {'message': f"Invalid year/month parameters: {str(e)}"})
-        
-        # Process all months if no specific month requested
-        # First, get all accounts and group them by year/month
+        # Find all distinct months with account data by extracting from project creation dates
         accounts = Account.objects.all().select_related('project')
         
-        # Debug: Print all distinct year/month combinations in accounts
-        distinct_dates = set()
-        for acc in accounts:
-            if acc.created:  # Check if created date exists
-                distinct_dates.add((acc.created.year, acc.created.month))
-        print(f"Found accounts with these year/month combinations: {sorted(distinct_dates)}")
+        # Dictionary to track monthly data
+        monthly_data = {}  # {(year, month): {'accounts': [], 'adv': 0, 'exp': 0, 'est': 0}}
         
-        # Group accounts by year/month to process each month separately
-        accounts_by_month = {}
-        for acc in accounts:
-            if acc.created:  # Check if created date exists
-                year = int(acc.created.year)
-                month = int(acc.created.month)
-                month_key = f"{year}-{month}"
+        print(f"Processing {accounts.count()} accounts")
+        
+        # Process each account and group by month/year
+        for account in accounts:
+            # Get the creation date of the associated project
+            if account.project and account.project.created:
+                year = account.created.year
+                month = account.created.month
                 
-                if month_key not in accounts_by_month:
-                    accounts_by_month[month_key] = []
-                    
-                accounts_by_month[month_key].append(acc)
+                # Create entry for this month if it doesn't exist
+                if (year, month) not in monthly_data:
+                    monthly_data[(year, month)] = {
+                        'accounts': [],
+                        'adv': Decimal('0.00'),
+                        'exp': Decimal('0.00'),
+                        'est': Decimal('0.00'),
+                        'net': Decimal('0.00'),
+                        'project_types': {
+                            'Estado Parcelario': Decimal('0.00'),
+                            'Mensura': Decimal('0.00'),
+                            'Amojonamiento': Decimal('0.00'),
+                            'Relevamiento': Decimal('0.00'),
+                            'Legajo Parcelario': Decimal('0.00')
+                        }
+                    }
+                
+                # Add this account's data to the month
+                monthly_data[(year, month)]['accounts'].append(account)
+                monthly_data[(year, month)]['adv'] += account.advance or Decimal('0.00')
+                monthly_data[(year, month)]['exp'] += account.expenses or Decimal('0.00')
+                monthly_data[(year, month)]['est'] += account.estimated or Decimal('0.00')
+                
+                # Calculate net worth for this account
+                net_worth = (account.advance or Decimal('0.00')) - (account.expenses or Decimal('0.00'))
+                monthly_data[(year, month)]['net'] += net_worth
+                
+                # Add to project type totals if the type exists
+                project_type = account.project.type if account.project else None
+                if project_type in monthly_data[(year, month)]['project_types']:
+                    monthly_data[(year, month)]['project_types'][project_type] += net_worth
         
-        # Process each month's accounts
-        for month_key, month_accounts in accounts_by_month.items():
-            year, month = map(int, month_key.split('-'))
-            print(f"Processing {len(month_accounts)} accounts for {month}/{year}")
-            
-            process_accounts_for_month(month_accounts, year, month, summaries)
-            
-            if month_key in summaries:
-                if month_key.split('-')[0] not in summaries:
+        # Create or update MonthlyFinancialSummary objects for each month
+        for (year, month), data in monthly_data.items():
+            try:
+                # Create or update the monthly summary
+                summary, created = MonthlyFinancialSummary.objects.update_or_create(
+                    year=year,
+                    month=month,
+                    defaults={
+                        'total_estimated': data['est'],
+                        'total_advance': data['adv'],
+                        'total_expenses': data['exp'],
+                        'total_networth': data['net'],
+                        'estado_parcelario_net': data['project_types']['Estado Parcelario'],
+                        'mensura_net': data['project_types']['Mensura'],
+                        'amojonamiento_net': data['project_types']['Amojonamiento'],
+                        'relevamiento_net': data['project_types']['Relevamiento'],
+                        'legajo_parcelario_net': data['project_types']['Legajo Parcelario'],
+                        'project_count': len(data['accounts'])
+                    }
+                )
+                
+                if created:
                     created_count += 1
                 else:
                     updated_count += 1
+                    
+                print(f"{'Created' if created else 'Updated'} summary for {month}/{year} with {len(data['accounts'])} accounts")
+                
+            except Exception as e:
+                print(f"Error processing month {month}/{year}: {str(e)}")
         
-        # Calculate total net worth and save all summaries
-        for summary_key, summary in summaries.items():
-            summary.total_networth = summary.total_advance - summary.total_expenses
-            summary.save()
-            print(f"Saved summary for {summary_key}: Net={summary.total_networth}")
-            
-        message = f"Successfully processed {len(summaries)} monthly summaries. Created {created_count} new, updated {updated_count} existing."
-        print(message)
-        return render(request, 'good.html', {'message': message})
+        message = f"Processing complete: {created_count} summaries created, {updated_count} summaries updated"
+        return render(request, 'accounting_template.html', {'message': message})
         
     except Exception as e:
-        error_message = f"Error creating monthly summaries: {str(e)}"
-        print(error_message)
         import traceback
-        traceback.print_exc()
-        return render(request, 'good.html', {'message': error_message})
+        error_message = f"Error creating monthly summaries: {str(e)}\n{traceback.format_exc()}"
+        print(error_message)
+        return render(request, 'accounting_template.html', {'error': error_message})
