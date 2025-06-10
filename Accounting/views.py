@@ -260,7 +260,6 @@ def create_month_summary(request):
                         'total_net_amoj': data['project_types']['Amojonamiento'],
                         'total_net_relev': data['project_types']['Relevamiento'],
                         'total_net_leg': data['project_types']['Legajo Parcelario'],
-                        'project_count': len(data['accounts'])
                     }
                 )
                 
