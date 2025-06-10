@@ -46,7 +46,6 @@ class MonthlyFinancialSummary(models.Model):
     """
     year = models.IntegerField(verbose_name="Año")
     month = models.IntegerField(verbose_name="Mes")
-    total_estimated = models.DecimalField(max_digits=20, decimal_places=2, default=0.00, verbose_name="Presupuesto Total")
     total_advance = models.DecimalField(max_digits=20, decimal_places=2, default=0.00, verbose_name="Cobros Total")
     total_expenses = models.DecimalField(max_digits=20, decimal_places=2, default=0.00, verbose_name="Gastos Total")
     total_networth = models.DecimalField(max_digits=20, decimal_places=2, default=0.00, verbose_name="Ganancia Neta")
@@ -69,5 +68,22 @@ class MonthlyFinancialSummary(models.Model):
             9: 'Septiembre', 10: 'Octubre', 11: 'Noviembre', 12: 'Diciembre'
         }
         return f"{month_names.get(self.month, self.month)} - {self.year}"
-
+    
+    @classmethod
+    def initialize(cls, year, month):
+        """
+        Create a new monthly summary record with default values for the specified year and month.
+        If record already exists, it will be returned without modifications.
+        """
+        
+        summary, created = cls.objects.get_or_create(
+            year=year,
+            month=month,
+            defaults={
+                'total_advance': 0.00,
+                'total_expenses': 0.00,
+                'total_networth': 0.00,
+            }
+        )
+        return summary
 
