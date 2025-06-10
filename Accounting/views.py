@@ -198,72 +198,159 @@ def copy_projects_to_accounting(request):
         account.save()
     return render(request, 'good.html', {'message': 'All projects copied to accounting.'})
 
+def process_accounts_for_month(accounts, year, month, summaries):
+    """
+    Process a set of accounts for a specific month and year.
+    Updates the summaries dictionary with the processed data.
+    """
+    from decimal import Decimal
+    
+    # Key for storing in the summaries dictionary
+    summary_key = f"{year}-{month}"
+    
+    # Get or create a summary for this year/month
+    if summary_key not in summaries:
+        summary, created = MonthlyFinancialSummary.objects.get_or_create(
+            year=year,
+            month=month
+        )
+        
+        # Reset all values to zero for this summary
+        summary.total_advance = Decimal('0.00')
+        summary.total_expenses = Decimal('0.00')
+        summary.total_networth = Decimal('0.00')
+        summary.total_net_mensura = Decimal('0.00')
+        summary.total_net_est_parc = Decimal('0.00')
+        summary.total_net_amoj = Decimal('0.00')
+        summary.total_net_relev = Decimal('0.00')
+        summary.total_net_leg = Decimal('0.00')
+        
+        summaries[summary_key] = summary
+    else:
+        summary = summaries[summary_key]
+    
+    # Process each account and add to the summary
+    for acc in accounts:
+        # Update the overall totals
+        summary.total_advance += acc.advance or Decimal('0.00')
+        summary.total_expenses += acc.expenses or Decimal('0.00')
+        
+        # Calculate net worth for this account
+        acc_net = (acc.advance or Decimal('0.00')) - (acc.expenses or Decimal('0.00'))
+        
+        # Update project type specific net worth
+        project_type = acc.project.type if acc.project and hasattr(acc.project, 'type') else None
+        
+        if project_type == 'Mensura':
+            summary.total_net_mensura += acc_net
+        elif project_type == 'Estado Parcelario':
+            summary.total_net_est_parc += acc_net
+        elif project_type == 'Amojonamiento':
+            summary.total_net_amoj += acc_net
+        elif project_type == 'Relevamiento':
+            summary.total_net_relev += acc_net
+        elif project_type == 'Legajo Parcelario':
+            summary.total_net_leg += acc_net
+    
+    # Update the total net worth for this month
+    summary.total_networth = summary.total_advance - summary.total_expenses
+
 def create_month_summary(request):
     """
     Create monthly financial summaries for all months with account data.
     Also calculates net worth for each project type (Mensura, Estado Parcelario, etc.)
     """
+    from decimal import Decimal
+    from datetime import datetime
+    
     try:
         # Dictionary to store all monthly summaries we'll be working with
         summaries = {}
         created_count = 0
         updated_count = 0
         
-        # First, get all accounts
-        accounts = Account.objects.all().select_related('project').order_by('created')
+        # Check if we need to create specific month summaries
+        target_year = request.GET.get('year')
+        target_month = request.GET.get('month')
         
-        # Initialize data structures to hold our aggregated values
+        # If specific year/month is requested, create only that summary
+        if target_year and target_month:
+            try:
+                year = int(target_year)
+                month = int(target_month)
+                print(f"Creating specific summary for {month}/{year}")
+                
+                # Find accounts for this month/year
+                month_accounts = Account.objects.filter(
+                    created__year=year, 
+                    created__month=month
+                ).select_related('project')
+                
+                if month_accounts.exists():
+                    process_accounts_for_month(month_accounts, year, month, summaries)
+                    print(f"Processed {month_accounts.count()} accounts for {month}/{year}")
+                else:
+                    # If no accounts found but specific month requested, create empty summary
+                    summary, created = MonthlyFinancialSummary.objects.get_or_create(
+                        year=year,
+                        month=month
+                    )
+                    if created:
+                        print(f"Created empty summary for {month}/{year}")
+                        created_count += 1
+                    else:
+                        print(f"Using existing summary for {month}/{year}")
+                        updated_count += 1
+                    summaries[f"{year}-{month}"] = summary
+                
+                # Calculate and save this specific summary
+                for summary_key, summary in summaries.items():
+                    summary.total_networth = summary.total_advance - summary.total_expenses
+                    summary.save()
+                    print(f"Saved summary for {summary_key}: Net={summary.total_networth}")
+                
+                message = f"Successfully processed summary for {month}/{year}."
+                print(message)
+                return render(request, 'good.html', {'message': message})
+            except ValueError as e:
+                return render(request, 'good.html', {'message': f"Invalid year/month parameters: {str(e)}"})
+        
+        # Process all months if no specific month requested
+        # First, get all accounts and group them by year/month
+        accounts = Account.objects.all().select_related('project')
+        
+        # Debug: Print all distinct year/month combinations in accounts
+        distinct_dates = set()
         for acc in accounts:
-            year = int(acc.created.year)
-            month = int(acc.created.month)
+            if acc.created:  # Check if created date exists
+                distinct_dates.add((acc.created.year, acc.created.month))
+        print(f"Found accounts with these year/month combinations: {sorted(distinct_dates)}")
+        
+        # Group accounts by year/month to process each month separately
+        accounts_by_month = {}
+        for acc in accounts:
+            if acc.created:  # Check if created date exists
+                year = int(acc.created.year)
+                month = int(acc.created.month)
+                month_key = f"{year}-{month}"
+                
+                if month_key not in accounts_by_month:
+                    accounts_by_month[month_key] = []
+                    
+                accounts_by_month[month_key].append(acc)
+        
+        # Process each month's accounts
+        for month_key, month_accounts in accounts_by_month.items():
+            year, month = map(int, month_key.split('-'))
+            print(f"Processing {len(month_accounts)} accounts for {month}/{year}")
             
-            # Get or create a summary for this year/month
-            summary_key = f"{year}-{month}"
-            if summary_key not in summaries:
-                summary, created = MonthlyFinancialSummary.objects.get_or_create(
-                    year=year,
-                    month=month
-                )
-                if created:
+            process_accounts_for_month(month_accounts, year, month, summaries)
+            
+            if month_key in summaries:
+                if month_key.split('-')[0] not in summaries:
                     created_count += 1
                 else:
                     updated_count += 1
-                    
-                # Reset all values to zero for this summary
-                summary.total_advance = Decimal('0.00')
-                summary.total_expenses = Decimal('0.00')
-                summary.total_networth = Decimal('0.00')
-                summary.total_net_mensura = Decimal('0.00')
-                summary.total_net_est_parc = Decimal('0.00')
-                summary.total_net_amoj = Decimal('0.00')
-                summary.total_net_relev = Decimal('0.00')
-                summary.total_net_leg = Decimal('0.00')
-                
-                summaries[summary_key] = summary
-            
-            # Add this account's data to the appropriate summary
-            summary = summaries[summary_key]
-            
-            # Update the overall totals
-            summary.total_advance += acc.advance or Decimal('0.00')
-            summary.total_expenses += acc.expenses or Decimal('0.00')
-            
-            # Calculate net worth for this account
-            acc_net = acc.advance - acc.expenses
-            
-            # Update project type specific net worth
-            project_type = acc.project.type if acc.project and hasattr(acc.project, 'type') else None
-            
-            if project_type == 'Mensura':
-                summary.total_net_mensura += acc_net
-            elif project_type == 'Estado Parcelario':
-                summary.total_net_est_parc += acc_net
-            elif project_type == 'Amojonamiento':
-                summary.total_net_amoj += acc_net
-            elif project_type == 'Relevamiento':
-                summary.total_net_relev += acc_net
-            elif project_type == 'Legajo Parcelario':
-                summary.total_net_leg += acc_net
         
         # Calculate total net worth and save all summaries
         for summary_key, summary in summaries.items():
