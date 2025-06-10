@@ -11,7 +11,7 @@ class Account(models.Model):
     netWorth = models.DecimalField(max_digits=20, decimal_places=2, default=0.00)
     created = models.DateTimeField(auto_now=True, verbose_name="Fecha de Creación")
     def __str__(self):
-        return str(self.project.pk) + self.project.created.strftime(" - %Y-%m-%d")
+        return str(self.project.pk) + self.created.strftime(" - %Y-%m-%d")
 
     class Meta:
         verbose_name = "Cobranza"
