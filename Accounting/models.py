@@ -50,6 +50,11 @@ class MonthlyFinancialSummary(models.Model):
     total_expenses = models.DecimalField(max_digits=20, decimal_places=2, default=0.00, verbose_name="Gastos Total")
     total_networth = models.DecimalField(max_digits=20, decimal_places=2, default=0.00, verbose_name="Ganancia Neta")
 
+    total_net_mensura = models.DecimalField(max_digits=20, decimal_places=2, default=0.00, verbose_name="Ganancia Neta Mensura")
+    total_net_est_parc = models.DecimalField(max_digits=20, decimal_places=2, default=0.00, verbose_name="Ganancia Neta Est Parcelario")
+    total_net_leg = models.DecimalField(max_digits=20, decimal_places=2, default=0.00, verbose_name="Ganancia Neta Legajos")
+    total_net_amoj = models.DecimalField(max_digits=20, decimal_places=2, default=0.00, verbose_name="Ganancia Neta Amojonamiento")
+    total_net_relev = models.DecimalField(max_digits=20, decimal_places=2, default=0.00, verbose_name="Ganancia Neta Relevamiento")
     last_updated = models.DateTimeField(auto_now=True, verbose_name="Última Actualización")
 
     class Meta:

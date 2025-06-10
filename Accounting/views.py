@@ -200,57 +200,84 @@ def copy_projects_to_accounting(request):
 
 def create_month_summary(request):
     """
-    Create a monthly financial summary for the current month, with the existing data.
-    This function initializes the monthly summary if it does not exist.
+    Create monthly financial summaries for all months with account data.
+    Also calculates net worth for each project type (Mensura, Estado Parcelario, etc.)
     """
-    account = Account.objects.all().order_by('-created')
-    aprilmonthsummary = MonthlyFinancialSummary.objects.filter(year=2025, month=4).first()
-    maymonthsummary = MonthlyFinancialSummary.objects.filter(year=2025, month=5).first()
-    junemonthsummary = MonthlyFinancialSummary.objects.filter(year=2025, month=6).first()
-    for acc in account:
-        if int(acc.created.year) == 2025 and int(acc.created.month) == 4:
-            if aprilmonthsummary:
-                aprilmonthsummary.total_advance += acc.advance
-                aprilmonthsummary.total_expenses += acc.expenses
-                aprilmonthsummary.total_networth = aprilmonthsummary.total_advance - aprilmonthsummary.total_expenses
-                
-            else:
-                aprilmonthsummary = MonthlyFinancialSummary.objects.create(
-                    year=2025,
-                    month=4,
-                    total_advance=acc.advance,
-                    total_expenses=acc.expenses,
-                    total_networth=acc.advance - acc.expenses
+    try:
+        # Dictionary to store all monthly summaries we'll be working with
+        summaries = {}
+        created_count = 0
+        updated_count = 0
+        
+        # First, get all accounts
+        accounts = Account.objects.all().select_related('project')
+        
+        # Initialize data structures to hold our aggregated values
+        for acc in accounts:
+            year = acc.created.year
+            month = acc.created.month
+            
+            # Get or create a summary for this year/month
+            summary_key = f"{year}-{month}"
+            if summary_key not in summaries:
+                summary, created = MonthlyFinancialSummary.objects.get_or_create(
+                    year=year,
+                    month=month
                 )
-        elif int(acc.created.year) == 2025 and int(acc.created.month) == 5: 
-            if maymonthsummary:
-                maymonthsummary.total_advance += acc.advance
-                maymonthsummary.total_expenses += acc.expenses
-                maymonthsummary.total_networth = maymonthsummary.total_advance - maymonthsummary.total_expenses
+                if created:
+                    created_count += 1
+                else:
+                    updated_count += 1
+                    
+                # Reset all values to zero for this summary
+                summary.total_advance = Decimal('0.00')
+                summary.total_expenses = Decimal('0.00')
+                summary.total_networth = Decimal('0.00')
+                summary.total_net_mensura = Decimal('0.00')
+                summary.total_net_est_parc = Decimal('0.00')
+                summary.total_net_amoj = Decimal('0.00')
+                summary.total_net_relev = Decimal('0.00')
+                summary.total_net_leg = Decimal('0.00')
                 
-            else:
-                maymonthsummary = MonthlyFinancialSummary.objects.create(
-                    year=2025,
-                    month=5,
-                    total_advance=acc.advance,
-                    total_expenses=acc.expenses,
-                    total_networth=acc.advance - acc.expenses
-                )
-        elif int(acc.created.year) == 2025 and int(acc.created.month) == 6:
-            if junemonthsummary:
-                junemonthsummary.total_advance += acc.advance
-                junemonthsummary.total_expenses += acc.expenses
-                junemonthsummary.total_networth = junemonthsummary.total_advance - junemonthsummary.total_expenses
-                
-            else:
-                junemonthsummary = MonthlyFinancialSummary.objects.create(
-                    year=2025,
-                    month=6,
-                    total_advance=acc.advance,
-                    total_expenses=acc.expenses,
-                    total_networth=acc.advance - acc.expenses
-                )
-        aprilmonthsummary.save()
-        maymonthsummary.save()
-        junemonthsummary.save()
-    return render(request, 'good.html', {'message': 'Monthly summary created/updated.'})
+                summaries[summary_key] = summary
+            
+            # Add this account's data to the appropriate summary
+            summary = summaries[summary_key]
+            
+            # Update the overall totals
+            summary.total_advance += acc.advance or Decimal('0.00')
+            summary.total_expenses += acc.expenses or Decimal('0.00')
+            
+            # Calculate net worth for this account
+            acc_net = acc.advance - acc.expenses
+            
+            # Update project type specific net worth
+            project_type = acc.project.type if acc.project and hasattr(acc.project, 'type') else None
+            
+            if project_type == 'Mensura':
+                summary.total_net_mensura += acc_net
+            elif project_type == 'Estado Parcelario':
+                summary.total_net_est_parc += acc_net
+            elif project_type == 'Amojonamiento':
+                summary.total_net_amoj += acc_net
+            elif project_type == 'Relevamiento':
+                summary.total_net_relev += acc_net
+            elif project_type == 'Legajo Parcelario':
+                summary.total_net_leg += acc_net
+        
+        # Calculate total net worth and save all summaries
+        for summary_key, summary in summaries.items():
+            summary.total_networth = summary.total_advance - summary.total_expenses
+            summary.save()
+            print(f"Saved summary for {summary_key}: Net={summary.total_networth}")
+            
+        message = f"Successfully processed {len(summaries)} monthly summaries. Created {created_count} new, updated {updated_count} existing."
+        print(message)
+        return render(request, 'good.html', {'message': message})
+        
+    except Exception as e:
+        error_message = f"Error creating monthly summaries: {str(e)}"
+        print(error_message)
+        import traceback
+        traceback.print_exc()
+        return render(request, 'good.html', {'message': error_message})
