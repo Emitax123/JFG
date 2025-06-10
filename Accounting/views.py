@@ -198,3 +198,59 @@ def copy_projects_to_accounting(request):
         account.save()
     return render(request, 'good.html', {'message': 'All projects copied to accounting.'})
 
+def create_month_summary(request):
+    """
+    Create a monthly financial summary for the current month, with the existing data.
+    This function initializes the monthly summary if it does not exist.
+    """
+    account = Account.objects.all().order_by('-created')
+    aprilmonthsummary = MonthlyFinancialSummary.objects.filter(year=2025, month=4).first()
+    maymonthsummary = MonthlyFinancialSummary.objects.filter(year=2025, month=5).first()
+    junemonthsummary = MonthlyFinancialSummary.objects.filter(year=2025, month=6).first()
+    for acc in account:
+        if int(acc.created.year) == 2025 and int(acc.created.month) == 4:
+            if aprilmonthsummary:
+                aprilmonthsummary.total_advance += acc.advance
+                aprilmonthsummary.total_expenses += acc.expenses
+                aprilmonthsummary.total_networth = aprilmonthsummary.total_advance - aprilmonthsummary.total_expenses
+                
+            else:
+                aprilmonthsummary = MonthlyFinancialSummary.objects.create(
+                    year=2025,
+                    month=4,
+                    total_advance=acc.advance,
+                    total_expenses=acc.expenses,
+                    total_networth=acc.advance - acc.expenses
+                )
+        elif int(acc.created.year) == 2025 and int(acc.created.month) == 5: 
+            if maymonthsummary:
+                maymonthsummary.total_advance += acc.advance
+                maymonthsummary.total_expenses += acc.expenses
+                maymonthsummary.total_networth = maymonthsummary.total_advance - maymonthsummary.total_expenses
+                
+            else:
+                maymonthsummary = MonthlyFinancialSummary.objects.create(
+                    year=2025,
+                    month=5,
+                    total_advance=acc.advance,
+                    total_expenses=acc.expenses,
+                    total_networth=acc.advance - acc.expenses
+                )
+        elif int(acc.created.year) == 2025 and int(acc.created.month) == 6:
+            if junemonthsummary:
+                junemonthsummary.total_advance += acc.advance
+                junemonthsummary.total_expenses += acc.expenses
+                junemonthsummary.total_networth = junemonthsummary.total_advance - junemonthsummary.total_expenses
+                
+            else:
+                junemonthsummary = MonthlyFinancialSummary.objects.create(
+                    year=2025,
+                    month=6,
+                    total_advance=acc.advance,
+                    total_expenses=acc.expenses,
+                    total_networth=acc.advance - acc.expenses
+                )
+        aprilmonthsummary.save()
+        maymonthsummary.save()
+        junemonthsummary.save()
+    return render(request, 'good.html', {'message': 'Monthly summary created/updated.'})
