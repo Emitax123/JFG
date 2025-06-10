@@ -214,8 +214,8 @@ def create_month_summary(request):
         
         # Initialize data structures to hold our aggregated values
         for acc in accounts:
-            year = acc.created.year
-            month = acc.created.month
+            year = int(acc.created.year)
+            month = int(acc.created.month)
             
             # Get or create a summary for this year/month
             summary_key = f"{year}-{month}"
