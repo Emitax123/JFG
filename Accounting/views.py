@@ -210,7 +210,7 @@ def create_month_summary(request):
         updated_count = 0
         
         # First, get all accounts
-        accounts = Account.objects.all().select_related('project')
+        accounts = Account.objects.all().select_related('project').order_by('created')
         
         # Initialize data structures to hold our aggregated values
         for acc in accounts:
