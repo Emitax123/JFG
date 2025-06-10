@@ -252,15 +252,14 @@ def create_month_summary(request):
                     year=year,
                     month=month,
                     defaults={
-                        'total_estimated': data['est'],
                         'total_advance': data['adv'],
                         'total_expenses': data['exp'],
                         'total_networth': data['net'],
-                        'estado_parcelario_net': data['project_types']['Estado Parcelario'],
-                        'mensura_net': data['project_types']['Mensura'],
-                        'amojonamiento_net': data['project_types']['Amojonamiento'],
-                        'relevamiento_net': data['project_types']['Relevamiento'],
-                        'legajo_parcelario_net': data['project_types']['Legajo Parcelario'],
+                        'total_net_est_parc': data['project_types']['Estado Parcelario'],
+                        'total_net_mensura': data['project_types']['Mensura'],
+                        'total_net_amoj': data['project_types']['Amojonamiento'],
+                        'total_net_relev': data['project_types']['Relevamiento'],
+                        'total_net_leg': data['project_types']['Legajo Parcelario'],
                         'project_count': len(data['accounts'])
                     }
                 )
