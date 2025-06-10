@@ -34,12 +34,12 @@ class Project (models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE, null=True)
     
     #Titular, que puede o no puede ser el cliente
-    titular_name = models.CharField(default="", max_length=30, verbose_name='Nombre y apellido')
-    titular_phone = models.CharField(default="", max_length=40, verbose_name='Telefono')
+    titular_name = models.CharField(default="", max_length=30, blank=True, verbose_name='Nombre y apellido')
+    titular_phone = models.CharField(default="", max_length=40, blank=True, verbose_name='Telefono')
 
     #Contacto, que puede o no puede ser el cliente
-    contact_name = models.CharField(default="", max_length=30, verbose_name='Nombre', null=True)
-    contact_phone = models.CharField(default="", max_length=40, verbose_name='Telefono', null=True)
+    contact_name = models.CharField(default="", max_length=30, blank=True, verbose_name='Nombre', null=True)
+    contact_phone = models.CharField(default="", max_length=40, blank=True, verbose_name='Telefono', null=True)
     #Nomenclatura
     partido= models.CharField(max_length=30, blank=True, verbose_name='Partido')
     partida= models.CharField(max_length=30, blank=True, verbose_name='Partida')
@@ -80,7 +80,7 @@ class Project (models.Model):
     adv = models.DecimalField(default=0, decimal_places=2, max_digits=10, verbose_name='Anticipo')
     gasto = models.DecimalField(default=0, decimal_places=2, max_digits=10, verbose_name='Gastos')
     #Datos finales
-    procedure = models.IntegerField(null=True, verbose_name='N° Tramite')
+    procedure = models.IntegerField(null=True, blank=True, verbose_name='N° Tramite')
     #aprob = models.DateField(default=)
 
     created = models.DateTimeField(auto_now_add=True)
