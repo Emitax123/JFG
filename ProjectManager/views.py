@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.core.paginator import Paginator, PageNotAnInteger
 
-from Accounting.models import Account
+from Accounting.models import Account, MonthlyFinancialSummary
 from .forms import ProjectForm, FileFieldForm, ProjectFullForm
 from .models import Project, Client, Event, ProjectFiles
 from django.db.models import Q, Sum, Count, ExpressionWrapper, F, FloatField
@@ -301,19 +301,22 @@ def balance(request):
         #Obtengo los proyectos del mes y año actual, pero solo los que no estan cerrados
         projects = Project.objects.filter(created__month=month, created__year=year).exclude(price=None, adv=None, gasto=None, closed=True)
     project_ids = projects.values_list('id', flat=True)
-    accounts = Account.objects.filter(project__id__in=project_ids)
-    sums_acc = accounts.aggregate(
-        adv=Sum('advance'),
-        exp=Sum('expenses'),
-        net=Sum('netWorth'),
-    )
+    # Convert year and month to integers to ensure proper query
+   
+    monthly_totals = MonthlyFinancialSummary.objects.filter(year=int(year), month=int(month)).first()
+    if monthly_totals:
+        adv = monthly_totals.total_advance
+        exp = monthly_totals.total_expenses
+        net = monthly_totals.total_networth
+    else:
+        adv = 0
+        exp = 0
+        net = 0
     sums = projects.aggregate(
         total=Sum('price'),
         
     )
     totalEstimatedAmount = sums['total'] or 0
-    adv = sums_acc['adv'] or 0
-    exp = sums_acc['exp'] or 0
     pending = totalEstimatedAmount - adv - exp
     cant = projects.count()
     cant_actual_month = projects.filter(created__month=month).count()
@@ -322,12 +325,7 @@ def balance(request):
         Q(created__month=month, created__year=year)
     ).exclude(price=None, adv=None, gasto=None).count()
 
-    if totalEstimatedAmount > 0:
-        percent = round(adv/(totalEstimatedAmount-exp)*100 , 2)#adv/totalestimated-exp ARRREGLARRRRR
-    else:
-        percent = 0
     #net = el neto, es decir los anticipos menos los gastos
-    net = adv-exp
     #Formateamos los numeros a 2 decimales y cambiamos el punto por la coma
     adv = format_currency(adv)
     totalEstimatedAmount = format_currency(totalEstimatedAmount)
@@ -349,7 +347,6 @@ def balance(request):
         'cant':cant,
         'cant_actual_month':cant_actual_month,
         'cant_previus_months':cant_previus_months,
-        'percent':percent, 
         'gastos':exp, 
         'net':net, 
         'month':month_str(month),

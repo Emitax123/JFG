@@ -1,8 +1,8 @@
 from django.shortcuts import render
-from .models import Account, AccountMovement
+from .models import Account, AccountMovement, MonthlyFinancialSummary
 from ProjectManager.models import Project
 from django.db import transaction
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 # Create your views here.
 
 def create_account(project_id):
@@ -34,24 +34,34 @@ def create_acc_entry(project_id, field, old_value, new_value):
                 account = Account(project=project)
 
             account, created = Account.objects.get_or_create(project=project)
+            monthly_summary, createdm = MonthlyFinancialSummary.objects.get_or_create(
+                year=timezone.now().year,
+                month=timezone.now().month
+            )
             if field == 'adv':
-                
+
                 account.advance = old_value + new_value
+                monthly_summary.total_advance += new_value
                 if new_value < 0:
                     acc_mov_description=f"Se devolvieron ${abs(new_value)}"
                 else:
                     acc_mov_description=f"Se cobraron ${new_value}"
             elif field == 'exp':
                 account.expenses = old_value + new_value
+                monthly_summary.total_expenses += new_value
                 if new_value < 0:
                     acc_mov_description=f"Se redujo el gasto en ${abs(new_value)}"
                 else:
                     acc_mov_description=f"Se ingreso el gasto de ${new_value}"
             elif field == 'est':
                 account.estimated = new_value
+                monthly_summary.total_estimated += new_value
                 acc_mov_description=f"Se ingreso costo final de ${new_value}"
+            
             account.netWorth = account.advance - account.expenses
             account.save()
+            monthly_summary.total_networth = monthly_summary.total_advance - monthly_summary.total_expenses
+            monthly_summary.save()
             #Create Record
             AccountMovement.objects.create(
                 account=account,
@@ -125,3 +135,4 @@ def copy_projects_to_accounting(request):
         account.created = project.created
         account.save()
     return render(request, 'good.html', {'message': 'All projects copied to accounting.'})
+

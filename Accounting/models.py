@@ -38,3 +38,36 @@ class AccountMovement(models.Model):
     
     def __str__(self):
         return f"{self.get_movement_type_display()} - {self.amount} - {self.created_at.strftime('%d/%m/%Y')}"
+    
+class MonthlyFinancialSummary(models.Model):
+    """
+    Model that aggregates financial data by month.
+    New instances are created automatically when data is recorded in a new month.
+    """
+    year = models.IntegerField(verbose_name="Año")
+    month = models.IntegerField(verbose_name="Mes")
+    total_estimated = models.DecimalField(max_digits=20, decimal_places=2, default=0.00, verbose_name="Presupuesto Total")
+    total_advance = models.DecimalField(max_digits=20, decimal_places=2, default=0.00, verbose_name="Cobros Total")
+    total_expenses = models.DecimalField(max_digits=20, decimal_places=2, default=0.00, verbose_name="Gastos Total")
+    total_networth = models.DecimalField(max_digits=20, decimal_places=2, default=0.00, verbose_name="Ganancia Neta")
+
+    last_updated = models.DateTimeField(auto_now=True, verbose_name="Última Actualización")
+
+    class Meta:
+        verbose_name = "Resumen Mensual"
+        verbose_name_plural = "Resumenes Mensuales"
+        unique_together = ['year', 'month']  # Ensure only one record per month
+        ordering = ['-year', '-month']  # Default ordering, newest first
+        indexes = [
+            models.Index(fields=['year', 'month']),  # For efficient lookups by year/month
+        ]
+
+    def __str__(self):
+        month_names = {
+            1: 'Enero', 2: 'Febrero', 3: 'Marzo', 4: 'Abril',
+            5: 'Mayo', 6: 'Junio', 7: 'Julio', 8: 'Agosto',
+            9: 'Septiembre', 10: 'Octubre', 11: 'Noviembre', 12: 'Diciembre'
+        }
+        return f"{month_names.get(self.month, self.month)} - {self.year}"
+
+
