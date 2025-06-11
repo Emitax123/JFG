@@ -224,9 +224,7 @@ def balance_anual(year):
     
     year_summary = MonthlyFinancialSummary.objects.filter(year=year).order_by('month')
     # Create a dictionary to easily look up summaries by month
-    summary_by_month = {}
-    for summary in year_summary:
-        summary_by_month[summary.month] = summary
+    summary_by_month = {summary.month: summary for summary in year_summary}
     
     # Pre-fetch all project counts for the year to avoid multiple queries
     project_counts = {}
@@ -257,10 +255,9 @@ def balance_anual(year):
                 'total_networth': format_currency(0),
                 'project_count': project_counts.get(month_num, 0)
             })
-    return {
-        'monthly_totals': monthly_totals,
-        'neto_anual': format_currency(year_networth),
-    }
+    return monthly_totals, format_currency(year_networth)
+
+   
 
 #Balance
 @login_required
