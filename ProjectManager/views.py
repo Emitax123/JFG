@@ -224,7 +224,9 @@ def balance_anual(year):
     
     year_summary = MonthlyFinancialSummary.objects.filter(year=year).order_by('month')
     # Create a dictionary to easily look up summaries by month
-    summary_by_month = {summary.month: summary for summary in year_summary}
+    summary_by_month = {}
+    for summary in year_summary:
+        summary_by_month[summary.month] = summary
     
     # Pre-fetch all project counts for the year to avoid multiple queries
     project_counts = {}
