@@ -64,12 +64,7 @@ def chart_data(request):
                         print(f"Successfully parsed date: month={month}, year={year}")
                         
                         # Get projects for this month/year
-                        projects = Project.objects.filter(
-                            created__month=month, 
-                            created__year=year
-                        ).exclude(price=None, adv=None, gasto=None)
-                        project_ids = projects.values_list('id', flat=True)
-                        accounts = Account.objects.filter(project__id__in=project_ids)
+                        month_summary = MonthlyFinancialSummary.objects.filter(year=year, month=month).first()
                         print(f"Found {accounts.count()} accounts for {month}/{year}")
                     else:
                         raise ValueError(f"Invalid date format: {date}")
@@ -77,38 +72,32 @@ def chart_data(request):
                     print(f"Error parsing date: {e}")
                     month = datetime.now().month
                     year = datetime.now().year
-                    projects = Project.objects.filter(created__month=month, created__year=year).exclude(price=None, adv=None, gasto=None, closed=True)
-                    project_ids = projects.values_list('id', flat=True)
-                    accounts = Account.objects.filter(project__id__in=project_ids)
+                    month_summary = MonthlyFinancialSummary.objects.filter(year=year, month=month).first()
             else:
                 print("No valid date in POST, using current date")
                 month = datetime.now().month
                 year = datetime.now().year
-                projects = Project.objects.filter(created__month=month, created__year=year).exclude(price=None, adv=None, gasto=None, closed=True)
-                project_ids = projects.values_list('id', flat=True)
-                accounts = Account.objects.filter(project__id__in=project_ids)
+                month_summary = MonthlyFinancialSummary.objects.filter(year=year, month=month).first()
         else:
             month = datetime.now().month
             year = datetime.now().year
-            projects = Project.objects.filter(created__month=month, created__year=year).exclude(price=None, adv=None, gasto=None, closed=True)
-            project_ids = projects.values_list('id', flat=True)
-            accounts = Account.objects.filter(project__id__in=project_ids)
+            month_summary = MonthlyFinancialSummary.objects.filter(year=year, month=month).first()
+            
 
-        # Continue only if we have accounts to analyze
+        accounts = Account.objects.filter(project__created__month=month, project__created__year=year)
+        
         if accounts.exists():
             sums = accounts.aggregate(
                 total_estimated=Sum('estimated'),
-                total_advance=Sum('advance'),
-                total_expenses=Sum('expenses')
             )
             
-            total_estimated = sums['total_estimated'] or 0
-            total_advance = sums['total_advance'] or 0 
-            total_expenses = sums['total_expenses'] or 0
         else:
             total_estimated = 0
-            total_advance = 0
-            total_expenses = 0
+           
+        
+        if month_summary.exists():
+            total_advance = month_summary.total_advance or 0
+            total_expenses = month_summary.total_expenses or 0
     except Exception as e:
         print(f"Error in chart_data: {e}")
         # Fall back to default values if there's an error
@@ -116,10 +105,6 @@ def chart_data(request):
         total_advance = 0 
         total_expenses = 0
     
-    total_estimated = sums['total_estimated'] or 0
-    print(total_estimated)
-    total_advance = sums['total_advance'] or 0
-    total_expenses = sums['total_expenses'] or 0
     labels = ['Total', 'Cobro', 'Gastos']
     values = [total_estimated, total_advance, total_expenses]
     backg = ['red', 'blue', 'green']
@@ -129,33 +114,15 @@ def chart_data(request):
     # Annotate each project with its net price
 
     # Aggregate net price by type
-    net_by_type = (
-        accounts
-        .values('project__type')
-        .annotate(net_sum=Sum('netWorth'))
-        .order_by('project__type')
-    )
 
     # Ensure all variables are always defined, even if not present in net_by_type
-    net_estado_parcelario = 0
-    net_mensura = 0
-    net_amojonamiento = 0
-    net_relevamiento = 0
-    net_legajo_parcelario = 0
-
-    for entry in net_by_type:
-        project_type = entry['project__type']
-        if project_type == 'Estado Parcelario':
-            net_estado_parcelario = entry['net_sum'] or 0
-        elif project_type == 'Mensura':
-            net_mensura = entry['net_sum'] or 0
-        elif project_type == 'Amojonamiento':
-            net_amojonamiento = entry['net_sum'] or 0
-        elif project_type == 'Relevamiento':
-            net_relevamiento = entry['net_sum'] or 0
-        elif project_type == 'Legajo Parcelario':
-            net_legajo_parcelario = entry['net_sum'] or 0
+    net_estado_parcelario = month_summary.total_estado_parc or 0
+    net_mensura = month_summary.total_mensura or 0
+    net_amojonamiento = month_summary.total_amoj or 0
+    net_relevamiento = month_summary.total_relev or 0
+    net_legajo_parcelario = month_summary.total_leg or 0
     
+
     labels2 = ['Est.Parcelario', 'Amojonamiento', 'Relevamiento', 'Mensura', 'Legajo Parcelario']
     values2 = [net_estado_parcelario, net_amojonamiento, net_relevamiento, net_mensura, net_legajo_parcelario]
     backg2 = ['red', 'blue', 'green', 'orange', 'purple']
