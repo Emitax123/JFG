@@ -336,7 +336,7 @@ def balance(request):
         'month':month_str(month),
         'month_number': month,  # Pass the numeric month as well 
         'year':year,
-        'monthly_totals': monthly_totals,
+        'monthly_totals': data,
         'neto_anual': year_total,
         })
 
