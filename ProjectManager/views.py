@@ -62,48 +62,60 @@ def chart_data(request):
                         month = int(date_split[1])
                         year = int(date_split[0])
                         print(f"Successfully parsed date: month={month}, year={year}")
-                        
-                        # Get projects for this month/year
-                        month_summary = MonthlyFinancialSummary.objects.filter(year=year, month=month).first()
-                        print(f"Found {accounts.count()} accounts for {month}/{year}")
                     else:
                         raise ValueError(f"Invalid date format: {date}")
                 except Exception as e:
                     print(f"Error parsing date: {e}")
                     month = datetime.now().month
                     year = datetime.now().year
-                    month_summary = MonthlyFinancialSummary.objects.filter(year=year, month=month).first()
             else:
                 print("No valid date in POST, using current date")
                 month = datetime.now().month
                 year = datetime.now().year
-                month_summary = MonthlyFinancialSummary.objects.filter(year=year, month=month).first()
         else:
             month = datetime.now().month
             year = datetime.now().year
-            month_summary = MonthlyFinancialSummary.objects.filter(year=year, month=month).first()
-            
 
+            
+        month_summary = MonthlyFinancialSummary.objects.filter(year=year, month=month).first()
         accounts = Account.objects.filter(project__created__month=month, project__created__year=year)
         
         if accounts.exists():
             sums = accounts.aggregate(
                 total_estimated=Sum('estimated'),
             )
-            
+            total_estimated = sums['total_estimated'] or 0
         else:
             total_estimated = 0
            
-        
-        if month_summary.exists():
+
+        if month_summary:
             total_advance = month_summary.total_advance or 0
             total_expenses = month_summary.total_expenses or 0
+            net_estado_parcelario = month_summary.total_estado_parc or 0
+            net_mensura = month_summary.total_mensura or 0
+            net_amojonamiento = month_summary.total_amoj or 0
+            net_relevamiento = month_summary.total_relev or 0
+            net_legajo_parcelario = month_summary.total_leg or 0
+        else:
+            total_advance = 0
+            total_expenses = 0
+            net_estado_parcelario = 0
+            net_mensura = 0
+            net_amojonamiento = 0
+            net_relevamiento = 0
+            net_legajo_parcelario = 0
     except Exception as e:
         print(f"Error in chart_data: {e}")
         # Fall back to default values if there's an error
-        total_estimated = 0
-        total_advance = 0 
+        total_advance = 0
         total_expenses = 0
+        net_estado_parcelario = 0
+        net_mensura = 0
+        net_amojonamiento = 0
+        net_relevamiento = 0
+        net_legajo_parcelario = 0
+        
     
     labels = ['Total', 'Cobro', 'Gastos']
     values = [total_estimated, total_advance, total_expenses]
@@ -116,11 +128,7 @@ def chart_data(request):
     # Aggregate net price by type
 
     # Ensure all variables are always defined, even if not present in net_by_type
-    net_estado_parcelario = month_summary.total_estado_parc or 0
-    net_mensura = month_summary.total_mensura or 0
-    net_amojonamiento = month_summary.total_amoj or 0
-    net_relevamiento = month_summary.total_relev or 0
-    net_legajo_parcelario = month_summary.total_leg or 0
+   
     
 
     labels2 = ['Est.Parcelario', 'Amojonamiento', 'Relevamiento', 'Mensura', 'Legajo Parcelario']
