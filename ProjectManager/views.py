@@ -92,11 +92,11 @@ def chart_data(request):
         if month_summary:
             total_advance = month_summary.total_advance or 0
             total_expenses = month_summary.total_expenses or 0
-            net_estado_parcelario = month_summary.total_estado_parc or 0
-            net_mensura = month_summary.total_mensura or 0
-            net_amojonamiento = month_summary.total_amoj or 0
-            net_relevamiento = month_summary.total_relev or 0
-            net_legajo_parcelario = month_summary.total_leg or 0
+            net_estado_parcelario = month_summary.total_net_amoj or 0
+            net_mensura = month_summary.total_net_mensura or 0
+            net_amojonamiento = month_summary.total_net_amoj or 0
+            net_relevamiento = month_summary.total_net_relev or 0
+            net_legajo_parcelario = month_summary.total_net_leg or 0
         else:
             total_advance = 0
             total_expenses = 0
