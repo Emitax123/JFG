@@ -11,6 +11,7 @@ def create_account(project_id):
     """
     Create an account for a project if it does not already exist.
     """
+    # Search or crates an account for the given project_id.
     try:
         project = Project.objects.get(id=project_id)
         account, created = Account.objects.get_or_create(project=project)
@@ -75,21 +76,20 @@ def create_acc_entry(project_id, field, old_value, new_value):
             
             # Process based on field type
             if field == 'adv':
-                print(f"Processing advance: current={account.advance}, adding={new_value}")
+
                 account.advance = (account.advance or Decimal('0.00')) + new_value
                 monthly_summary.total_advance = (monthly_summary.total_advance or Decimal('0.00')) + new_value
-                print(f"New advance value: {account.advance}, monthly total: {monthly_summary.total_advance}")
-                
+                define_type_for_summary(monthly_summary, project.type, new_value)
                 if new_value < 0:
                     acc_mov_description = f"Se devolvieron ${abs(new_value)}"
                 else:
                     acc_mov_description = f"Se cobraron ${new_value}"
                     
             elif field == 'exp':
-                print(f"Processing expense: current={account.expenses}, adding={new_value}")
+                
                 account.expenses = (account.expenses or Decimal('0.00')) + new_value
                 monthly_summary.total_expenses = (monthly_summary.total_expenses or Decimal('0.00')) + new_value
-                print(f"New expense value: {account.expenses}, monthly total: {monthly_summary.total_expenses}")
+                define_type_for_summary(monthly_summary, project.type, -new_value)
                 
                 if new_value < 0:
                     acc_mov_description = f"Se redujo el gasto en ${abs(new_value)}"
@@ -97,7 +97,6 @@ def create_acc_entry(project_id, field, old_value, new_value):
                     acc_mov_description = f"Se ingreso el gasto de ${new_value}"
                     
             elif field == 'est':
-                print(f"Processing estimate: current={account.estimated}, setting to={new_value}")
                 account.estimated = new_value           
                 acc_mov_description = f"Se ingreso costo final de ${new_value}"
             else:
@@ -184,6 +183,23 @@ def accounting_mov_display(request, pk=None):
     return render(request, 'accounting_template.html', context)
 
 
+def define_type_for_summary(summary, project_type, amount):
+    """
+    Helper function to define the project type and update the summary.
+    """
+    if project_type == 'Mensura':
+        summary.total_net_mensura += amount
+    elif project_type == 'Estado Parcelario':
+        summary.total_net_est_parc += amount
+    elif project_type == 'Amojonamiento':
+        summary.total_net_amoj += amount
+    elif project_type == 'Relevamiento':
+        summary.total_net_relev += amount
+    elif project_type == 'Legajo Parcelario':
+        summary.total_net_leg += amount
+    else:
+        print(f"Unknown project type: {project_type}")
+    return summary
 
 def create_month_summary(request):
     """
