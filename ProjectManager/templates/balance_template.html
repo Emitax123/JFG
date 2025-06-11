@@ -49,11 +49,11 @@
 <div>
     <div class="monthly-summary">
         <div class="title"><h2>{{year}} - Neto Anual $ {{neto_anual}} </h2></div>
-        {% for total in monthly_totals %}
+        {% for month in monthly_totals %}
         {% with currentMonth=forloop.counter %}
         <div class="month-data">
             <div class="month-details title"><span>Mes</span><span>Proyectos</span><span>Ganancia Neta</span></div>
-            <div class="month-details"><span>{{total.month_name}} </span><span> {{total.cant}} </span><span style="font-weight: bold;"> ${{ total.neto }}</span></div>
+            <div class="month-details"><span>{{month.month}} </span><span> {{month.project_count}} </span><span style="font-weight: bold;"> ${{ month.total_networth }}</span></div>
         {% endwith %}    
         </div>
         {% endfor %}

@@ -221,61 +221,43 @@ def format_currency(value):
 #Funcion usada dentro de balance, para mostrar el balance anual
 def balance_anual(year):
     # Annotate each project with its month
-    monthly = (
-        Project.objects
-        .filter(created__year=year)
-        .exclude(price=None, adv=None, gasto=None)
-        .annotate(month=ExtractMonth('created'))
-        .values('month')
-        .annotate(
-            total=Sum('price'),
-            gastos=Sum('gasto'),
-            cobro=Sum('adv'),
-            cant=Count('id')
-        )
-        .order_by('month')
-    )
-
-    # Prepare a list for all 12 months
+    
+    year_summary = MonthlyFinancialSummary.objects.filter(year=year).order_by('month')
+    # Create a dictionary to easily look up summaries by month
+    summary_by_month = {summary.month: summary for summary in year_summary}
+    
+    # Pre-fetch all project counts for the year to avoid multiple queries
+    project_counts = {}
+    for month_data in Project.objects.filter(created__year=year).annotate(
+        month=ExtractMonth('created')
+    ).values('month').annotate(count=Count('id')):
+        project_counts[month_data['month']] = month_data['count']
+    
     monthly_totals = []
-    monthly_data = [[] for _ in range(12)]  # If you still want to keep this for compatibility
-
-    # Fill in the months with data or zeros
-    monthly_dict = {item['month']: item for item in monthly}
-    for m in range(1, 13):
-        data = monthly_dict.get(m)
-        if data:
-            neto = data['cobro'] - data['gastos']
+    year_networth = 0
+    for month_num in range(1, 13):
+        # Get the summary for the current month, or create a default one if it doesn't exist
+        month_name = month_str(month_num)
+        if month_num in summary_by_month:
+            #Find data for month, because it exists
+            summary = summary_by_month[month_num]
+            
             monthly_totals.append({
-                'total': data['total'] or 0,
-                'gastos': data['gastos'] or 0,
-                'cobro': data['cobro'] or 0,
-                'neto': neto,
-                'cant': data['cant'],
-                'month_name': month_str(m)
+                'month': month_str(summary.month),
+                'total_networth': format_currency(summary.total_networth),
+                'project_count': project_counts.get(month_num, 0)
             })
+            year_networth += summary.total_networth
         else:
+            # If no summary exists for this month, create a default one
             monthly_totals.append({
-                'total': 0,
-                'gastos': 0,
-                'cobro': 0,
-                'neto': 0,
-                'cant': 0,
-                'month_name': month_str(m)
+                'month': month_name,
+                'total_networth': format_currency(0),
+                'project_count': project_counts.get(month_num, 0)
             })
-
-    neto_anual = sum(d['neto'] for d in monthly_totals)
-    neto_anual = format_currency(neto_anual)
-
-    # Format currency for each month's neto
-    for month in monthly_totals:
-        month['neto'] = format_currency(month['neto'])
-
     return {
-        'monthly_data': monthly_data,
         'monthly_totals': monthly_totals,
-        'year': year,
-        'neto_anual': neto_anual,
+        'neto_anual': format_currency(year_networth),
     }
 
 #Balance
@@ -334,7 +316,7 @@ def balance(request):
     pending = format_currency(pending)
     
     #Creamos la lista anual y la lista que sume los totales de cada mes
-    data = balance_anual(year)
+    data, year_total = balance_anual(year)
     non_exist = False
     if not projects.exists():
         non_exist = True
@@ -352,9 +334,8 @@ def balance(request):
         'month':month_str(month),
         'month_number': month,  # Pass the numeric month as well 
         'year':year,
-        'monthly_totals': data['monthly_totals'],
-        'monthly_list': data['monthly_data'],
-        'neto_anual': data['neto_anual'],
+        'monthly_totals': monthly_totals,
+        'neto_anual': year_total,
         })
 
 #Todos los proyectos
