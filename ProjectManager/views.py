@@ -39,6 +39,31 @@ def paginate_queryset(request, queryset, per_page=12):
 def index(request):
     return render (request, 'Index.html')
 
+#chart data format
+def chart_data_format(data):
+    chart_data = {
+        'label1': 'Balance',
+        'label2': 'Ganancias por tipo',
+        'labels1': ['Total', 'Cobro', 'Gastos'],
+        'values1': [
+            float(data['raw']['estimated']), 
+            float(data['raw']['advance']), 
+            float(data['raw']['expenses'])
+        ],
+        'labels2': ['Est.Parcelario', 'Amojonamiento', 'Relevamiento', 'Mensura', 'Legajo Parcelario'],
+        'values2': [
+            float(data['raw']['net_by_type']['estado_parcelario']),
+            float(data['raw']['net_by_type']['amojonamiento']),
+            float(data['raw']['net_by_type']['relevamiento']),
+            float(data['raw']['net_by_type']['mensura']),
+            float(data['raw']['net_by_type']['legajo_parcelario'])
+        ],
+        'chart_type': 'doughnut',
+        'barckgroundColor': ['red', 'blue', 'green'],
+        'barckgroundColor2': ['red', 'blue', 'green', 'orange', 'purple']
+    }
+    return chart_data
+
 # charts/views.py
 def chart_data(request):
     print(f"====== Chart Data Request ======")
@@ -337,6 +362,7 @@ def balance(request):
     try:
         balance_data = get_financial_data(year, month)
         data, year_total = balance_anual(year)
+        chart_data = chart_data_format(balance_data)
         
     except Exception as e:
         # Manejo de errores
@@ -358,6 +384,7 @@ def balance(request):
         'year':year,
         'monthly_totals': data,
         'neto_anual': year_total,
+        'chart_data': chart_data,
         })
 
 #Todos los proyectos

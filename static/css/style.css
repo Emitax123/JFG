@@ -285,7 +285,7 @@ div.balance-cont div.board {
   flex-flow: wrap;
   justify-content: center;
   align-items: center;
-  height: 400px;
+  min-height: 500px;
   border-radius: 10px;
   background-color: white;
   padding: 10px;

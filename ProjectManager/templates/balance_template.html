@@ -3,6 +3,7 @@
 {% block graph %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <div class="balance-cont">
+<div id="chartdatacont" data-chart="{{ chart_data|json_script:'chart-data' }}"></div>
 <div class="month-selector" >
     <form name="month" action="{% url 'balance' %}" method="post">
         {% csrf_token %}
@@ -63,50 +64,126 @@
 <!-- charts/templates/chart.html -->
 
 <script>
-    
+// This script initializes the charts and handles AJAX requests for data
     document.addEventListener('DOMContentLoaded', function () {
+        // Function to get CSRF token from cookies
         function getCookie(name) {
             const value = `; ${document.cookie}`;
             const parts = value.split(`; ${name}=`);
             if (parts.length === 2) return parts.pop().split(';').shift();
         }
-          function fetchChartData() {
-            console.log("Fetching chart data...");
-            // Get the current date from the form or use current date
+        
+        // Chart references to allow updates
+        let chart1, chart2;
+        
+        function initializeCharts() {
+            console.log("Initializing charts with embedded data...");
+            
+            try {
+                // Get the chart data from the embedded script tag
+                const chartData = JSON.parse(document.getElementById('chart-data').textContent);
+                console.log("Using embedded chart data:", chartData);
+                
+                if (chartData && chartData.labels1 && chartData.values1 && chartData.labels2 && chartData.values2) {
+                    // Create charts with the embedded data
+                    createCharts(chartData);
+                } else {
+                    console.error('Incomplete embedded chart data:', chartData);
+                    fetchChartData(); // Fall back to AJAX if embedded data is incomplete
+                }
+            } catch (error) {
+                console.error('Error parsing embedded chart data:', error);
+                fetchChartData(); // Fall back to AJAX if embedded data fails
+            }
+        }
+        
+        function createCharts(data) {
+            // Circle chart (doughnut or pie)
+            const ctx = document.getElementById('myChart').getContext('2d');
+            
+            if (chart1) {
+                chart1.destroy(); // Destroy existing chart if it exists
+            }
+            
+            chart1 = new Chart(ctx, {
+                type: 'pie', // or 'doughnut'
+                data: {
+                    labels: data.labels2,
+                    datasets: [{
+                        label: data.label2,
+                        data: data.values2,
+                        backgroundColor: ['#2997D6', '#CB372B', '#2FCA06', '#F2C94C', '#9B51E0'],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: data.label2
+                        }
+                    }
+                }
+            });
+            
+            const ctxx = document.getElementById('myChart2').getContext('2d');
+            
+            if (chart2) {
+                chart2.destroy(); // Destroy existing chart if it exists
+            }
+            
+            // Bar Chart
+            chart2 = new Chart(ctxx, {
+                type: 'bar',
+                data: {
+                    labels: data.labels1,
+                    datasets: [{
+                        label: '',
+                        data: data.values1,
+                        backgroundColor: [
+                            '#6366F1', // Indigo
+                            '#F59E42', // Orange
+                            '#F43F5E'  // Rose
+                        ],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: false,
+                        },
+                        title: {
+                            display: true,
+                            text: data.label1
+                        }
+                    }
+                }
+            });
+        }
+        
+        function fetchChartData() {
+            console.log("Fetching chart data via AJAX...");
+            
             const dateInput = document.getElementById('date-input');
-            const formData = new FormData();
-              // Use the selected date or set it to current month/year if empty
+            const urlParams = new URLSearchParams();
+            
             if (dateInput && dateInput.value) {
                 console.log("Using selected date:", dateInput.value);
-                formData.append('date', dateInput.value);
-            } else {                // Use the month and year from the page if available
+                urlParams.append('date', dateInput.value);
+            } else {
                 const year = "{{year}}";
                 const monthNumber = "{{month_number}}";
                 
                 if (year && monthNumber) {
-                    // Format as YYYY-MM with padded month number
                     const paddedMonth = monthNumber.toString().padStart(2, '0');
                     const formattedDate = `${year}-${paddedMonth}`;
                     console.log("Using page date:", formattedDate);
-                    formData.append('date', formattedDate);
-                } else {
-                    console.log("No date available, using current date");
+                    urlParams.append('date', formattedDate);
                 }
             }
-            
-            // Debug what's in the FormData
-            console.log("FormData contents:");
-            for (let pair of formData.entries()) {
-                console.log(pair[0] + ': ' + pair[1]);
-            }
-              // Fetch chart data from the server using URLSearchParams instead of FormData
-            // This ensures the data is properly sent as application/x-www-form-urlencoded
-            const urlParams = new URLSearchParams();
-            for (let pair of formData.entries()) {
-                urlParams.append(pair[0], pair[1]);
-            }
-            
-            console.log("Sending request with data:", urlParams.toString());
             
             fetch('/chart-data/', {
                 method: 'POST',
@@ -120,61 +197,7 @@
             .then(data => {
                 console.log("Received chart data:", data);
                 if (data && data.labels1 && data.values1 && data.labels2 && data.values2) {
-                    // Circle chart (doughnut or pie)
-                    const ctx = document.getElementById('myChart').getContext('2d');
-                    
-                    new Chart(ctx, {
-                        type: 'pie', // or 'doughnut'
-                        data: {
-                            labels: data.labels2, // e.g. ['Est.Parcelario', ...]
-                            datasets: [{
-                                label: data.label2, // e.g. 'Ganancias por tipo'
-                                data: data.values2, // e.g. [net_estado_parcelario, ...]
-                                backgroundColor: ['#2997D6', '#CB372B', '#2FCA06', '#F2C94C', '#9B51E0'],
-                                hoverOffset: 4
-                            }]
-                        },
-                        options: {
-                            plugins: {
-                                title: {
-                                    display: true,
-                                    text: data.label2
-                                }
-                            }
-                        }
-                    });
-                    
-                    const ctxx = document.getElementById('myChart2').getContext('2d');
-                    // Bar Chart
-                    new Chart(ctxx, {
-                        type: 'bar',
-                        data: {
-                            labels: data.labels1, // Use the correct labels for the bar chart
-                            datasets: [{
-                                label: '', // Show label in legend
-                                data: data.values1,
-                                backgroundColor: [
-                                    '#6366F1', // Indigo
-                                    '#F59E42', // Orange
-                                    '#F43F5E'  // Rose
-                                ],
-                                hoverOffset: 4
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            plugins: {
-                                legend: {
-                                    display: true, // Show legend
-                                    position: false,
-                                },
-                                title: {
-                                    display: true,
-                                    text: data.label1
-                                }
-                            }
-                        }
-                    });
+                    createCharts(data);
                 } else {
                     console.error('Incomplete or empty data received:', data);
                 }
@@ -184,21 +207,19 @@
             });
         }
         
-        // Call the function when the page loads
-        fetchChartData();
+        // Initialize charts when page loads
+        initializeCharts();
         
-        // Also update charts when date changes
+        // Update charts when date changes - still use AJAX here
         document.getElementById('date-input').addEventListener('change', fetchChartData);
-    });
-    
-    document.getElementById('submit-date').addEventListener('click', () => {
-        const dateInput = document.getElementById('date-input');
-        if (dateInput.value === ""){
-            event.preventDefault();
-        };
-
         
-
+        // Handle submit button click
+        document.getElementById('submit-date').addEventListener('click', () => {
+            const dateInput = document.getElementById('date-input');
+            if (dateInput.value === "") {
+                event.preventDefault();
+            }
+        });
     });
 </script>
 {% endblock %}
