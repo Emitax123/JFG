@@ -193,6 +193,88 @@ def close_view(request, pk):
 def format_currency(value):
     return f"{value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
+
+
+def get_financial_data(year, month):
+    """
+    Single function to retrieve all financial data needed for both
+    balance and chart displays.
+    """
+    data = {
+        'raw': {},
+        'formatted': {},
+        'counts': {},
+        'objects': {},
+    }
+    
+    # 1. Get monthly summary (single query)
+    monthly_summary = MonthlyFinancialSummary.objects.filter(year=year, month=month).first()
+    data['objects']['monthly_summary'] = monthly_summary
+    
+    # 2. Get projects (single query)
+    projects = Project.objects.filter(created__month=month, created__year=year).exclude(
+        price=None, adv=None, gasto=None
+    )
+    data['objects']['projects'] = projects
+    
+    # 3. Get accounts (single query)
+    accounts = Account.objects.filter(project__created__month=month, project__created__year=year)
+    data['objects']['accounts'] = accounts
+    
+    # 4. Calculate all values once
+    if monthly_summary:
+        adv = monthly_summary.total_advance or 0
+        exp = monthly_summary.total_expenses or 0
+        net = monthly_summary.total_networth or 0
+        net_estado_parcelario = monthly_summary.total_net_est_parc or 0
+        net_mensura = monthly_summary.total_net_mensura or 0
+        net_amojonamiento = monthly_summary.total_net_amoj or 0
+        net_relevamiento = monthly_summary.total_net_relev or 0
+        net_legajo_parcelario = monthly_summary.total_net_leg or 0
+    else:
+        adv = exp = net = 0
+        net_estado_parcelario = net_mensura = net_amojonamiento = 0
+        net_relevamiento = net_legajo_parcelario = 0
+    
+    # 5. Calculate estimated amount (single aggregation)
+    sums = projects.aggregate(total=Sum('price'))
+    total_estimated = sums['total'] or 0
+    
+    # Store raw values
+    data['raw'] = {
+        'advance': adv,
+        'expenses': exp,
+        'networth': net,
+        'estimated': total_estimated,
+        'pending': total_estimated - adv - exp,
+        'net_by_type': {
+            'estado_parcelario': net_estado_parcelario,
+            'mensura': net_mensura,
+            'amojonamiento': net_amojonamiento,
+            'relevamiento': net_relevamiento,
+            'legajo_parcelario': net_legajo_parcelario,
+        }
+    }
+    
+    # Store formatted values
+    data['formatted'] = {
+        'adv': format_currency(adv),
+        'exp': format_currency(exp),
+        'net': format_currency(net),
+        'total': format_currency(total_estimated),
+        'pending': format_currency(total_estimated - adv - exp),
+    }
+    
+    # Store counts
+    data['counts'] = {
+        'total': projects.count(),
+        'current_month': projects.filter(created__month=month).count(),
+        'previous_months': Project.objects.filter(closed=False).exclude(
+            Q(created__month=month, created__year=year)
+        ).exclude(price=None, adv=None, gasto=None).count(),
+    }
+    
+    return data
 #Funcion usada dentro de balance, para mostrar el balance anual
 def balance_anual(year):
     # Annotate each project with its month
@@ -245,9 +327,6 @@ def balance(request):
         date_split = date.split("-")
         month = int(date_split[1])
         year = int(date_split[0])
-        #Obtengo los proyectos del mes y año seleccionado
-        
-        projects = Project.objects.filter(created__month=month, created__year=year).exclude(price=None, adv=None, gasto=None)
        
 
     else:
@@ -255,56 +334,25 @@ def balance(request):
         month = datetime.now().month
         year = datetime.now().year
         #Obtengo los proyectos del mes y año actual, pero solo los que no estan cerrados
-        projects = Project.objects.filter(created__month=month, created__year=year).exclude(price=None, adv=None, gasto=None, closed=True)
-    project_ids = projects.values_list('id', flat=True)
-    # Convert year and month to integers to ensure proper query
-   
-    monthly_totals = MonthlyFinancialSummary.objects.filter(year=int(year), month=int(month)).first()
-    if monthly_totals:
-        adv = monthly_totals.total_advance
-        exp = monthly_totals.total_expenses
-        net = monthly_totals.total_networth
-    else:
-        adv = 0
-        exp = 0
-        net = 0
-    sums = projects.aggregate(
-        total=Sum('price'),
+    try:
+        balance_data = get_financial_data(year, month)
+        data, year_total = balance_anual(year)
         
-    )
-    totalEstimatedAmount = sums['total'] or 0
-    pending = totalEstimatedAmount - adv - exp
-    cant = projects.count()
-    cant_actual_month = projects.filter(created__month=month).count()
-    # Fix: Query previous months' projects separately, looking for projects from earlier months/years with closed=False
-    cant_previus_months = Project.objects.filter(closed=False).exclude(
-        Q(created__month=month, created__year=year)
-    ).exclude(price=None, adv=None, gasto=None).count()
+    except Exception as e:
+        # Manejo de errores
+        print(f"Error al obtener datos financieros: {e}")
+        return render (request, 'error_template.html', {'non_exist':True})
 
-    #net = el neto, es decir los anticipos menos los gastos
-    #Formateamos los numeros a 2 decimales y cambiamos el punto por la coma
-    adv = format_currency(adv)
-    totalEstimatedAmount = format_currency(totalEstimatedAmount)
-    exp = format_currency(exp)
-    net = format_currency(net)
-    pending = format_currency(pending)
-    
-    #Creamos la lista anual y la lista que sume los totales de cada mes
-    data, year_total = balance_anual(year)
-    non_exist = False
-    if not projects.exists():
-        non_exist = True
     return render (request, 'balance_template.html', {
         'method_post':method_post,
-        'non_exist':non_exist,
-        'total':totalEstimatedAmount, 
-        'adv':adv, 
-        'pending':pending,
-        'cant':cant,
-        'cant_actual_month':cant_actual_month,
-        'cant_previus_months':cant_previus_months,
-        'gastos':exp, 
-        'net':net, 
+        'total':balance_data['formatted']['total'], 
+        'adv':balance_data['formatted']['adv'], 
+        'pending':balance_data['formatted']['pending'],
+        'cant':balance_data['counts']['total'],
+        'cant_actual_month':balance_data['counts']['current_month'],
+        'cant_previus_months':balance_data['counts']['previous_months'],
+        'gastos':balance_data['formatted']['exp'], 
+        'net':balance_data['formatted']['net'],
         'month':month_str(month),
         'month_number': month,  # Pass the numeric month as well 
         'year':year,

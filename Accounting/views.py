@@ -76,7 +76,6 @@ def create_acc_entry(project_id, field, old_value, new_value):
             
             # Process based on field type
             if field == 'adv':
-
                 account.advance = (account.advance or Decimal('0.00')) + new_value
                 monthly_summary.total_advance = (monthly_summary.total_advance or Decimal('0.00')) + new_value
                 define_type_for_summary(monthly_summary, project.type, new_value)
@@ -84,18 +83,14 @@ def create_acc_entry(project_id, field, old_value, new_value):
                     acc_mov_description = f"Se devolvieron ${abs(new_value)}"
                 else:
                     acc_mov_description = f"Se cobraron ${new_value}"
-                    
             elif field == 'exp':
-                
                 account.expenses = (account.expenses or Decimal('0.00')) + new_value
                 monthly_summary.total_expenses = (monthly_summary.total_expenses or Decimal('0.00')) + new_value
                 define_type_for_summary(monthly_summary, project.type, -new_value)
-                
                 if new_value < 0:
                     acc_mov_description = f"Se redujo el gasto en ${abs(new_value)}"
                 else:
-                    acc_mov_description = f"Se ingreso el gasto de ${new_value}"
-                    
+                    acc_mov_description = f"Se ingreso el gasto de ${new_value}"   
             elif field == 'est':
                 account.estimated = new_value           
                 acc_mov_description = f"Se ingreso costo final de ${new_value}"
@@ -200,100 +195,3 @@ def define_type_for_summary(summary, project_type, amount):
     else:
         print(f"Unknown project type: {project_type}")
     return summary
-
-def create_month_summary(request):
-    """
-    Create monthly financial summaries
-    It takes the Accounts models that are already created and groups its data by month/year.
-    Also calculates net worth for each project type (Mensura, Estado Parcelario, etc.)
-    Currently, the only months that are has Accounts created are April, May and June 2025.
-    """
-    try:
-        # Track counts for reporting
-        created_count = 0
-        updated_count = 0
-        
-        # Find all distinct months with account data by extracting from project creation dates
-        accounts = Account.objects.all().select_related('project')
-        
-        # Dictionary to track monthly data
-        monthly_data = {}  # {(year, month): {'accounts': [], 'adv': 0, 'exp': 0, 'est': 0}}
-        
-        print(f"Processing {accounts.count()} accounts")
-        
-        # Process each account and group by month/year
-        for account in accounts:
-            # Get the creation date of the associated project
-            if account.project and account.project.created:
-                year = account.project.created.year
-                month = account.project.created.month
-
-                # Create entry for this month if it doesn't exist
-                if (year, month) not in monthly_data:
-                    monthly_data[(year, month)] = {
-                        'accounts': [],
-                        'adv': Decimal('0.00'),
-                        'exp': Decimal('0.00'),
-                        'est': Decimal('0.00'),
-                        'net': Decimal('0.00'),
-                        'project_types': {
-                            'Estado Parcelario': Decimal('0.00'),
-                            'Mensura': Decimal('0.00'),
-                            'Amojonamiento': Decimal('0.00'),
-                            'Relevamiento': Decimal('0.00'),
-                            'Legajo Parcelario': Decimal('0.00')
-                        }
-                    }
-                
-                # Add this account's data to the month
-                monthly_data[(year, month)]['accounts'].append(account)
-                monthly_data[(year, month)]['adv'] += account.advance or Decimal('0.00')
-                monthly_data[(year, month)]['exp'] += account.expenses or Decimal('0.00')
-                monthly_data[(year, month)]['est'] += account.estimated or Decimal('0.00')
-                
-                # Calculate net worth for this account
-                net_worth = (account.advance or Decimal('0.00')) - (account.expenses or Decimal('0.00'))
-                monthly_data[(year, month)]['net'] += net_worth
-                
-                # Add to project type totals if the type exists
-                project_type = account.project.type if account.project else None
-                if project_type in monthly_data[(year, month)]['project_types']:
-                    monthly_data[(year, month)]['project_types'][project_type] += net_worth
-        
-        # Create or update MonthlyFinancialSummary objects for each month
-        for (year, month), data in monthly_data.items():
-            try:
-                # Create or update the monthly summary
-                summary, created = MonthlyFinancialSummary.objects.update_or_create(
-                    year=year,
-                    month=month,
-                    defaults={
-                        'total_advance': data['adv'],
-                        'total_expenses': data['exp'],
-                        'total_networth': data['net'],
-                        'total_net_est_parc': data['project_types']['Estado Parcelario'],
-                        'total_net_mensura': data['project_types']['Mensura'],
-                        'total_net_amoj': data['project_types']['Amojonamiento'],
-                        'total_net_relev': data['project_types']['Relevamiento'],
-                        'total_net_leg': data['project_types']['Legajo Parcelario'],
-                    }
-                )
-                
-                if created:
-                    created_count += 1
-                else:
-                    updated_count += 1
-                    
-                print(f"{'Created' if created else 'Updated'} summary for {month}/{year} with {len(data['accounts'])} accounts")
-                
-            except Exception as e:
-                print(f"Error processing month {month}/{year}: {str(e)}")
-        
-        message = f"Processing complete: {created_count} summaries created, {updated_count} summaries updated"
-        return render(request, 'accounting_template.html', {'message': message})
-        
-    except Exception as e:
-        import traceback
-        error_message = f"Error creating monthly summaries: {str(e)}\n{traceback.format_exc()}"
-        print(error_message)
-        return render(request, 'accounting_template.html', {'error': error_message})
