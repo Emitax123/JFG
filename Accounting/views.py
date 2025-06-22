@@ -5,6 +5,7 @@ from ProjectManager.models import Project
 from django.db import transaction
 from datetime import datetime, timedelta
 from django.utils import timezone
+from django.db.models import F
 # Create your views here.
 
 def create_account(project_id):
@@ -76,38 +77,44 @@ def create_acc_entry(project_id, field, old_value, new_value):
             
             # Process based on field type
             if field == 'adv':
-                account.advance = (account.advance or Decimal('0.00')) + new_value
-                monthly_summary.total_advance = (monthly_summary.total_advance or Decimal('0.00')) + new_value
+                Account.objects.filter(id=account.id).update(advance=F('advance') + new_value)
+                MonthlyFinancialSummary.objects.filter(id=monthly_summary.id).update(total_advance=F('total_advance') + new_value)
                 define_type_for_summary(monthly_summary, project.type, new_value)
                 if new_value < 0:
                     acc_mov_description = f"Se devolvieron ${abs(new_value)}"
                 else:
                     acc_mov_description = f"Se cobraron ${new_value}"
             elif field == 'exp':
-                account.expenses = (account.expenses or Decimal('0.00')) + new_value
-                monthly_summary.total_expenses = (monthly_summary.total_expenses or Decimal('0.00')) + new_value
+                Account.objects.filter(id=account.id).update(expenses=F('expenses') + new_value)
+                MonthlyFinancialSummary.objects.filter(id=monthly_summary.id).update(total_expenses=F('total_expenses') + new_value)
                 define_type_for_summary(monthly_summary, project.type, -new_value)
                 if new_value < 0:
                     acc_mov_description = f"Se redujo el gasto en ${abs(new_value)}"
                 else:
                     acc_mov_description = f"Se ingreso el gasto de ${new_value}"   
             elif field == 'est':
-                account.estimated = new_value           
+                Account.objects.filter(id=account.id).update(estimated=new_value)
                 acc_mov_description = f"Se ingreso costo final de ${new_value}"
             else:
                 print(f"Error: Invalid field type '{field}'")
                 return None
             
             # Update net worth values
-            account.netWorth = account.advance - account.expenses
-            monthly_summary.total_networth = monthly_summary.total_advance - monthly_summary.total_expenses
+            Account.objects.filter(id=account.id).update(
+                netWorth=F('advance') - F('expenses')
+            )
+            MonthlyFinancialSummary.objects.filter(id=monthly_summary.id).update(
+                total_networth=F('total_advance') - F('total_expenses')
+            )
 
             # Save both models
-            print(f"Saving account with netWorth: {account.netWorth}")
-            account.save()
+            if created:
+                print(f"Saving account with netWorth: {account.netWorth}")
+                account.save()
             
-            print(f"Saving monthly summary with netWorth: {monthly_summary.total_networth}")
-            monthly_summary.save()
+            if createdm:
+                print(f"Saving monthly summary with netWorth: {monthly_summary.total_networth}")
+                monthly_summary.save()
             
             # Create movement record
             movement = AccountMovement.objects.create(
