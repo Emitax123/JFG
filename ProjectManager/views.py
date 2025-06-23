@@ -323,8 +323,9 @@ def get_financial_data(year, month):
     data['counts'] = {
         'total': projects.count(),
         'current_month': projects.filter(created__month=month).count(),
+        
         'previous_months': Project.objects.filter(closed=False).exclude(
-            Q(created__year=year, created__month=month) | Q(created__year__gt=year)
+            Q(created__year=year, created__month=month)
         ).exclude(price=None, adv=None, gasto=None).count(),
     }
     
