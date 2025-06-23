@@ -264,6 +264,8 @@ def get_financial_data(year, month):
     # 1. Get monthly summary (single query)
     monthly_summary = MonthlyFinancialSummary.objects.filter(year=year, month=month).first()
     data['objects']['monthly_summary'] = monthly_summary
+    if not monthly_summary:
+        return False
     
     # 2. Get projects (single query)
     projects = Project.objects.filter(created__month=month, created__year=year).exclude(
@@ -274,7 +276,6 @@ def get_financial_data(year, month):
     # 3. Get accounts (single query)
     accounts = Account.objects.filter(project__created__month=month, project__created__year=year)
     data['objects']['accounts'] = accounts
-    
     # 4. Calculate all values once
     if monthly_summary:
         adv = monthly_summary.total_advance or 0
@@ -397,7 +398,7 @@ def balance(request):
     except Exception as e:
         # Manejo de errores
         print(f"Error al obtener datos financieros: {e}")
-        return render (request, 'error_template.html', {'non_exist':True})
+        return render (request, 'balance_template.html', {'non_exist':True})
 
     return render (request, 'balance_template.html', {
         'method_post':method_post,
@@ -788,7 +789,8 @@ def balance_info(request):
         
         # Use the existing function to get financial data
         balance_data = get_financial_data(year, month)
-        
+        if balance_data is False:
+            return JsonResponse({'error': 'No financial data found for the specified month and year.'}, status=404)
         # Format the data for the response
         response_data = {
             'balance_info': {
