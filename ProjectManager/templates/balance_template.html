@@ -3,7 +3,8 @@
 {% block graph %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <div class="balance-cont">
-<div style="display: none;" id="chartdatacont" data-chart="{{ chart_data|json_script:'chart-data' }}"></div>
+{{ chart_data|json_script:'chart-data' }}
+<div style="display: none;" id="chartdatacont"></div>
 <div class="month-selector" >
     <form name="month" action="{% url 'balance' %}" method="post">
         {% csrf_token %}
@@ -68,12 +69,12 @@
     document.addEventListener('DOMContentLoaded', function () {
         // Chart references
         let chart1, chart2;
-        
-        function initializeCharts() {
+          function initializeCharts() {
             console.log("Initializing charts with embedded data...");
             
             try {
                 // Get the chart data from the embedded script tag
+                // Django's json_script creates a script tag with the specified ID
                 const chartData = JSON.parse(document.getElementById('chart-data').textContent);
                 console.log("Using embedded chart data:", chartData);
                 
@@ -85,6 +86,17 @@
                 }
             } catch (error) {
                 console.error('Error parsing embedded chart data:', error);
+                console.log("Trying alternative method to get chart data...");
+                try {
+                    // Try getting chart data from the data-chart attribute as a fallback
+                    const chartDataContainer = document.getElementById('chartdatacont');
+                    if (chartDataContainer) {
+                        // No need to JSON.parse here as json_script already provides the script element
+                        console.log("Chart data container found:", chartDataContainer);
+                    }
+                } catch (fallbackError) {
+                    console.error('Error in fallback chart data retrieval:', fallbackError);
+                }
             }
         }
         
