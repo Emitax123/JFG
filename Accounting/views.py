@@ -1,4 +1,6 @@
 from decimal import Decimal
+from typing import Optional
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from .models import Account, AccountMovement, MonthlyFinancialSummary
 from ProjectManager.models import Project
@@ -8,7 +10,7 @@ from django.utils import timezone
 from django.db.models import F
 # Create your views here.
 
-def create_account(project_id):
+def create_account(project_id: int) -> Account: 
     """
     Create an account for a project if it does not already exist.
     """
@@ -25,9 +27,21 @@ def create_account(project_id):
         print(f"Project with id {project_id} does not exist.")
         return None
 
-def create_acc_entry(project_id, field, old_value, new_value):
+def create_acc_entry(project_id: int, 
+                     field: str, 
+                     old_value: Decimal, 
+                     new_value: Decimal
+                     ) -> Optional[Account]:
     """
     Create an account entry for a project when a field is updated.
+     Args:
+        project_id: The ID of the project.
+        field: The field being updated ('adv', 'exp', or 'est').
+        old_value: The previous value.
+        new_value: The new value.
+        
+    Returns:
+        The updated account object, or None if the operation failed.
     """
     # Ensure we're working with Decimal objects to avoid type errors
     if old_value is None:
@@ -137,7 +151,9 @@ def create_acc_entry(project_id, field, old_value, new_value):
         traceback.print_exc()
         return None
 
-def accounting_mov_display(request, pk=None):
+def accounting_mov_display(request: HttpRequest, 
+                           pk: Optional[int] = None
+                           ) -> HttpResponse:
 
     """
     Display the accounting information for all projects or for a specific project.
@@ -185,7 +201,10 @@ def accounting_mov_display(request, pk=None):
     return render(request, 'accounting_template.html', context)
 
 
-def define_type_for_summary(summary, project_type, amount):
+def define_type_for_summary(summary: MonthlyFinancialSummary, 
+                            project_type: str, 
+                            amount: Decimal
+                            ) -> MonthlyFinancialSummary:
     """
     Helper function to define the project type and update the summary.
     """

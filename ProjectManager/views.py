@@ -41,6 +41,35 @@ def index(request):
 
 #chart data format
 def chart_data_format(data):
+    """
+    Format data for chart visualization.
+    This function processes raw financial data into a structured format suitable for 
+    rendering charts, specifically doughnut charts. It organizes data into two main categories:
+    balance information (total, collection, expenses) and revenue by service type.
+    Parameters:
+    -----------
+    data : dict
+        A dictionary containing financial data with a 'raw' key that includes:
+        - 'estimated': Total estimated revenue
+        - 'advance': Amount collected/advanced
+        - 'expenses': Total expenses
+        - 'net_by_type': Dictionary with revenue breakdown by service type:
+            - 'estado_parcelario': Revenue from property status services
+            - 'amojonamiento': Revenue from boundary marking services
+            - 'relevamiento': Revenue from surveying services
+            - 'mensura': Revenue from measurement services
+            - 'legajo_parcelario': Revenue from property file services
+    Returns:
+    --------
+    dict
+        A formatted dictionary containing:
+        - 'label1', 'label2': Chart titles/labels
+        - 'labels1', 'labels2': Category labels for the two chart types
+        - 'values1', 'values2': Corresponding numerical values for each category
+        - 'chart_type': The type of chart to render (doughnut)
+        - 'barckgroundColor', 'barckgroundColor2': Color schemes for the charts
+    """
+    
     chart_data = {
         'label1': 'Balance',
         'label2': 'Ganancias por tipo',
@@ -295,7 +324,7 @@ def get_financial_data(year, month):
         'total': projects.count(),
         'current_month': projects.filter(created__month=month).count(),
         'previous_months': Project.objects.filter(closed=False).exclude(
-            Q(created__month=month, created__year=year)
+            Q(created__year=year, created__month__gt=month) | Q(created__year__gt=year)
         ).exclude(price=None, adv=None, gasto=None).count(),
     }
     
@@ -723,3 +752,57 @@ def clientedislist(request, pk):
     client.not_listed = True
     client.save()
     return redirect('clients')
+
+# Add this new function to handle balance info requests
+def balance_info(request):
+    """
+    Return balance information for AJAX requests.
+    
+    Args:
+        request: HTTP request containing date information.
+        
+    Returns:
+        JsonResponse: Balance information data in JSON format.
+    """
+    try:
+        if request.method == 'POST':
+            date = request.POST.get('date')
+            if date and '-' in date:
+                try:
+                    date_split = date.split("-")
+                    if len(date_split) >= 2:
+                        month = int(date_split[1])
+                        year = int(date_split[0])
+                    else:
+                        raise ValueError(f"Invalid date format: {date}")
+                except Exception as e:
+                    month = datetime.now().month
+                    year = datetime.now().year
+            else:
+                month = datetime.now().month
+                year = datetime.now().year
+        else:
+            month = datetime.now().month
+            year = datetime.now().year
+        
+        # Use the existing function to get financial data
+        balance_data = get_financial_data(year, month)
+        
+        # Format the data for the response
+        response_data = {
+            'balance_info': {
+                'month': month_str(month),
+                'year': year,
+                'total': balance_data['formatted']['total'],
+                'adv': balance_data['formatted']['adv'],
+                'pending': balance_data['formatted']['pending'],
+                'cant_actual_month': balance_data['counts']['current_month'],
+                'cant_previus_months': balance_data['counts']['previous_months'],
+                'gastos': balance_data['formatted']['exp'],
+                'net': balance_data['formatted']['net']
+            }
+        }
+        
+        return JsonResponse(response_data)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

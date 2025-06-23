@@ -31,6 +31,8 @@ class AccountMovement(models.Model):
     description = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     class Meta:
+        verbose_name = "Movimiento de Cuenta"
+        verbose_name_plural = "Movimientos de Cuenta"
         indexes = [
             models.Index(fields=['account', 'created_at']),  # For queries filtering by account and sorting by date
             models.Index(fields=['movement_type']),          # For queries filtering by movement type

@@ -7,6 +7,11 @@ class Client(models.Model):
     flag = models.BooleanField(default=False, verbose_name='Fijo')
     not_listed = models.BooleanField(default=False, verbose_name='No listado')
 
+    class Meta:
+        verbose_name = "Cliente"
+        verbose_name_plural = "Clientes"
+        ordering = ['name']
+        
     def __str__(self):
         return self.name
     
@@ -100,6 +105,10 @@ class Project (models.Model):
     def __str__(self):
         namepk = str(self.pk) + " - " + self.type
         return namepk
+    class Meta:
+        verbose_name = "Proyecto"
+        verbose_name_plural = "Proyectos"
+        ordering = ['-created']
 
 class ProjectFiles (models.Model):
     project_pk= models.IntegerField(default=0)
@@ -114,3 +123,10 @@ class Event (models.Model):
     time = models.DateTimeField(auto_now_add=True)
     model_pk = models.IntegerField(default=0)
     msg = models.CharField(max_length=100, null=True)
+    
+    class Meta:
+        verbose_name = "Evento"
+        verbose_name_plural = "Eventos"
+        ordering = ['-time']
+    def __str__(self):
+        return f"{self.get_type_display()} - {self.time.strftime('%Y-%m-%d %H:%M:%S')} - {self.model_pk} - {self.msg}"

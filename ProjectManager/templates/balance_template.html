@@ -17,7 +17,7 @@
 <div class="board-container" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
     <div class="board" style="margin-right: 20px;">
         
-        <div class="balance-info">
+        <div class="balance-info" id="balance-info-container">
             <h3 style="margin-bottom: 20px;"><span>{{month}} - {{year}}</span></h3>
             <div style="margin-bottom: 20px;">
                 <span>• Presupuestos de {{month}}: <span>{{ cant_actual_month }}</span></span><br>
@@ -89,11 +89,11 @@
                     createCharts(chartData);
                 } else {
                     console.error('Incomplete embedded chart data:', chartData);
-                    fetchChartData(); // Fall back to AJAX if embedded data is incomplete
+                    fetchData(); // Fall back to AJAX if embedded data is incomplete
                 }
             } catch (error) {
                 console.error('Error parsing embedded chart data:', error);
-                fetchChartData(); // Fall back to AJAX if embedded data fails
+                fetchData(); // Fall back to AJAX if embedded data fails
             }
         }
         
@@ -164,8 +164,39 @@
             });
         }
         
-        function fetchChartData() {
-            console.log("Fetching chart data via AJAX...");
+        function updateBalanceInfo(data) {
+            if (!data.balance_info) return;
+            
+            const container = document.getElementById('balance-info-container');
+            if (!container) return;
+            
+            const info = data.balance_info;
+            
+            // Update the header month and year
+            const header = container.querySelector('h3');
+            if (header) header.innerHTML = `<span>${info.month} - ${info.year}</span>`;
+            
+            // Update the balance information
+            const infoDiv = container.querySelector('div');
+            if (infoDiv) {
+                let html = `<span>• Presupuestos de ${info.month}: <span>${info.cant_actual_month}</span></span><br>`;
+                
+                if (info.cant_previus_months !== undefined) {
+                    html += `<span>• Presupuestos previos (abiertos): <span>${info.cant_previus_months}</span></span><br>`;
+                }
+                
+                html += `<span>• La suma esperada de presupuestos previos y actuales<br>`;
+                html += `es de: <span>$${info.total}</span></span><br>`;
+                html += `<span>• Los gastos ingresados este mes son: <span>$${info.gastos}</span>.</span><br>`;
+                html += `<span>• Durante ${info.month} se cobraron: <span>$${info.adv}.</span><br>`;
+                html += `<span>• Ganancia neta de ${info.month}: <span>$${info.net}</span>.</span><br>`;
+                
+                infoDiv.innerHTML = html;
+            }
+        }
+        
+        function fetchData() {
+            console.log("Fetching data via AJAX...");
             
             const dateInput = document.getElementById('date-input');
             const urlParams = new URLSearchParams();
@@ -185,6 +216,7 @@
                 }
             }
             
+            // Fetch chart data first
             fetch('/chart-data/', {
                 method: 'POST',
                 headers: {
@@ -205,13 +237,31 @@
             .catch(error => {
                 console.error('Error fetching chart data:', error);
             });
+            
+            // Now fetch balance info
+            fetch('/balance-info/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: urlParams
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Received balance info:", data);
+                updateBalanceInfo(data);
+            })
+            .catch(error => {
+                console.error('Error fetching balance info:', error);
+            });
         }
         
         // Initialize charts when page loads
         initializeCharts();
         
         // Update charts when date changes - still use AJAX here
-        document.getElementById('date-input').addEventListener('change', fetchChartData);
+        document.getElementById('date-input').addEventListener('change', fetchData);
         
         // Handle submit button click
         document.getElementById('submit-date').addEventListener('click', () => {

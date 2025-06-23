@@ -32,6 +32,7 @@ urlpatterns = [
   path('clients/projectcreate/<int:pk>', views.create_for_client, name='clientprojectcreate'),
   path('create/clientedislist/<int:pk>', views.clientedislist, name='clientedislist'),
   path('accounting/', include('Accounting.urls')),
+  path('balance-info/', views.balance_info, name='balance_info'),
 ]
 urlpatterns += staticfiles_urlpatterns()
 urlpatterns += static(settings.STATIC_URL,document_root=settings.STATICFILES_DIRS)
