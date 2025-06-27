@@ -1,5 +1,7 @@
 from decimal import Decimal
 from typing import Optional
+import logging
+logger = logging.getLogger(__name__)
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from .models import Account, AccountMovement, MonthlyFinancialSummary
@@ -200,24 +202,36 @@ def accounting_mov_display(request: HttpRequest,
     
     return render(request, 'accounting_template.html', context)
 
-
 def define_type_for_summary(summary: MonthlyFinancialSummary, 
                             project_type: str, 
                             amount: Decimal
-                            ) -> MonthlyFinancialSummary:
+                            ) -> None:
     """
-    Helper function to define the project type and update the summary.
+    Helper function to define the project type and update the summary using F() expressions.
+    This ensures atomic database updates and prevents race conditions.
     """
+    summary_id = summary.id
+    
     if project_type == 'Mensura':
-        summary.total_net_mensura += amount
+        MonthlyFinancialSummary.objects.filter(id=summary_id).update(
+            total_net_mensura=F('total_net_mensura') + amount
+        )
+      
     elif project_type == 'Estado Parcelario':
-        summary.total_net_est_parc += amount
+        MonthlyFinancialSummary.objects.filter(id=summary_id).update(
+            total_net_est_parc=F('total_net_est_parc') + amount
+        )
     elif project_type == 'Amojonamiento':
-        summary.total_net_amoj += amount
+        MonthlyFinancialSummary.objects.filter(id=summary_id).update(
+            total_net_amoj=F('total_net_amoj') + amount
+        )
     elif project_type == 'Relevamiento':
-        summary.total_net_relev += amount
+        MonthlyFinancialSummary.objects.filter(id=summary_id).update(
+            total_net_relev=F('total_net_relev') + amount
+        )
     elif project_type == 'Legajo Parcelario':
-        summary.total_net_leg += amount
+        MonthlyFinancialSummary.objects.filter(id=summary_id).update(
+            total_net_leg=F('total_net_leg') + amount
+        )
     else:
-        print(f"Unknown project type: {project_type}")
-    return summary
+        logger.error(f"Unknown project type: {project_type}. Cannot update summary.")

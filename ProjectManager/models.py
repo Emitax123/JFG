@@ -38,6 +38,8 @@ class Project (models.Model):
     #CLiente
     client = models.ForeignKey(Client, on_delete=models.CASCADE, null=True)
     
+    #Deberia añadir files como un campo relacionado a un modelo de archivos
+    
     #Titular, que puede o no puede ser el cliente
     titular_name = models.CharField(default="", max_length=30, blank=True, verbose_name='Nombre y apellido')
     titular_phone = models.CharField(default="", max_length=40, blank=True, verbose_name='Telefono')
@@ -90,7 +92,6 @@ class Project (models.Model):
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-
     closed = models.BooleanField(default=False, verbose_name='Cerrado')
     
     def formatted_price(self):
