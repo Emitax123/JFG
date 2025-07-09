@@ -76,6 +76,12 @@ class MonthlyFinancialSummary(models.Model):
         }
         return f"{month_names.get(self.month, self.month)} - {self.year}"
     
+    def net_worth(self):
+        """
+        Calculate the net worth of the monthly summary.
+        """
+        return self.total_advance - self.total_expenses
+
     @classmethod
     def initialize(cls, year, month):
         """

@@ -273,7 +273,7 @@ def get_financial_data(year: int, month: int) -> dict:
     if monthly_summary:
         adv = monthly_summary.total_advance or 0
         exp = monthly_summary.total_expenses or 0
-        net = monthly_summary.total_networth or 0
+        net = monthly_summary.net_worth() or 0
         net_estado_parcelario = monthly_summary.total_net_est_parc or 0
         net_mensura = monthly_summary.total_net_mensura or 0
         net_amojonamiento = monthly_summary.total_net_amoj or 0

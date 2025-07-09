@@ -130,4 +130,4 @@ class Event (models.Model):
         verbose_name_plural = "Eventos"
         ordering = ['-time']
     def __str__(self):
-        return f"{self.get_type_display()} - {self.time.strftime('%Y-%m-%d %H:%M:%S')} - {self.model_pk} - {self.msg}"
+        return f"{self.time.strftime('%Y-%m-%d %H:%M:%S')} - {self.model_pk} - {self.msg}"

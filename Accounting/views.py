@@ -93,21 +93,53 @@ def create_acc_entry(project_id: int,
             
             # Process based on field type
             if field == 'adv':
-                Account.objects.filter(id=account.id).update(advance=F('advance') + new_value)
-                MonthlyFinancialSummary.objects.filter(id=monthly_summary.id).update(total_advance=F('total_advance') + new_value)
-                define_type_for_summary(monthly_summary, project.type, new_value)
+                if created:
+                    # For new accounts, set the initial value directly
+                    Account.objects.filter(id=account.id).update(advance=new_value)
+                else:
+                    # For existing accounts, add to current value
+                    Account.objects.filter(id=account.id).update(advance=F('advance') + new_value)
+                
+                if createdm:
+                    # For new monthly summaries, set the initial value directly
+                    MonthlyFinancialSummary.objects.filter(id=monthly_summary.id).update(total_advance=new_value)
+                else:
+                    # For existing summaries, add to current value
+                    MonthlyFinancialSummary.objects.filter(id=monthly_summary.id).update(total_advance=F('total_advance') + new_value)
+                
+                define_type_for_summary(monthly_summary, project.type, new_value, createdm)
                 if new_value < 0:
                     acc_mov_description = f"Se devolvieron ${abs(new_value)}"
                 else:
                     acc_mov_description = f"Se cobraron ${new_value}"
+                    
             elif field == 'exp':
-                Account.objects.filter(id=account.id).update(expenses=F('expenses') + new_value)
-                MonthlyFinancialSummary.objects.filter(id=monthly_summary.id).update(total_expenses=F('total_expenses') + new_value)
-                define_type_for_summary(monthly_summary, project.type, -new_value)
+                print(f"Monthly expenses before update: {monthly_summary.total_expenses}")
+                
+                if created:
+                    # For new accounts, set the initial value directly
+                    Account.objects.filter(id=account.id).update(expenses=new_value)
+                else:
+                    # For existing accounts, add to current value
+                    Account.objects.filter(id=account.id).update(expenses=F('expenses') + new_value)
+                
+                if createdm:
+                    # For new monthly summaries, set the initial value directly
+                    MonthlyFinancialSummary.objects.filter(id=monthly_summary.id).update(total_expenses=new_value)
+                else:
+                    # For existing summaries, add to current value
+                    MonthlyFinancialSummary.objects.filter(id=monthly_summary.id).update(total_expenses=F('total_expenses') + new_value)
+                
+                define_type_for_summary(monthly_summary, project.type, -new_value, createdm)
                 if new_value < 0:
                     acc_mov_description = f"Se redujo el gasto en ${abs(new_value)}"
                 else:
-                    acc_mov_description = f"Se ingreso el gasto de ${new_value}"   
+                    acc_mov_description = f"Se ingreso el gasto de ${new_value}"  
+                    
+                # Refresh to see actual values after update
+                monthly_summary.refresh_from_db()
+                print(f"Monthly expenses after update: {monthly_summary.total_expenses}") 
+                
             elif field == 'est':
                 Account.objects.filter(id=account.id).update(estimated=new_value)
                 acc_mov_description = f"Se ingreso costo final de ${new_value}"
@@ -116,12 +148,29 @@ def create_acc_entry(project_id: int,
                 return None
             
             # Update net worth values
-            Account.objects.filter(id=account.id).update(
-                netWorth=F('advance') - F('expenses')
-            )
-            MonthlyFinancialSummary.objects.filter(id=monthly_summary.id).update(
-                total_networth=F('total_advance') - F('total_expenses')
-            )
+            if created:
+                # For new accounts, calculate networth from current values
+                account.refresh_from_db()  # Get the updated values
+                Account.objects.filter(id=account.id).update(
+                    netWorth=F('advance') - F('expenses')
+                )
+            else:
+                # For existing accounts, just update networth
+                Account.objects.filter(id=account.id).update(
+                    netWorth=F('advance') - F('expenses')
+                )
+            
+            if createdm:
+                # For new summaries, calculate networth from current values
+                monthly_summary.refresh_from_db()  # Get the updated values
+                MonthlyFinancialSummary.objects.filter(id=monthly_summary.id).update(
+                    total_networth=F('total_advance') - F('total_expenses')
+                )
+            else:
+                # For existing summaries, just update networth
+                MonthlyFinancialSummary.objects.filter(id=monthly_summary.id).update(
+                    total_networth=F('total_advance') - F('total_expenses')
+                )
 
             # Save both models
             if created:
@@ -204,34 +253,56 @@ def accounting_mov_display(request: HttpRequest,
 
 def define_type_for_summary(summary: MonthlyFinancialSummary, 
                             project_type: str, 
-                            amount: Decimal
+                            amount: Decimal,
+                            is_new_summary: bool = False
                             ) -> None:
     """
     Helper function to define the project type and update the summary using F() expressions.
     This ensures atomic database updates and prevents race conditions.
+    
+    Args:
+        summary: The monthly summary object
+        project_type: The type of project
+        amount: The amount to add/subtract
+        is_new_summary: Whether this is a newly created summary (use direct assignment vs F() addition)
     """
     summary_id = summary.id
     
     if project_type == 'Mensura':
-        MonthlyFinancialSummary.objects.filter(id=summary_id).update(
-            total_net_mensura=F('total_net_mensura') + amount
-        )
+        if is_new_summary:
+            MonthlyFinancialSummary.objects.filter(id=summary_id).update(total_net_mensura=amount)
+        else:
+            MonthlyFinancialSummary.objects.filter(id=summary_id).update(
+                total_net_mensura=F('total_net_mensura') + amount
+            )
       
     elif project_type == 'Estado Parcelario':
-        MonthlyFinancialSummary.objects.filter(id=summary_id).update(
-            total_net_est_parc=F('total_net_est_parc') + amount
-        )
+        if is_new_summary:
+            MonthlyFinancialSummary.objects.filter(id=summary_id).update(total_net_est_parc=amount)
+        else:
+            MonthlyFinancialSummary.objects.filter(id=summary_id).update(
+                total_net_est_parc=F('total_net_est_parc') + amount
+            )
     elif project_type == 'Amojonamiento':
-        MonthlyFinancialSummary.objects.filter(id=summary_id).update(
-            total_net_amoj=F('total_net_amoj') + amount
-        )
+        if is_new_summary:
+            MonthlyFinancialSummary.objects.filter(id=summary_id).update(total_net_amoj=amount)
+        else:
+            MonthlyFinancialSummary.objects.filter(id=summary_id).update(
+                total_net_amoj=F('total_net_amoj') + amount
+            )
     elif project_type == 'Relevamiento':
-        MonthlyFinancialSummary.objects.filter(id=summary_id).update(
-            total_net_relev=F('total_net_relev') + amount
-        )
+        if is_new_summary:
+            MonthlyFinancialSummary.objects.filter(id=summary_id).update(total_net_relev=amount)
+        else:
+            MonthlyFinancialSummary.objects.filter(id=summary_id).update(
+                total_net_relev=F('total_net_relev') + amount
+            )
     elif project_type == 'Legajo Parcelario':
-        MonthlyFinancialSummary.objects.filter(id=summary_id).update(
-            total_net_leg=F('total_net_leg') + amount
-        )
+        if is_new_summary:
+            MonthlyFinancialSummary.objects.filter(id=summary_id).update(total_net_leg=amount)
+        else:
+            MonthlyFinancialSummary.objects.filter(id=summary_id).update(
+                total_net_leg=F('total_net_leg') + amount
+            )
     else:
         logger.error(f"Unknown project type: {project_type}. Cannot update summary.")
