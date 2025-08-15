@@ -9,7 +9,7 @@
     {% else %}
     {% for Project in projects %}
     <div style="width: 100%;">
-      <a href="{% url 'projectview' pk=Project.pk %}">
+      <a style="width: 100%;" href="{% url 'projectview' pk=Project.pk %}">
         {% if Project.closed %}
         <div class="cont-work" style="background-color:rgb(183, 239, 184);">
         {% elif Project.paused %}
