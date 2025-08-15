@@ -182,11 +182,14 @@ div.index-links-cont a {
   font-weight: bold;
   text-decoration: none;
   font-size: 30px;
+  transition: all 0.3s ease;
 }
 
 div.index-links-cont a:hover {
   color: #005b75;
-  transition: color 0.3s ease;
+  transform: scale(1.1);
+  transform: scale(1.07);
+  /* Equivale a font-size: 32px pero sin cambiar el layout */
   font-size: 32px;
   transition: font-size 0.3s ease;
   background-color: #ded5d5;
