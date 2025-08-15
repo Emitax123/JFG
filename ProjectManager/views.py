@@ -256,6 +256,7 @@ def pause_view(request: HttpRequest, pk: int) -> HttpResponse:
         logger.error(f"Project with pk {pk} does not exist.")
         return redirect('projects')
 
+
 #Formateo de datos
 def format_currency(value):
     return f"{value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
@@ -429,6 +430,16 @@ def balance(request: HttpRequest) -> HttpResponse:
         'chart_data': chart_data,
         })
 
+def list_paused(request: HttpRequest) -> HttpResponse:
+    """
+    List all paused projects.
+    """
+    projects = Project.objects.select_related('client').filter(paused=True).order_by('-created')[:108]
+    if not projects.exists():
+        return render(request, 'project_list_template.html', {'no_projects': True})
+    
+    actual_pag, pages = paginate_queryset(request, projects)
+    return render(request, 'project_list_template.html', {'projects': actual_pag, 'pages': pages})
 #Todos los proyectos
 def projectlist_view(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
