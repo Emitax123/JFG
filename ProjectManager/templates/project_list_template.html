@@ -3,12 +3,12 @@
 {% block form %}
 
 <div id="galeria-work" class="galeria-work">
-  <div style="justify-content: left; gap: 20px; width: 100%;">
+  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; width: 100%;">
     {% if no_projects %}
-      <span style="font-weight: bold;">No se encontraron resultados</span>
+      <span style="font-weight: bold; grid-column: 1 / -1;">No se encontraron resultados</span>
     {% else %}
     {% for Project in projects %}
-    <div  >
+    <div>
       <a href="{% url 'projectview' pk=Project.pk %}">
         {% if Project.closed %}
         <div class="cont-work" style="background-color:rgb(183, 239, 184);">
@@ -40,8 +40,8 @@
       </a>
     </div>
     {% endfor %}
-  
-  </div>    
+
+  </div>
 </div>
 {% if pages.num_pages > 1 %}
 <div class="pagination-cont" >
