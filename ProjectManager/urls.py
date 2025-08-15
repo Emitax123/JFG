@@ -14,6 +14,7 @@ urlpatterns = [
   path('create/', views.create_view, name = 'create'),
   path('delete/<int:pk>', views.delete_view, name = 'delete'),
   path('close/<int:pk>', views.close_view, name = 'close'),
+  path('pause/<int:pk>', views.pause_view, name = 'pause'),
   path('balance/', views.balance, name= 'balance'),
   path('upload/<int:pk>', views.upload_files, name= 'upload'),
   path('download/<int:pk>/', views.download_file, name='download'),

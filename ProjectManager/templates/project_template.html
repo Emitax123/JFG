@@ -3,8 +3,14 @@
 {% block form %}
   <div class="cont-project-div">
     
-
-    <div {% if project.closed %} style="border: 5px solid green;"  {% endif %} class="project-div">
+     {% if project.closed %}
+     <div style="border: 5px solid green;"   class="project-div">
+     {% elif project.paused %}
+     <div style="border: 5px solid yellow;"   class="project-div">
+     {% else %}
+     <div class="project-div">
+     {% endif %}
+    
       <!-- Delete button -->
       <div class="delete-container">
         <form method="post" action="{% url 'delete' pk=project.pk %}">
@@ -261,6 +267,16 @@
         <button class="close-button" onclick="window.location.href='{% url 'close' pk=project.pk %}'" class="full-modify-btn">
         Terminar
         </button>
+        {% if project.paused %}
+        <button class="pause-button" onclick="window.location.href='{% url 'pause' pk=project.pk %}'" class="full-modify-btn">
+          Reanudar
+        </button>
+        {% else %}
+        <button class="pause-button" onclick="window.location.href='{% url 'pause' pk=project.pk %}'" class="full-modify-btn">
+        Archivar
+        </button>
+        {% endif %}
+        
       </div>
       {% endif %}
     </div>

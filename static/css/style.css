@@ -139,7 +139,7 @@ ul.navbar-submenu {
 }
 
 .navbar .nav-dropdown .dropdown-items li a:hover {
-  background-color: #28326f;
+  background-color: #b9b9b9;
   transition: 1s;
 }
 
@@ -643,7 +643,7 @@ button {
 }
 
 .blue-button:hover {
-  background-color: #005b75;
+  background-color: #b9b9b9;
   transition: background-color 0.3s ease;
 }
 
@@ -1011,7 +1011,7 @@ div.history-cont-header {
 
 a {
   text-decoration: none;
-  width: 100%;
+
 }
 
 div.cont-work {
@@ -1071,6 +1071,23 @@ div.cont-work {
   transform: scale(1.05);
   transition: all 0.2s ease;
 }
+
+.pause-button {
+  background-color: #00799b;
+  color: white;
+  padding: 5px 10px;
+
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.pause-button:hover {
+  background-color: #005f6b;
+  transform: scale(1.05);
+  transition: all 0.2s ease;
+}
+
 
 .visually-hidden {
   position: absolute;

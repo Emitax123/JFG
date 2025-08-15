@@ -93,6 +93,7 @@ class Project (models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     closed = models.BooleanField(default=False, verbose_name='Cerrado')
+    paused = models.BooleanField(default=False, verbose_name='Pausado')
     
     def formatted_price(self):
         return f"{self.price:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")

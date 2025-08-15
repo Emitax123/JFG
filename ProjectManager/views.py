@@ -229,8 +229,27 @@ def close_view(request: HttpRequest, pk: int) -> HttpResponse:
     try:
         project = Project.objects.get(pk=pk)
         project.closed = True
+        project.paused = False
         project.save()
         msg = "Se ha cerrado un proyecto"
+        save_in_history(pk, 1, msg)
+        return redirect('projects')
+    except Project.DoesNotExist:
+        logger.error(f"Project with pk {pk} does not exist.")
+        return redirect('projects')
+
+@transaction.atomic
+def pause_view(request: HttpRequest, pk: int) -> HttpResponse:
+    try:
+        project = Project.objects.get(pk=pk)
+        if project.paused:
+            # If already paused, resume it
+            project.paused = False
+            msg = "Se ha reanudado un proyecto"
+        else:
+            project.paused = True
+            msg = "Se ha pausado un proyecto"
+        project.save()
         save_in_history(pk, 1, msg)
         return redirect('projects')
     except Project.DoesNotExist:
@@ -425,7 +444,7 @@ def projectlist_view(request: HttpRequest) -> HttpResponse:
         return render (request, 'project_list_template.html', {'projects':actual_pag, 'pages':pages})
         
     else:
-        actual_pag, pages = paginate_queryset(request, Project.objects.select_related('client').filter(closed=False).order_by('-created')[:108])
+        actual_pag, pages = paginate_queryset(request, Project.objects.select_related('client').filter(closed=False, paused=False).order_by('-created')[:108])
     return render (request, 'project_list_template.html', {'projects':actual_pag, 'pages':pages})
 
 #Proyectos por cliente
@@ -442,12 +461,14 @@ def projectlistfortype_view(request: HttpRequest, type: int) -> HttpResponse:
     type_map = {
         1: "Mensura",
         2: "Estado Parcelario",
-        3: "Amojonamiento"
+        3: "Amojonamiento",
+        4: "Relevamiento",
+        5: "Legajo Parcelario"
     }
     project_type = type_map.get(type)
     if not project_type:
         return render(request, 'project_list_template.html', {'no_projects': True})
-    projects = Project.objects.select_related('client').filter(type=project_type, closed=False).order_by('-created')[:108]
+    projects = Project.objects.select_related('client').filter(type=project_type, closed=False, paused=False).order_by('-created')[:108]
     actual_pag, pages = paginate_queryset(request, projects)
     if not projects.exists():
         return render (request, 'project_list_template.html', {'no_projects':True})

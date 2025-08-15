@@ -79,17 +79,23 @@ def create_acc_entry(project_id: int,
             current_month = int(timezone.now().month)
             
             monthly_summary, createdm = MonthlyFinancialSummary.objects.get_or_create(
+                user=project.user,
                 year=current_year,
-                month=current_month
+                month=current_month,
+                defaults={
+                    'total_advance': Decimal('0.00'),
+                    'total_expenses': Decimal('0.00'),
+                    'income_mensura': Decimal('0.00'),
+                    'income_est_parc': Decimal('0.00'),
+                    'income_leg': Decimal('0.00'),
+                    'income_amoj': Decimal('0.00'),
+                    'income_relev': Decimal('0.00'),
+                }
             )
-            
             if createdm:
                 print(f"Monthly summary created for {current_year}-{current_month}")
-                # Initialize the monthly summary (returns the instance)
-                summary_obj = MonthlyFinancialSummary.initialize(current_year, current_month)
-                if summary_obj:
-                    monthly_summary = summary_obj  # Use the returned instance
-                    print(f"Successfully initialized monthly summary: {monthly_summary}")
+            else:
+                print(f"Using existing monthly summary for {current_year}-{current_month}")
             
             # Process based on field type
             if field == 'adv':
