@@ -440,6 +440,17 @@ def list_paused(request: HttpRequest) -> HttpResponse:
     
     actual_pag, pages = paginate_queryset(request, projects)
     return render(request, 'project_list_template.html', {'projects': actual_pag, 'pages': pages})
+
+def list_closed(request: HttpRequest) -> HttpResponse:
+    """
+    List all closed projects.
+    """
+    projects = Project.objects.select_related('client').filter(closed=True).order_by('-created')[:108]
+    if not projects.exists():
+        return render(request, 'project_list_template.html', {'no_projects': True})
+    
+    actual_pag, pages = paginate_queryset(request, projects)
+    return render(request, 'project_list_template.html', {'projects': actual_pag, 'pages': pages})
 #Todos los proyectos
 def projectlist_view(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':

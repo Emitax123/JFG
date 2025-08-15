@@ -12,6 +12,7 @@ urlpatterns = [
   path('listprojects/<int:pk>', views.alt_projectlist_view, name = 'projectslist'),
   path('listprojectstype/<int:type>', views.projectlistfortype_view, name = 'projectslisttype'),
   path('listpaused/', views.list_paused, name = 'listpaused'),
+  path('listclosed/', views.list_closed, name = 'listclosed'),
   path('create/', views.create_view, name = 'create'),
   path('delete/<int:pk>', views.delete_view, name = 'delete'),
   path('close/<int:pk>', views.close_view, name = 'close'),

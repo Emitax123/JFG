@@ -19,7 +19,10 @@
         <a href="{% url 'projectslisttype' type='5' %}" class="project-link">Legajos Parcelarios</a>
       </div>
       <div>
-        <a href="{% url 'listpaused' type='3' %}" class="project-link">Archivados</a>
+        <a href="{% url 'listpaused' %}" class="project-link">Archivados</a>
+      </div>
+      <div>
+        <a href="{% url 'listclosed' %}" class="project-link">Terminados</a>
       </div>
     </div>
   </div>
