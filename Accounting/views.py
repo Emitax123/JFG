@@ -79,7 +79,6 @@ def create_acc_entry(project_id: int,
             current_month = int(timezone.now().month)
             
             monthly_summary, createdm = MonthlyFinancialSummary.objects.get_or_create(
-                user=project.user,
                 year=current_year,
                 month=current_month,
                 defaults={
