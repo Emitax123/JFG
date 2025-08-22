@@ -73,7 +73,7 @@ class Project (models.Model):
    
     
     direction = models.CharField(max_length=100, blank=True, verbose_name='Calle')
-    direction_number = models.CharField(max_length=10, blank=True, verbose_name='Altura')
+    direction_number = models.CharField(max_length=20, blank=True, verbose_name='Altura')
     floor = models.CharField(max_length=10, blank=True, verbose_name='Piso')
     depto = models.CharField(max_length=10, blank=True, verbose_name='Depto')
 
