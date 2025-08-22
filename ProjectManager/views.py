@@ -682,6 +682,8 @@ def search(request: HttpRequest) -> JsonResponse:
                 'id': obj.pk,
                 'type': obj.type,
                 'datecreated': obj.created.strftime('%d/%m/%Y'),
+                'client': obj.client.name if obj.client else 'Sin Cliente',
+                'partida': obj.partida if obj.partida else 'Sin Partida',
                 })
         else:
             results = list(Project.objects.none())

@@ -35,6 +35,12 @@
                 <li>
                   <a href="{% url 'projectslisttype' type=3 %}">Amojonamientos</a>
                 </li>
+                <li>
+                  <a href="{% url 'projectslisttype' type=4 %}">Relevamientos</a>
+                </li>
+                <li>
+                  <a href="{% url 'projectslisttype' type=5 %}">Legajos</a>
+                </li>
               </ul>
             </li>
             <li>
@@ -187,8 +193,14 @@
           const dateSpan = document.createElement('span')
           dateSpan.textContent = result.datecreated
           dateSpan.classList.add('date-search')
+          const clientSpan = document.createElement('span')
+          clientSpan.textContent = result.client
+          clientSpan.classList.add('date-search')
+          const partidaSpan = document.createElement('span')
+          partidaSpan.textContent = result.partida
+          partidaSpan.classList.add('date-search')
     
-          link.append(titleSpan, dateSpan)
+          link.append(titleSpan, clientSpan, partidaSpan, dateSpan)
           fragment.appendChild(link)
         })
     
