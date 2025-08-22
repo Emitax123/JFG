@@ -261,6 +261,12 @@
         Modificación completa
         </button>
       </div>
+       <div class="end-btn-container">
+
+        <button class="blue-button" onclick="window.location.href='{% url 'accounting_create' pk=project.pk %}'" class="full-modify-btn">
+        Nuevo mov.
+        </button>
+      </div>
       {% if not project.closed %}
       <div class="end-btn-container">
 
