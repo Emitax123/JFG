@@ -3,13 +3,15 @@ from typing import Optional
 import logging
 logger = logging.getLogger(__name__)
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from .models import Account, AccountMovement, MonthlyFinancialSummary
 from ProjectManager.models import Project
 from django.db import transaction
 from datetime import datetime, timedelta
 from django.utils import timezone
 from django.db.models import F
+from django.contrib.auth.decorators import login_required
+from .forms import ManualAccountEntryForm
 # Create your views here.
 
 def create_account(project_id: int) -> Account: 
@@ -311,3 +313,48 @@ def define_type_for_summary(summary: MonthlyFinancialSummary,
             )
     else:
         logger.error(f"Unknown project type: {project_type}. Cannot update summary.")
+
+
+@login_required
+def create_manual_acc_entry (request, pk): 
+    """ 
+                     
+    User can create a manual account entry for a project.
+    This function handles two states
+    POST handles the data that user send via form, using this data to create a new account movement,
+    calling for this the function create_acc_entry()
+    if not POST, then renders a template with the previous mentioned form
+   
+    """
+    if request.method == 'POST':
+        project = get_object_or_404(Project, id=pk)
+        # Handle form submission
+        form = ManualAccountEntryForm(request.POST)
+        if form.is_valid():
+            if form.cleaned_data['movement_type'] == 'ADV':
+               type = 'adv'
+            else:
+                if form.cleaned_data['movement_type'] == 'EXP':
+                    type = 'exp'
+                else:
+                    type = 'est'
+                
+            # Create the account entry
+            create_acc_entry(
+                project=project,
+                field=type,
+                old_value=None,
+                new_value=form.cleaned_data['amount'],
+                msg=form.cleaned_data.get('description'),  # Use description from form if provided
+            )
+            if type == 'est':
+                # If it's an EST entry, redirect to the accounting display
+                return redirect('projectview', pk=project.id)
+            return redirect('accounting_display', pk=project.id)
+    else:
+        # Render the form
+        form = ManualAccountEntryForm()
+    
+    
+    return render(request, 'account_form.html', {'form': form})
+
