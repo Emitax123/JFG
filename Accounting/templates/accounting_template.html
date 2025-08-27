@@ -199,7 +199,7 @@
               {% endif %}
             {% else %}
               {% if accountm.amount < 0 %}
-                <span class="acc-data"><span class="movement-type-btn" data-description="{{ accountm.description|default:'Sin descripción' }}" style="font-weight: bold; min-width: 80%; padding: 5px; background-color: rgb(241, 246, 95); border-radius: 5px; cursor: pointer;">Modificion G</span></span>
+                <span class="acc-data"><span class="movement-type-btn" data-description="{{ accountm.description|default:'Sin descripción' }}" style="font-weight: bold; min-width: 80%; padding: 5px; background-color: rgb(241, 246, 95); border-radius: 5px; cursor: pointer;">Mod. G</span></span>
               {% else %}
                 <span class="acc-data"><span class="movement-type-btn" data-description="{{ accountm.description|default:'Sin descripción' }}" style="font-weight: bold; min-width: 80%; padding: 5px; background-color: lightcoral; border-radius: 5px; cursor: pointer;">Gasto</span></span>
               {% endif %}
@@ -221,10 +221,16 @@
             <div class="pagination">
               {% if page_obj.has_previous %}
                 <a href="?page=1{% if start_date %}
+                    
+                    
                     &start-date={{ start_date }}
                   {% endif %}{% if end_date %}
+                    
+                    
                     &end-date={{ end_date }}
                   {% endif %}{% if request.GET.filter %}
+                    
+                    
                     &filter={{ request.GET.filter }}
                   {% endif %}"
                   class="blue-button"
@@ -232,10 +238,16 @@
                   Primera
                 </a>
                 <a href="?page={{ page_obj.previous_page_number }}{% if start_date %}
+                    
+                    
                     &start-date={{ start_date }}
                   {% endif %}{% if end_date %}
+                    
+                    
                     &end-date={{ end_date }}
                   {% endif %}{% if request.GET.filter %}
+                    
+                    
                     &filter={{ request.GET.filter }}
                   {% endif %}"
                   class="blue-button"
@@ -248,10 +260,16 @@
 
               {% if page_obj.has_next %}
                 <a href="?page={{ page_obj.next_page_number }}{% if start_date %}
+                    
+                    
                     &start-date={{ start_date }}
                   {% endif %}{% if end_date %}
+                    
+                    
                     &end-date={{ end_date }}
                   {% endif %}{% if request.GET.filter %}
+                    
+                    
                     &filter={{ request.GET.filter }}
                   {% endif %}"
                   class="blue-button"
@@ -259,10 +277,16 @@
                   Siguiente
                 </a>
                 <a href="?page={{ page_obj.paginator.num_pages }}{% if start_date %}
+                    
+                    
                     &start-date={{ start_date }}
                   {% endif %}{% if end_date %}
+                    
+                    
                     &end-date={{ end_date }}
                   {% endif %}{% if request.GET.filter %}
+                    
+                    
                     &filter={{ request.GET.filter }}
                   {% endif %}"
                   class="blue-button"

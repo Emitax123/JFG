@@ -803,7 +803,8 @@ def create_for_client(request: HttpRequest, pk: int) -> HttpResponse:
                 save_in_history(pk, 2, msg)
                 create_account(form_instance.pk)
                 if 'save_and_backhome' in request.POST:
-                    return redirect('projects')
+                    
+                    return redirect('projectview', pk=form_instance.pk)
             except Exception as e:
                 logger.error(f"Error creating project for client {pk}: {str(e)}")
                 return render(request, 'project_for_client.html', {'error': 'Error creating project.'})    
