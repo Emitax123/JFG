@@ -35,7 +35,8 @@ def create_account(project_id: int) -> Account:
 def create_acc_entry(project_id: int, 
                      field: str, 
                      old_value: Decimal, 
-                     new_value: Decimal
+                     new_value: Decimal,
+                     custom_description: str = None
                      ) -> Optional[Account]:
     """
     Create an account entry for a project when a field is updated.
@@ -191,12 +192,14 @@ def create_acc_entry(project_id: int,
                 monthly_summary.save()
             
             # Create movement record
+            # Use custom description if provided, otherwise use auto-generated one
+            final_description = custom_description if custom_description else acc_mov_description
             movement = AccountMovement.objects.create(
                 account=account,
                 project=project,
                 amount=new_value,
                 movement_type='ADV' if field == 'adv' else 'EXP' if field == 'exp' else 'EST',
-                description=acc_mov_description
+                description=final_description
             )
             print(f"Created movement record: {movement}")
             
@@ -381,6 +384,7 @@ def create_manual_acc_entry (request, pk):
                             field='adv',
                             old_value=old_adv,
                             new_value=amount,
+                            custom_description=description
                         )
                         
                     elif movement_type == 'EXP':
@@ -393,6 +397,7 @@ def create_manual_acc_entry (request, pk):
                             field='exp',
                             old_value=old_gasto,
                             new_value=amount,
+                            custom_description=description
                         )
                         
                     elif movement_type == 'EST':
@@ -405,20 +410,14 @@ def create_manual_acc_entry (request, pk):
                             field='est',
                             old_value=old_price,
                             new_value=amount,
+                            custom_description=description
                         )
                     
                     # Save the project with updated values
                     project.save()
                     
-                    # Create manual movement record for tracking
-                    account, _ = Account.objects.get_or_create(project=project)
-                    movement = AccountMovement.objects.create(
-                        account=account,
-                        project=project,
-                        amount=amount,
-                        movement_type=movement_type,
-                        description=description or f"Entrada manual: {movement_type}"
-                    )
+                    # The AccountMovement is already created by create_acc_entry()
+                    # No need to create it manually here
                     
                     # Determine redirect based on entry type
                     if movement_type == 'EST':
