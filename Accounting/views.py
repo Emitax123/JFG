@@ -86,11 +86,12 @@ def create_acc_entry(project_id: int,
                 defaults={
                     'total_advance': Decimal('0.00'),
                     'total_expenses': Decimal('0.00'),
-                    'income_mensura': Decimal('0.00'),
-                    'income_est_parc': Decimal('0.00'),
-                    'income_leg': Decimal('0.00'),
-                    'income_amoj': Decimal('0.00'),
-                    'income_relev': Decimal('0.00'),
+                    'total_net_mensura': Decimal('0.00'),
+                    'total_net_est_parc': Decimal('0.00'),
+                    'total_net_leg': Decimal('0.00'),
+                    'total_net_amoj': Decimal('0.00'),
+                    'total_net_relev': Decimal('0.00'),
+
                 }
             )
             if createdm:
@@ -318,43 +319,110 @@ def define_type_for_summary(summary: MonthlyFinancialSummary,
 @login_required
 def create_manual_acc_entry (request, pk): 
     """ 
-                     
     User can create a manual account entry for a project.
-    This function handles two states
-    POST handles the data that user send via form, using this data to create a new account movement,
-    calling for this the function create_acc_entry()
-    if not POST, then renders a template with the previous mentioned form
-   
+    This function modifies the project data directly and creates account movements.
+    
+    Uses transaction.atomic to ensure data consistency across:
+    - Project field updates (price, adv, gasto)
+    - Account creation/updates
+    - Monthly summary updates
+    - Movement record creation
     """
+    
     if request.method == 'POST':
-        project = get_object_or_404(Project, id=pk)
-        # Handle form submission
-        form = ManualAccountEntryForm(request.POST)
-        if form.is_valid():
-            if form.cleaned_data['movement_type'] == 'ADV':
-               type = 'adv'
-            else:
-                if form.cleaned_data['movement_type'] == 'EXP':
-                    type = 'exp'
-                else:
-                    type = 'est'
+        try:
+            with transaction.atomic():
+                project = get_object_or_404(Project, id=pk)
+                form = ManualAccountEntryForm(request.POST)
                 
-            # Create the account entry
-            create_acc_entry(
-                project=project,
-                field=type,
-                old_value=None,
-                new_value=form.cleaned_data['amount'],
-                msg=form.cleaned_data.get('description'),  # Use description from form if provided
-            )
-            if type == 'est':
-                # If it's an EST entry, redirect to the accounting display
-                return redirect('projectview', pk=project.id)
-            return redirect('accounting_display', pk=project.id)
+                if form.is_valid():
+                    # Determine movement type
+                    movement_type = form.cleaned_data['movement_type']
+                    amount = form.cleaned_data['amount']
+                    description = form.cleaned_data.get('description', '')
+                    
+                    # Store old values for accounting
+                    old_price = project.price or Decimal('0.00')
+                    old_adv = project.adv or Decimal('0.00')
+                    old_gasto = project.gasto or Decimal('0.00')
+                    
+                    # Update project fields directly based on movement type
+                    if movement_type == 'ADV':
+                        project.adv = (project.adv or Decimal('0.00')) + amount
+                        logger.info(f"Anticipo agregado: ${amount} al proyecto {pk}")
+                        
+                        # Create accounting entry
+                        create_acc_entry(
+                            project_id=project.id,
+                            field='adv',
+                            old_value=old_adv,
+                            new_value=amount,
+                        )
+                        
+                    elif movement_type == 'EXP':
+                        project.gasto = (project.gasto or Decimal('0.00')) + amount
+                        logger.info(f"Gasto agregado: ${amount} al proyecto {pk}")
+                        
+                        # Create accounting entry
+                        create_acc_entry(
+                            project_id=project.id,
+                            field='exp',
+                            old_value=old_gasto,
+                            new_value=amount,
+                        )
+                        
+                    elif movement_type == 'EST':
+                        project.price = amount  # For estimates, we set the total price
+                        logger.info(f"Presupuesto establecido: ${amount} para proyecto {pk}")
+                        
+                        # Create accounting entry
+                        create_acc_entry(
+                            project_id=project.id,
+                            field='est',
+                            old_value=old_price,
+                            new_value=amount,
+                        )
+                    
+                    # Save the project with updated values
+                    project.save()
+                    
+                    # Create manual movement record for tracking
+                    account, _ = Account.objects.get_or_create(project=project)
+                    movement = AccountMovement.objects.create(
+                        account=account,
+                        project=project,
+                        amount=amount,
+                        movement_type=movement_type,
+                        description=description or f"Entrada manual: {movement_type}"
+                    )
+                    
+                    # Determine redirect based on entry type
+                    if movement_type == 'EST':
+                        return redirect('projectview', pk=project.id)
+                    else:
+                        return redirect('accounting_display', pk=project.id)
+                        
+                else:
+                    logger.warning(f"Formulario inválido para proyecto {pk}: {form.errors}")
+                    
+        except Exception as e:
+            logger.error(f"Error en entrada manual proyecto {pk}: {str(e)}")
+            # Add error message to form
+            if 'form' in locals():
+                form.add_error(None, f"Error procesando la entrada: {str(e)}")
+            else:
+                form = ManualAccountEntryForm()
+                form.add_error(None, f"Error procesando la entrada: {str(e)}")
+            
     else:
-        # Render the form
+        # Render the form for GET requests
         form = ManualAccountEntryForm()
     
-    
-    return render(request, 'account_form.html', {'form': form})
+    # Get project for template context
+    try:
+        project = get_object_or_404(Project, id=pk)
+        return render(request, 'account_form.html', {'form': form, 'project': project})
+    except Exception as e:
+        logger.error(f"Error obteniendo proyecto {pk}: {str(e)}")
+        return render(request, 'account_form.html', {'form': form})
 

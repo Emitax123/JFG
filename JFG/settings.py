@@ -98,12 +98,14 @@ DATABASES = {
     'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
 }
 
-'''DATABASES = {
+'''
+DATABASES = {
     'default': {
        'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
-}'''
+}
+'''
 
 
 # Access token from environment variable
@@ -171,3 +173,77 @@ else:
     SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
+
+# Logging Configuration optimizada para Railway
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': '{levelname}: {message}',
+            'style': '{',
+        },
+        'production': {
+            'format': '[{asctime}] {levelname} {name}: {message}',
+            'style': '{',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO' if not DEBUG else 'WARNING',
+            'class': 'logging.StreamHandler',
+            'formatter': 'production' if not DEBUG else 'simple',
+        },
+        # Comentado para Railway - usar solo console logs
+        # 'file': {
+        #     'level': 'ERROR',
+        #     'class': 'logging.FileHandler',
+        #     'filename': BASE_DIR / 'logs' / 'django.log',
+        #     'formatter': 'production',
+        # },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'WARNING',
+    },
+    'loggers': {
+        # Silenciar logs de Django que no son importantes
+        'django': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'ERROR',  # Solo errores de requests (404, 500, etc)
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'handlers': [],  # Silenciar completamente las consultas DB
+            'level': 'CRITICAL',
+            'propagate': False,
+        },
+        'django.utils.autoreload': {
+            'handlers': [],  # Silenciar mensajes de recarga automática
+            'level': 'CRITICAL',
+            'propagate': False,
+        },
+        # Tus apps - logs van a console (Railway los captura)
+        'ProjectManager': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'Accounting': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'Users': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}

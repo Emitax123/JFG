@@ -84,10 +84,11 @@
     .acc-row span.acc-data.link {
       padding: 10px;
     }
-  </style> <div class="acc-global-cont">
+  </style>
+  <div class="acc-global-cont">
     <div style="display: flex; flex-flow: row wrap; justify-content: space-between; width: 100%; margin-bottom: 10px;">
       {% if project_id %}
-        <div style="margin-bottom: 10px;">
+        <div class="list-movs">
           <a href="{% url 'accounting_display' %}" class="white-button" style="padding: 3px;">Ver todos los movimientos</a>
         </div>
       {% endif %}
@@ -105,7 +106,7 @@
         <input type="date" id="start-date" name="start-date" value="{{ start_date }}" />
         <label for="end-date">Fecha de fin:</label>
         <input type="date" id="end-date" name="end-date" value="{{ end_date }}" />
-        <button class="white-button" type="submit">Filtrar</button>
+        <button class="toggle-btn" type="submit">Filtrar</button>
       </form>
       <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -123,6 +124,49 @@
               }
             }
           })
+        
+          // Handle movement type clicks to show/hide descriptions
+          const movementTypeBtns = document.querySelectorAll('.movement-type-btn')
+          movementTypeBtns.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              // Find the parent row and the description row
+              const parentRow = this.closest('.acc-row')
+              const descriptionRow = parentRow.nextElementSibling
+        
+              if (descriptionRow && descriptionRow.classList.contains('description-row')) {
+                // Toggle visibility with smooth animation
+                if (descriptionRow.style.display === 'none' || descriptionRow.style.display === '') {
+                  descriptionRow.style.display = 'block'
+                  descriptionRow.style.opacity = '0'
+                  descriptionRow.style.transition = 'opacity 0.3s ease-in-out'
+                  setTimeout(() => {
+                    descriptionRow.style.opacity = '1'
+                  }, 10)
+        
+                  // Add visual feedback to clicked button
+                  this.style.transform = 'scale(0.95)'
+                  setTimeout(() => {
+                    this.style.transform = 'scale(1)'
+                  }, 150)
+                } else {
+                  descriptionRow.style.opacity = '0'
+                  setTimeout(() => {
+                    descriptionRow.style.display = 'none'
+                  }, 300)
+                }
+              }
+            })
+        
+            // Add hover effect
+            btn.addEventListener('mouseenter', function () {
+              this.style.transform = 'scale(1.05)'
+              this.style.transition = 'transform 0.2s ease'
+            })
+        
+            btn.addEventListener('mouseleave', function () {
+              this.style.transform = 'scale(1)'
+            })
+          })
         })
       </script>
     </div>
@@ -138,25 +182,35 @@
         </div>
         {% for accountm in accounts_mov %}
           <div class="acc-row">
-            <span class="first acc-data"><a href="{% url 'projectview' pk=accountm.project.pk %}" style="display: inline-block;
-width: auto;text-decoration: none; color: inherit;">{{ accountm.project.pk }}</a></span>
-            <span class="acc-data">{{ accountm.project.type }}</span>
-            <span class="acc-data">{{ accountm.project.client.name }}</span>
+            <span class="first acc-data">
+              {% if accountm.account.project.pk %}
+                <a href="{% url 'projectview' pk=accountm.account.project.pk %}" style="display: inline-block; width: auto; text-decoration: none; color: inherit;">{{ accountm.account.project.pk }}</a>
+              {% else %}
+                N/A
+              {% endif %}
+            </span>
+            <span class="acc-data">{{ accountm.account.project.type|default:'N/A' }}</span>
+            <span class="acc-data">{{ accountm.account.project.client.name|default:'N/A' }}</span>
             {% if accountm.movement_type == 'ADV' %}
               {% if accountm.amount < 0 %}
-                <span class="acc-data"><span style="font-weight: bold; min-width: 80%; padding: 5px; background-color: rgb(241, 246, 95); border-radius: 5px;">Modificacion A</span></span>
+                <span class="acc-data"><span class="movement-type-btn" data-description="{{ accountm.description|default:'Sin descripción' }}" style="font-weight: bold; min-width: 80%; padding: 5px; background-color: rgb(241, 246, 95); border-radius: 5px; cursor: pointer;">Modificacion A</span></span>
               {% else %}
-                <span class="acc-data"><span style="font-weight: bold; min-width: 80%; padding: 5px; background-color: lightgreen; border-radius: 5px;">Anticipo</span></span>
+                <span class="acc-data"><span class="movement-type-btn" data-description="{{ accountm.description|default:'Sin descripción' }}" style="font-weight: bold; min-width: 80%; padding: 5px; background-color: lightgreen; border-radius: 5px; cursor: pointer;">Anticipo</span></span>
               {% endif %}
             {% else %}
               {% if accountm.amount < 0 %}
-                <span class="acc-data"><span style="font-weight: bold; min-width: 80%; padding: 5px; background-color: rgb(241, 246, 95); border-radius: 5px;">Modificion G</span></span>
+                <span class="acc-data"><span class="movement-type-btn" data-description="{{ accountm.description|default:'Sin descripción' }}" style="font-weight: bold; min-width: 80%; padding: 5px; background-color: rgb(241, 246, 95); border-radius: 5px; cursor: pointer;">Modificion G</span></span>
               {% else %}
-                <span class="acc-data"><span style="font-weight: bold; min-width: 80%; padding: 5px; background-color: lightcoral; border-radius: 5px;">Gasto</span></span>
+                <span class="acc-data"><span class="movement-type-btn" data-description="{{ accountm.description|default:'Sin descripción' }}" style="font-weight: bold; min-width: 80%; padding: 5px; background-color: lightcoral; border-radius: 5px; cursor: pointer;">Gasto</span></span>
               {% endif %}
             {% endif %}
             <span class="acc-data">${{ accountm.amount }}</span>
             <span class="acc-data">{{ accountm.created_at|date:'d/m/Y' }}</span>
+          </div>
+          <!-- Description row (initially hidden) -->
+          <div class="description-row" style="display: none; background-color: #f8f9fa; border-left: 4px solid #007bff; padding: 10px; margin: 5px 0; border-radius: 3px;">
+            <div style="font-weight: bold; color: #495057; margin-bottom: 5px;">Descripción del movimiento:</div>
+            <div class="description-content" style="color: #6c757d; font-style: italic;">{{ accountm.description|default:'Sin descripción disponible' }}</div>
           </div>
         {% endfor %}
       </div>
