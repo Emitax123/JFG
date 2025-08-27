@@ -4,6 +4,7 @@ import logging
 logger = logging.getLogger(__name__)
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import Account, AccountMovement, MonthlyFinancialSummary
 from ProjectManager.models import Project
 from django.db import transaction
@@ -213,12 +214,18 @@ def create_acc_entry(project_id: int,
 def accounting_mov_display(request: HttpRequest, 
                            pk: Optional[int] = None
                            ) -> HttpResponse:
-
     """
     Display the accounting information for all projects or for a specific project.
+    Optimized version with proper pagination and query optimization.
     """
-    # Create base query that selects all movements except 'EST' type with prefetched related data
-    accounts_query = AccountMovement.objects.select_related('project', 'project__client').exclude(movement_type='EST')
+    logger.info(f"Loading accounting movements for project: {pk}")
+    
+    # Optimized base query with select_related for foreign keys
+    accounts_query = AccountMovement.objects.select_related(
+        'project', 
+        'project__client',
+        'account'
+    ).exclude(movement_type='EST')
     
     # If project pk is provided in URL, filter by it
     if pk is not None:
@@ -242,19 +249,36 @@ def accounting_mov_display(request: HttpRequest,
                 accounts_query = accounts_query.filter(created_at__lt=end_date_next)
         except ValueError:
             # Handle invalid date format gracefully
-            # Just continue without applying the filter
             pass
     
-    # Get the final queryset ordered by date (newest first)
-    accounts_mov = accounts_query.order_by('-created_at')
+    # Order by date (newest first) and limit results for better performance
+    accounts_query = accounts_query.order_by('-created_at')
     
+    # Add pagination to avoid loading too many records at once
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
     
-    # Pass the filter parameters to the template context to maintain state
+    paginator = Paginator(accounts_query, 50)  # Show 50 movements per page
+    page = request.GET.get('page', 1)
+    
+    try:
+        accounts_mov = paginator.page(page)
+    except PageNotAnInteger:
+        accounts_mov = paginator.page(1)
+    except EmptyPage:
+        accounts_mov = paginator.page(paginator.num_pages)
+    
+    # Get count efficiently
+    total_movements = accounts_query.count()
+    
+    logger.info(f"Loaded {accounts_mov.object_list.count()} movements (page {page} of {paginator.num_pages})")
+    
     context = {
         'accounts_mov': accounts_mov,
         'start_date': request.GET.get('start-date', ''),
         'end_date': request.GET.get('end-date', ''),
-        'project_id': pk  # Pass the project ID to the template
+        'project_id': pk,
+        'total_movements': total_movements,
+        'page_obj': accounts_mov,  # For pagination template
     }
     
     return render(request, 'accounting_template.html', context)

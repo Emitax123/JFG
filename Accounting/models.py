@@ -33,9 +33,13 @@ class AccountMovement(models.Model):
     class Meta:
         verbose_name = "Movimiento de Cuenta"
         verbose_name_plural = "Movimientos de Cuenta"
+        ordering = ['-created_at']  # Default ordering for better query performance
         indexes = [
             models.Index(fields=['account', 'created_at']),  # For queries filtering by account and sorting by date
             models.Index(fields=['movement_type']),          # For queries filtering by movement type
+            models.Index(fields=['project', 'created_at']),  # For project-specific queries with date sorting
+            models.Index(fields=['-created_at', 'movement_type']),  # For main listing page with type exclusion
+            models.Index(fields=['created_at']),  # For date-based filtering
         ]
     
     def __str__(self):
