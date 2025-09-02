@@ -313,10 +313,8 @@ def get_financial_data(year: int, month: int) -> dict:
         })
         return data
     
-    # 2. Get projects (single query)
-    projects = Project.objects.filter(created__month=month, created__year=year).exclude(
-        price=None, adv=None, gasto=None
-    )
+    # 2. Get projects (single query) - include ALL projects for the month/year
+    projects = Project.objects.filter(created__month=month, created__year=year)
     data['objects']['projects'] = projects
     
     # 3. Get accounts (single query)
@@ -343,10 +341,14 @@ def get_financial_data(year: int, month: int) -> dict:
     
     # Store raw values
     data['raw'] = {
-        'advance': adv,
-        'expenses': exp,
+        'adv': adv,           # Keep consistent naming
+        'advance': adv,       # For chart_data_format compatibility
+        'exp': exp,           # Keep consistent naming  
+        'expenses': exp,      # For chart_data_format compatibility
+        'net': net,
         'networth': net,
-        'estimated': total_estimated,
+        'total': total_estimated,
+        'estimated': total_estimated,  # For chart_data_format compatibility
         'pending': total_estimated - adv - exp,
         'net_by_type': {
             'estado_parcelario': net_estado_parcelario,
@@ -368,12 +370,15 @@ def get_financial_data(year: int, month: int) -> dict:
     
     # Store counts
     data['counts'] = {
-        'total': projects.count(),
-        'current_month': projects.filter(created__month=month).count(),
-        
-        'previous_months': Project.objects.filter(closed=False).exclude(
-            Q(created__year=year, created__month=month)
-        ).exclude(price=None, adv=None, gasto=None).count(),
+        'total': projects.count(),                    # Total projects for the month
+        'current_month': projects.count(),            # Same as total since we're already filtering by month
+        'previous_months': Project.objects.filter(
+            closed=False, 
+            paused=False
+        ).exclude(
+            created__year=year, 
+            created__month=month
+        ).count(),
     }
     
     return data
