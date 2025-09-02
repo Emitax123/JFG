@@ -111,6 +111,7 @@ def create_acc_entry(project_id: int,
             
             # Process based on field type
             if field == 'adv':
+                # Update Account
                 if created:
                     # For new accounts, set the initial value directly
                     Account.objects.filter(id=account.id).update(advance=new_value)
@@ -118,6 +119,10 @@ def create_acc_entry(project_id: int,
                     # For existing accounts, add to current value
                     Account.objects.filter(id=account.id).update(advance=F('advance') + new_value)
                 
+                # Update Project - add to existing advance value
+                Project.objects.filter(id=project_id).update(adv=F('adv') + new_value)
+                
+                # Update MonthlyFinancialSummary
                 if createdm:
                     # For new monthly summaries, set the initial value directly
                     MonthlyFinancialSummary.objects.filter(id=monthly_summary.id).update(total_advance=new_value)
@@ -134,6 +139,7 @@ def create_acc_entry(project_id: int,
             elif field == 'exp':
                 print(f"Monthly expenses before update: {monthly_summary.total_expenses}")
                 
+                # Update Account
                 if created:
                     # For new accounts, set the initial value directly
                     Account.objects.filter(id=account.id).update(expenses=new_value)
@@ -141,6 +147,10 @@ def create_acc_entry(project_id: int,
                     # For existing accounts, add to current value
                     Account.objects.filter(id=account.id).update(expenses=F('expenses') + new_value)
                 
+                # Update Project - add to existing gasto value
+                Project.objects.filter(id=project_id).update(gasto=F('gasto') + new_value)
+                
+                # Update MonthlyFinancialSummary
                 if createdm:
                     # For new monthly summaries, set the initial value directly
                     MonthlyFinancialSummary.objects.filter(id=monthly_summary.id).update(total_expenses=new_value)
@@ -159,7 +169,12 @@ def create_acc_entry(project_id: int,
                 print(f"Monthly expenses after update: {monthly_summary.total_expenses}") 
                 
             elif field == 'est':
+                # Update Account
                 Account.objects.filter(id=account.id).update(estimated=new_value)
+                
+                # Update Project - set the price value directly (not additive for estimates)
+                Project.objects.filter(id=project_id).update(price=new_value)
+                
                 acc_mov_description = f"Se ingreso costo final de ${new_value}"
             else:
                 print(f"Error: Invalid field type '{field}'")

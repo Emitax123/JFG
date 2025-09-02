@@ -369,9 +369,16 @@ def get_financial_data(year: int, month: int) -> dict:
     }
     
     # Store counts
+    current_date = datetime.now()
+    current_year = current_date.year
+    current_month_num = current_date.month
+    
     data['counts'] = {
-        'total': projects.count(),                    # Total projects for the month
-        'current_month': projects.count(),            # Same as total since we're already filtering by month
+        'total': projects.count(),                    # Total projects for the requested month
+        'current_month': Project.objects.filter(     # Projects created in the actual current month
+            created__year=current_year, 
+            created__month=current_month_num
+        ).count(),
         'previous_months': Project.objects.filter(
             closed=False, 
             paused=False
