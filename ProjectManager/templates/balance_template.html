@@ -9,7 +9,7 @@
     <form name="month" action="{% url 'balance' %}" method="post">
         {% csrf_token %}
         <input id="date-input" name="date" type="month">
-        <!-- <button id="submit-date" class="white-button" type="submit">Hecho</button> -->
+        <button id="submit-date" class="white-button" type="submit">Hecho</button>
     </form>
 </div>
 
@@ -38,7 +38,7 @@
         </div>
         
     </div>
-    <a class="blue-button" href="{% url 'earnings_per_client_count' 10 %}">Ver mas</a>
+    <!-- <a class="blue-button" href="{% url 'earnings_per_client_count' 10 %}">Ver mas</a> -->
 </div>
 {% if non_exist %}
     <p>No existen registros en la fecha indicada</p>
