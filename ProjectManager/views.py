@@ -22,7 +22,7 @@ import io
 from urllib.request import urlopen
 from urllib.error import URLError
 from django.db import DatabaseError, transaction
-from Accounting.views import create_acc_entry, create_account
+from Accounting.views import create_acc_entry, create_account, get_earnings_per_client
 
 #Manejo de paginacion
 def paginate_queryset(request: HttpRequest, queryset, per_page=12) -> tuple: 
@@ -277,8 +277,41 @@ def get_financial_data(year: int, month: int) -> dict:
     # 1. Get monthly summary (single query)
     monthly_summary = MonthlyFinancialSummary.objects.filter(year=year, month=month).first()
     data['objects']['monthly_summary'] = monthly_summary
+    
     if not monthly_summary:
-        return False
+        # Return empty but valid data structure when no data exists
+        data.update({
+            'raw': {
+                'total': Dec('0.00'),
+                'estimated': Dec('0.00'),  # Added for chart_data_format
+                'adv': Dec('0.00'),
+                'advance': Dec('0.00'),   # Added for chart_data_format
+                'pending': Dec('0.00'),
+                'exp': Dec('0.00'),
+                'expenses': Dec('0.00'),  # Added for chart_data_format
+                'net': Dec('0.00'),
+                'net_by_type': {         # Added for chart_data_format
+                    'estado_parcelario': Dec('0.00'),
+                    'amojonamiento': Dec('0.00'),
+                    'relevamiento': Dec('0.00'),
+                    'mensura': Dec('0.00'),
+                    'legajo_parcelario': Dec('0.00')
+                }
+            },
+            'formatted': {
+                'total': format_currency(Dec('0.00')),
+                'adv': format_currency(Dec('0.00')),
+                'pending': format_currency(Dec('0.00')),
+                'exp': format_currency(Dec('0.00')),
+                'net': format_currency(Dec('0.00'))
+            },
+            'counts': {
+                'total': 0,
+                'current_month': 0,
+                'previous_months': 0
+            }
+        })
+        return data
     
     # 2. Get projects (single query)
     projects = Project.objects.filter(created__month=month, created__year=year).exclude(
@@ -406,7 +439,8 @@ def balance(request: HttpRequest) -> HttpResponse:
         balance_data = get_financial_data(year, month)
         data, year_total = balance_anual(year)
         chart_data = chart_data_format(balance_data)
-        
+        clients_ctx = get_earnings_per_client(10)
+
     except Exception as e:
         # Manejo de errores
         print(f"Error al obtener datos financieros: {e}")
@@ -428,7 +462,8 @@ def balance(request: HttpRequest) -> HttpResponse:
         'monthly_totals': data,
         'neto_anual': year_total,
         'chart_data': chart_data,
-        })
+        'clients_ctx': clients_ctx,
+    })
 
 def list_paused(request: HttpRequest) -> HttpResponse:
     """

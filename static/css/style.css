@@ -1382,3 +1382,87 @@ input[type="file"] {
 .acc-form-container form .form-group button {
   padding: 0.2em;
 }
+
+div.rank-clients-cont {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  width: 80%;
+  padding: 2em;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+  color: black;
+  border-radius: 10px;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2em;
+  overflow: hidden;
+  /* Evita desbordamiento */
+}
+
+div.rank-clients-cont span {
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-bottom: 1em;
+}
+
+div.rank-clients-cont a {
+  padding: 0.2em;
+}
+
+div.cont-divide {
+  display: flex;
+  flex-flow: row;
+  width: 100%;
+  justify-content: flex-start;
+  margin-bottom: 1em;
+  gap: 2em;
+  box-sizing: border-box;
+  /* Incluye padding y border en el width */
+  overflow: hidden;
+  /* Evita desbordamiento horizontal */
+}
+
+div.cont-divide span {
+  font-weight: bold;
+  font-size: 1.2rem;
+  padding-left: 1em;
+
+}
+
+div.cont-divide div.client-list {
+  background-color: #f0f0f0;
+
+  border-radius: 5px;
+  padding: 1em 0 0 0;
+  flex: 1;
+  /* Usa flex en lugar de min-width para mejor control */
+  max-width: calc(100% - 2em);
+  /* Asegura que no se desborde considerando el gap */
+  overflow: hidden;
+  /* Evita desbordamiento del contenido interno */
+  word-wrap: break-word;
+  /* Rompe palabras largas si es necesario */
+}
+
+div.cont-divide ul {
+  list-style: none;
+  padding: 0;
+  margin-top: 1em;
+}
+
+div.cont-divide ul li {
+  width: 100%;
+  font-weight: 600;
+  padding: 0.5em 1em;
+}
+
+/* Colores alternados para los elementos li */
+div.cont-divide ul li:nth-child(odd) {
+  background-color: #ffffff;
+  /* Color para elementos impares (1°, 3°, 5°...) */
+}
+
+div.cont-divide ul li:nth-child(even) {
+  background-color: #f0f0f0;
+  /* Color para elementos pares (2°, 4°, 6°...) */
+}

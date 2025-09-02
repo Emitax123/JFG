@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models import Sum, Count
+from decimal import Decimal
 
 # Create your models here.
 class Client(models.Model):
@@ -15,6 +17,67 @@ class Client(models.Model):
     def __str__(self):
         return self.name
     
+    @property
+    def total_net_earnings(self):
+        """Calculate total net earnings from all client projects"""
+        from Accounting.models import Account
+        result = Account.objects.filter(
+            project__client=self
+        ).aggregate(
+            total_advance=Sum('advance'),
+            total_expenses=Sum('expenses')
+        )
+        
+        advance = result['total_advance'] or Decimal('0.00')
+        expenses = result['total_expenses'] or Decimal('0.00')
+        return advance - expenses
+    
+    @property
+    def earnings_by_project_type(self):
+        """
+        Acumula las ganancias por tipo de proyecto.
+        Retorna un diccionario con cada tipo y sus ganancias totales.
+        """
+        from Accounting.models import Account
+        
+        # Query optimizada para obtener ganancias por tipo
+        projects_data = Account.objects.filter(
+            project__client=self
+        ).values(
+            'project__type'  # Agrupa por tipo de proyecto
+        ).annotate(
+            net = Sum('netWorth')
+        )
+        
+        earnings_by_type = {}
+        
+        for data in projects_data:
+            project_type = data['project__type']
+            net_earnings = data['net'] or Decimal('0.00')
+
+            earnings_by_type[project_type] = {
+                'net_earnings': net_earnings
+            }
+            
+        return earnings_by_type
+    
+    @property
+    def projects_count_by_type(self):
+        """Count of projects by type for this client"""
+        return self.project_set.values('type').annotate(
+            count=Count('id')
+        )
+    
+    @property
+    def total_projects_count(self):
+        """Count of all projects for this client"""
+        return self.project_set.count()
+
+    @property
+    def active_projects_count(self):
+        """Count of active (non-closed) projects"""
+        return self.project_set.filter(closed=False).count()
+
 
 class Project (models.Model):
     TYPE_CHOICES = (

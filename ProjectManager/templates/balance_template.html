@@ -12,10 +12,37 @@
         <button id="submit-date" class="white-button" type="submit">Hecho</button>
     </form>
 </div>
+
+<div class="rank-clients-cont">
+    <span>Tus mejores clientes</span>
+    <div class="cont-divide" >
+        <div class="client-list">
+            <span>Clientes Fijos</span>
+            <ul>
+                {% for data in clients_ctx.fix_clients_earnings %}
+                    <li>{{ data.client.name }} - ${{ data.net_earnings }}</li>
+                {% endfor %}
+            </ul>
+
+            
+        </div>
+        <div class="client-list">
+            <span>Clientes Particulares</span>
+            <ul>
+                {% for data in clients_ctx.regular_clients_earnings %}
+                <li>{{ data.client.name }} - ${{ data.net_earnings }}</li>
+                {% endfor %}
+            </ul>
+            
+        </div>
+        
+    </div>
+    <a class="blue-button" href="{% url 'earnings_per_client_count' 10 %}">Ver mas</a>
+</div>
 {% if non_exist %}
     <p>No existen registros en la fecha indicada</p>
 {% else %}
-<div class="board-container" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
+<div class="board-container" style="display: flex; flex-direction: row; justify-content: space-between;">
     <div class="board" style="margin-right: 20px;">
         
         <div class="balance-info" id="balance-info-container">

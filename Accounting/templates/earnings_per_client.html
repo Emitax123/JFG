@@ -1,0 +1,20 @@
+{% extends 'base_template.html' %}
+{% load static %}
+{% block form %}
+  <div>
+    <div class="client-list">
+      <ul>
+        {% for data in context.fix_clients_earnings %}
+          <li>{{ data.client.name }} - ${{ data.net_earnings }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="client-list">
+      <ul>
+        {% for data in context.regular_clients_earnings %}
+          <li>{{ data.client.name }} - ${{ data.net_earnings }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+{% endblock %}

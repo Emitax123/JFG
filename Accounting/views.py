@@ -6,13 +6,21 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import Account, AccountMovement, MonthlyFinancialSummary
+from ProjectManager.models import Client
 from ProjectManager.models import Project
 from django.db import transaction
 from datetime import datetime, timedelta
 from django.utils import timezone
-from django.db.models import F
+from django.db.models import F, Sum, Count
 from django.contrib.auth.decorators import login_required
 from .forms import ManualAccountEntryForm
+# Removed circular import: from ProjectManager.views import format_currency
+
+# Utility function moved here to avoid circular import
+def format_currency(value):
+    """Format currency with proper decimal and thousands separators"""
+    return f"{value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
 # Create your views here.
 
 def create_account(project_id: int) -> Account: 
@@ -88,12 +96,12 @@ def create_acc_entry(project_id: int,
                 defaults={
                     'total_advance': Decimal('0.00'),
                     'total_expenses': Decimal('0.00'),
+                    'total_networth': Decimal('0.00'),  # Add this field to defaults
                     'total_net_mensura': Decimal('0.00'),
                     'total_net_est_parc': Decimal('0.00'),
                     'total_net_leg': Decimal('0.00'),
                     'total_net_amoj': Decimal('0.00'),
                     'total_net_relev': Decimal('0.00'),
-
                 }
             )
             if createdm:
@@ -157,7 +165,7 @@ def create_acc_entry(project_id: int,
                 print(f"Error: Invalid field type '{field}'")
                 return None
             
-            # Update net worth values
+            # Update networth for both account and monthly summary
             if created:
                 # For new accounts, calculate networth from current values
                 account.refresh_from_db()  # Get the updated values
@@ -170,27 +178,11 @@ def create_acc_entry(project_id: int,
                     netWorth=F('advance') - F('expenses')
                 )
             
-            if createdm:
-                # For new summaries, calculate networth from current values
-                monthly_summary.refresh_from_db()  # Get the updated values
-                MonthlyFinancialSummary.objects.filter(id=monthly_summary.id).update(
-                    total_networth=F('total_advance') - F('total_expenses')
-                )
-            else:
-                # For existing summaries, just update networth
-                MonthlyFinancialSummary.objects.filter(id=monthly_summary.id).update(
-                    total_networth=F('total_advance') - F('total_expenses')
-                )
+            # Always update monthly summary networth after updating totals
+            MonthlyFinancialSummary.objects.filter(id=monthly_summary.id).update(
+                total_networth=F('total_advance') - F('total_expenses')
+            )
 
-            # Save both models
-            if created:
-                print(f"Saving account with netWorth: {account.netWorth}")
-                account.save()
-            
-            if createdm:
-                print(f"Saving monthly summary with netWorth: {monthly_summary.total_networth}")
-                monthly_summary.save()
-            
             # Create movement record
             # Use custom description if provided, otherwise use auto-generated one
             final_description = custom_description if custom_description else acc_mov_description
@@ -202,6 +194,12 @@ def create_acc_entry(project_id: int,
                 description=final_description
             )
             print(f"Created movement record: {movement}")
+            
+            # Refresh objects to get updated values for logging
+            account.refresh_from_db()
+            monthly_summary.refresh_from_db()
+            print(f"Account netWorth after update: {account.netWorth}")
+            print(f"Monthly summary netWorth after update: {monthly_summary.total_networth}")
             
             return account
             
@@ -449,3 +447,114 @@ def create_manual_acc_entry (request, pk):
         logger.error(f"Error obteniendo proyecto {pk}: {str(e)}")
         return render(request, 'account_form.html', {'form': form})
 
+
+def get_earnings_per_client(count: int = 10):
+    """
+    This view returns the earnings per client separated by flag status.
+    Shows top earnings for both flag=True (VIP clients) and flag=False (regular clients).
+    Ordered by net earnings (advance - expenses).
+    """
+    logger.info(f"Getting top {count} earnings for both VIP and regular clients")
+    
+    def get_clients_earnings_by_flag(flag_value: bool, limit: int):
+        """Helper function to get earnings data for clients by flag status"""
+        clients_earnings = []
+        
+        # Query desde Account hacia Client a través de Project, filtrado por flag
+        clients_data = Account.objects.select_related(
+            'project__client'
+        ).filter(
+            project__client__flag=flag_value
+        ).values(
+            'project__client__id',
+            'project__client__name'
+        ).annotate(
+            net=Sum('netWorth'), # Calculate net earnings for ordering
+            projects_count=Count('project', distinct=True)
+        ).order_by('-net')[:limit]  # Order by net earnings (highest first)
+
+        for client_data in clients_data:
+
+            net_earnings = client_data['net'] or Decimal('0.00')
+
+            # Obtener el objeto Client para usar los métodos que creamos
+            client = Client.objects.get(id=client_data['project__client__id'])
+            
+            clients_earnings.append({
+                'client': client,
+                'net_earnings': format_currency(net_earnings),
+                'projects_count': client_data['projects_count'],
+                'active_projects': client.active_projects_count,
+                'earnings_by_type': client.earnings_by_project_type,
+                'projects_by_type': dict(client.projects_count_by_type.values_list('type', 'count'))
+            })
+            
+        return clients_earnings
+    
+    # Obtener top earnings para clientes VIP (flag=True)
+    fix_clients_earnings = get_clients_earnings_by_flag(flag_value=True, limit=count)
+    
+    # Obtener top earnings para clientes regulares (flag=False)  
+    regular_clients_earnings = get_clients_earnings_by_flag(flag_value=False, limit=count)
+    
+    context = {
+        'fix_clients_earnings': fix_clients_earnings,
+        'regular_clients_earnings': regular_clients_earnings,
+        'count': count,
+        'project_types': ['Estado Parcelario', 'Mensura', 'Amojonamiento', 'Relevamiento', 'Legajo Parcelario']
+    }
+
+    return context
+
+@login_required
+def display_earnings(request, count: int = 10):
+    """
+    Display earnings for all clients.
+    """
+    context = get_earnings_per_client(count=count)
+    return render(request, 'earnings_per_client.html', context)
+
+@login_required  
+def client_detailed_earnings(request, client_id: int):
+    """
+    Detailed earnings view for a specific client.
+    Shows all projects with their individual earnings.
+    """
+    client = get_object_or_404(Client, id=client_id)
+    
+    # Get all projects with their accounts for this client
+    projects_data = []
+    projects = Project.objects.filter(client=client)
+    accounts = Account.objects.filter(project__in=projects)
+
+    for project in projects:
+        try:
+            account = project.account
+            net_earnings = (account.advance or Decimal('0.00')) - (account.expenses or Decimal('0.00'))
+            projects_data.append({
+                'project': project,
+                'account': accounts.get(project=project),
+                'net_earnings': net_earnings,
+                'status': 'Cerrado' if project.closed else 'Pausado' if project.paused else 'Activo'
+            })
+        except:
+            # Project without account
+            projects_data.append({
+                'project': project,
+                'account': None,
+                'net_earnings': Decimal('0.00'),
+                'status': 'Sin cuenta'
+            })
+    
+    context = {
+        'client': client,
+        'projects_data': projects_data,
+        'total_net_earnings': client.total_net_earnings,
+        'earnings_by_type': client.earnings_by_project_type,
+        'projects_by_type': client.projects_count_by_type,
+        'total_projects': client.total_projects_count,
+        'active_projects': client.active_projects_count
+    }
+    
+    return render(request, 'client_detailed_earnings.html', context)
+    
