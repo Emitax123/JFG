@@ -7,21 +7,26 @@
     </div>
   {% endif %}
   <div class="client-list-cont">
-    {% for client in clients %}
-      <div class="client-container">
-        <div style="width: 60%;">
-          <h2>{{ client.name }}</h2>
-        </div>
+    <div class="clients-l-cont">
+      {% for client in clients %}
+        <div class="client-container">
+          <div>
+            <h2>{{ client.name }}</h2>
+          </div>
 
-        <div class="client-buttons">
-          <div>
-            <a href="{% url 'projectslist' pk=client.pk %}" class="button">Ver proyectos</a>
-          </div>
-          <div>
-            <a href="{% url 'clientprojectcreate' pk=client.pk %}" class="button">Crear proyecto</a>
+          <div class="client-buttons">
+            <div>
+              <a href="{% url 'projectslist' pk=client.pk %}" class="button">Ver proyectos</a>
+            </div>
+            <div>
+              <a href="{% url 'clientprojectcreate' pk=client.pk %}" class="button">Crear proyecto</a>
+            </div>
+            <div>
+              <a href="{% url 'client_detailed_earnings' client.id %}" class="button">Ver ganancias</a>
+            </div>
           </div>
         </div>
-      </div>
-    {% endfor %}
+      {% endfor %}
+    </div>
   </div>
 {% endblock %}

@@ -11,7 +11,7 @@
 }
 
 a {
-  text-decoration: none;
+  text-decoration: none !important;
 }
 
 /* Style the header */
@@ -826,19 +826,31 @@ div.login-form form button {
 .client-list-cont {
   display: flex;
   flex-flow: wrap;
+  justify-content: center;
+  padding: 2em;
+  width: 50%;
+
+}
+
+.clients-l-cont {
+  display: flex;
+  flex-flow: column;
   width: 100%;
-  ;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.5);
 }
 
 .client-container {
   width: 100%;
   display: flex;
   flex-flow: row;
-  justify-content: start;
-  background: linear-gradient(45deg, #ffffff, #f9f9f9);
-  border-bottom: 1px solid #ddd;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  justify-content: space-between;
+  border-radius: 10px;
+  border-bottom: 2px solid #ddd;
+
   transition: background-color 0.3s ease;
+  padding: 0.5em 1em;
 }
 
 .client-container:hover {
@@ -848,7 +860,7 @@ div.login-form form button {
 .client-container h2 {
   min-width: 200px;
   color: #333;
-  margin: 10px 40% 10px 60px;
+
 
 }
 
@@ -871,13 +883,13 @@ div.login-form form button {
   border-radius: 4px;
   background-color: #00799b;
   color: white;
-  transition: background-color 0.3s ease, transform 0.3s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .client-container a:hover {
   background-color: #005b75;
   ;
-  transform: scale(1.05);
+  transform: scale(1.02);
 }
 
 /* Create client */
@@ -1059,7 +1071,7 @@ div.cont-work {
 }
 
 .close-button {
-  background-color: #28a745;
+  background-color: #27ae60;
   color: white;
   padding: 5px 10px;
 
@@ -1069,7 +1081,7 @@ div.cont-work {
 }
 
 .close-button:hover {
-  background-color: #218838;
+  background-color: #1e8449;
   transform: scale(1.05);
   transition: all 0.2s ease;
 }
@@ -1383,7 +1395,7 @@ input[type="file"] {
   padding: 0.2em;
 }
 
-div.rank-clients-cont {
+div.rank-clients-cont-balance {
   display: flex;
   flex-flow: column;
   align-items: center;
@@ -1399,17 +1411,15 @@ div.rank-clients-cont {
   /* Evita desbordamiento */
 }
 
-div.rank-clients-cont span {
+div.rank-clients-cont-balance span {
   font-weight: bold;
   font-size: 1.2rem;
   margin-bottom: 1em;
 }
 
-div.rank-clients-cont a {
-  padding: 0.2em;
-}
 
-div.cont-divide {
+
+div.rank-clients-cont-balance div.cont-divide {
   display: flex;
   flex-flow: row;
   width: 100%;
@@ -1422,7 +1432,18 @@ div.cont-divide {
   /* Evita desbordamiento horizontal */
 }
 
-div.cont-divide span {
+/* Efecto hover para mejorar la interacción */
+div.rank-clients-cont-balance div.cont-divide li:hover {
+  background-color: #e3eef1;
+  transform: scale(1.01);
+}
+
+div.rank-clients-cont-balance a.blue-button {
+
+  padding: 0.2em;
+}
+
+div.rank-clients-cont-balance div.cont-divide span {
   font-weight: bold;
   font-size: 1.2rem;
   padding-left: 1em;

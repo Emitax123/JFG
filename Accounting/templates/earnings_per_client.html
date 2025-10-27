@@ -1,20 +1,171 @@
 {% extends 'base_template.html' %}
 {% load static %}
 {% block form %}
-  <div>
-    <div class="client-list">
-      <ul>
-        {% for data in context.fix_clients_earnings %}
-          <li>{{ data.client.name }} - ${{ data.net_earnings }}</li>
-        {% endfor %}
-      </ul>
+  <div class="rank-container">
+    
+    <!-- Count Selector Section -->
+    <div class="count-selector">
+      <span class="selector-label">Mostrar Top:</span>
+      <div class="count-options">
+        <a href="{% url 'earnings_per_client_count' 10 %}" class="count-btn {% if count == 10 %}active{% endif %}">10</a>
+        <a href="{% url 'earnings_per_client_count' 20 %}" class="count-btn {% if count == 20 %}active{% endif %}">20</a>
+        <a href="{% url 'earnings_per_client_count' 30 %}" class="count-btn {% if count == 30 %}active{% endif %}">30</a>
+      </div>
     </div>
-    <div class="client-list">
-      <ul>
-        {% for data in context.regular_clients_earnings %}
-          <li>{{ data.client.name }} - ${{ data.net_earnings }}</li>
-        {% endfor %}
-      </ul>
+    
+    <div class="rank-clients-cont client-list">
+      <span>Clientes Fijos</span>
+      <div class="list-title">
+        <span>Cliente</span>
+        <span>Ganancias Netas</span>
+        <span>Proyectos</span>
+        <span>Activos</span>
+      </div>
+
+      {% for data in fix_clients_earnings %}
+        <a style="display: flex; width: 100%; color: black;" href="{% url 'client_detailed_earnings' data.client.id %}">
+          <div>
+            <span>{{ data.client.name }}</span>
+            <span>${{ data.net_earnings }}</span>
+            <span>{{ data.projects_count }}</span>
+            <span>{{ data.active_projects }}</span>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+    <div class="client-list rank-clients-cont">
+      <span>Clientes Regulares</span>
+      <div class="list-title">
+        <span>Cliente</span>
+        <span>Ganancias Netas</span>
+        <span>Proyectos</span>
+        <span>Activos</span>
+      </div>
+      {% for data in regular_clients_earnings %}
+        <a style="display: flex; width: 100%; color: black;" href="">
+          <div>
+            <span>{{ data.client.name }}</span>
+            <span>${{ data.net_earnings }}</span>
+            <span>{{ data.projects_count }}</span>
+            <span>{{ data.active_projects }}</span>
+          </div>
+        </a>
+      {% endfor %}
     </div>
   </div>
+  <style>
+    .rank-container {
+      display: flex;
+      flex-flow: column;
+      width: fit-content;
+      align-items: center;
+      justify-content: center;
+      min-width: 50%;
+      gap: 2em;
+    }
+    
+    /* Count Selector Styles */
+    .count-selector {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1em;
+      width: fit-content;
+      background-color: #ffffff;
+      border-radius: 10px;
+      padding: 1em 1.5em;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .selector-label {
+      font-weight: bold;
+      color: #2c3e50;
+      font-size: 1em;
+    }
+    
+    .count-options {
+      display: flex;
+      gap: 0.5em;
+    }
+    
+    .count-btn {
+      padding: 0.5em 1.2em;
+      background-color: #ecf0f1;
+      color: #2c3e50;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+    }
+    
+    .count-btn:hover {
+      background-color: #bdc3c7;
+      transform: scale(1.05);
+    }
+    
+    .count-btn.active {
+      background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+      color: white;
+      border-color: #2980b9;
+      box-shadow: 0 2px 8px rgba(52, 152, 219, 0.4);
+    }
+    
+    .client-list {
+      display: flex;
+      width: 100%;
+      flex-flow: column;
+      justify-content: center;
+      align-items: center;
+      background-color: #ffffff;
+      border-radius: 10px;
+      padding: 1em;
+      gap: 0.5em;
+      color: black;
+    }
+    
+    .client-list div {
+      display: flex;
+      width: 100%;
+      align-items: center;
+      flex-flow: row;
+    }
+    .client-list span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      font-weight: bold;
+    }
+    
+    .list-title {
+      padding-bottom: 0.2em;
+      margin-bottom: 0.2em;
+      border-bottom: 2px solid #538997;
+    }
+
+    /* Fondos intercalados para elementos <a> dentro de .client-list */
+    .client-list a {
+      transition: background-color 0.2s ease;
+      border-radius: 5px;
+      padding: 0.3em 0.5em;
+    }
+    
+    /* Los elementos impares (1, 3, 5, ...) sin fondo */
+    .client-list a:nth-child(odd) {
+      background-color: transparent;
+    }
+    
+    /* Los elementos pares (2, 4, 6, ...) con fondo */
+    .client-list a:nth-child(even) {
+      background-color: #f0f4f5;
+    }
+    
+    /* Efecto hover para mejorar la interacción */
+    .client-list a:hover {
+      background-color: #e3eef1;
+      transform: scale(1.01);
+    }
+    
+  </style>
 {% endblock %}

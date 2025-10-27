@@ -1,5 +1,279 @@
 {% extends 'base_template.html' %}
 {% load static %}
-{% block form %}
 
+{% block form %}
+  <div class="client-details-container">
+    <!-- Header Section: Client Info -->
+    <div class="client-header">
+      <div class="client-info">
+        <span class="client-name">{{ client.name }}</span>
+        <div class="client-meta">
+          <span class="client-type">
+            {% if client.flag %}
+              <span>Cliente Fijo</span>
+            {% else %}
+              <span>Cliente Regular</span>
+            {% endif %}
+            <span class="phone">
+              <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" height="16" width="16">
+                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                <g id="SVGRepo_iconCarrier">
+                  <path d="M1 5V1H7V5L4.5 7.5L8.5 11.5L11 9H15V15H11C5.47715 15 1 10.5228 1 5Z" fill="#000000"></path>
+                </g>
+              </svg>{{ client.phone }}
+            </span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <span class="quick-actions-title">Acciones Rápidas</span>
+        <a href="{% url 'clientprojectcreate' client.id %}" class="action-btn create">Nuevo Proyecto</a>
+        <a href="{% url 'projectslist' client.id %}" class="action-btn view">Ver Proyectos</a>
+        <a href="{% url 'clients' %}" class="action-btn view">Ir a Clientes</a>
+      </div>
+    </div>
+
+    <!-- Financial Summary Section -->
+    <div class="financial-summary">
+      <span class="title">Resumen Financiero</span>
+      <div class="summary-flex">
+        <div class="summary-card total">
+          <span class="card-label">Ganancias Netas Totales</span>
+          <span class="card-value">${{ total_net_earnings|floatformat:2 }}</span>
+        </div>
+
+        <div class="summary-card blue">
+          <span class="card-label">Total Proyectos</span>
+          <span class="card-value">{{ total_projects }}</span>
+        </div>
+
+        <div class="summary-card blue">
+          <span class="card-label">Proyectos Activos</span>
+          <span class="card-value">{{ active_projects }}</span>
+        </div>
+
+        <div class="summary-card blue">
+          <span class="card-label">Proyectos Terminados</span>
+          <span class="card-value">{{ total_projects|add:'-'|add:active_projects }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Earnings by Project Type -->
+    <div class="earnings-by-type">
+      <span class="title">Ganancias por Tipo de Proyecto</span>
+      <div class="type-flex">
+        {% for type, data in earnings_by_type.items %}
+          <div class="type-card">
+            <span class="type-name">{{ type }}</span>
+            <span class="type-earnings">${{ data.net_earnings|floatformat:2 }}</span>
+            <span class="type-count">
+              {% for item in projects_by_type %}
+                {% if item.type == type %}
+                  {{ item.count }} proyecto{{ item.count|pluralize }}
+                {% endif %}
+              {% endfor %}
+            </span>
+          </div>
+        {% empty %}
+          <p class="no-data">No hay datos de ganancias por tipo</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .client-details-container {
+      width: 80%;
+      margin: 0 auto;
+      padding: 2em;
+      color: black !important;
+    }
+    
+    .client-header {
+      display: flex;
+      justify-content: center;
+      place-self: center;
+      align-items: stretch; /* Cambiado de flex-start a stretch para que los hijos ocupen todo el alto */
+      gap: 2em;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      width: 50%;
+    }
+    
+    .client-info {
+      display: flex;
+      flex-direction: column;
+      width: 40%;
+      background-color: #ffffff;
+      border-radius: 8px;
+      padding: 1.5em;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+    .client-info .client-type {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2em;
+      font-weight: 600;
+    }
+    .client-type .phone {
+      display: flex;
+      align-items: center;
+      gap: 0.2em;
+      font-weight: 600;
+    }
+    
+    .client-info span.client-name {
+      font-size: 2rem;
+      font-weight: 600;
+    }
+    
+    .client-meta {
+      display: flex;
+      align-items: center;
+    }
+    
+    .quick-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5em;
+      width: 40%;
+      text-align: center;
+      font-weight: 600;
+      background-color: #ffffff;
+      border-radius: 8px;
+      padding: 1.5em;
+      height: 100%;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+    
+    .quick-actions span.quick-actions-title {
+      font-weight: bold;
+      font-size: 1rem;
+      color: #666;
+    }
+    
+    .action-btn {
+      padding: 8px 16px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-size: 0.9em;
+      transition: all 0.2s;
+    }
+    
+    .action-btn.create {
+      background: #27ae60;
+      color: white;
+      transition: all 0.2s ease;
+    }
+    .action-btn.create:hover {
+      background-color: #1e8449;
+      transform: scale(1.02);
+    }
+    
+    .action-btn.view {
+      background: #00799b;
+      color: white;
+    }
+    .action-btn.view:hover {
+      background-color: #015065;
+      transform: scale(1.02);
+    }
+    
+    .financial-summary,
+    .earnings-by-type,
+    .projects-section,
+    .project-shortcuts {
+      background: white;
+      padding: 2em;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+    
+    span.title {
+      display: block;
+      margin-top: 0;
+      border-bottom: 2px solid #3498db;
+      font-weight: bold;
+      font-size: 1.5em;
+      width: 100%;
+    }
+    
+    .summary-flex {
+      display: flex;
+      flex-flow: row;
+      gap: 1.5em;
+      margin-top: 15px;
+    }
+    
+    .summary-card {
+      display: flex;
+      flex-direction: column;
+      flex: 1; /* Todos los cards ocupan el mismo espacio */
+      min-width: 0; /* Previene desbordamiento de contenido */
+      padding: 15px;
+      border-radius: 5px;
+      text-align: center;
+    }
+    
+    .summary-card.total {
+      background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+      color: white;
+    }
+    
+    .summary-card.blue {
+      background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+      color: white;
+    }
+    
+    .card-label {
+      font-size: 0.85em;
+      margin-bottom: 5px;
+      opacity: 0.9;
+    }
+    
+    .card-value {
+      font-size: 1.4rem;
+      font-weight: bold;
+    }
+    
+    .type-flex {
+      display: flex;
+      flex-flow: row;
+      gap: 15px;
+      margin-top: 15px;
+    }
+    
+    .type-card {
+      display: flex;
+      flex-direction: column;
+      flex: 1; /* Todos los cards ocupan el mismo espacio */
+      min-width: 0;
+      width: 50%;
+      padding: 15px;
+      background: #f8f9fa;
+      border-left: 4px solid #3498db;
+      border-radius: 5px;
+    }
+    
+    .type-name {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .type-earnings {
+      font-size: 1.3em;
+      color: #27ae60;
+      margin-bottom: 5px;
+    }
+    
+    .type-count {
+      font-size: 0.85em;
+      color: #666;
+    }
+  </style>
 {% endblock %}

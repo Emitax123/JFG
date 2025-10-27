@@ -451,7 +451,7 @@ def balance(request: HttpRequest) -> HttpResponse:
         balance_data = get_financial_data(year, month)
         data, year_total = balance_anual(year)
         chart_data = chart_data_format(balance_data)
-        clients_ctx = get_earnings_per_client(10)
+        clients_ctx = get_earnings_per_client(5)
 
     except Exception as e:
         # Manejo de errores
@@ -500,6 +500,9 @@ def list_closed(request: HttpRequest) -> HttpResponse:
     return render(request, 'project_list_template.html', {'projects': actual_pag, 'pages': pages})
 #Todos los proyectos
 def projectlist_view(request: HttpRequest) -> HttpResponse:
+    # Get view mode from GET parameter (default to 'cards')
+    view_mode = request.GET.get('view', 'cards')
+    
     if request.method == 'POST':
         if request.POST.get('search-input')!="":
             query = request.POST.get('search-input')
@@ -508,21 +511,22 @@ def projectlist_view(request: HttpRequest) -> HttpResponse:
             ).order_by('-created')[:108]
             
             if not projects.exists():
-                return render (request, 'project_list_template.html', {'no_projects':True})
+                return render (request, 'project_list_template.html', {'no_projects':True, 'view_mode': view_mode})
         actual_pag, pages = paginate_queryset(request, projects)
-        return render (request, 'project_list_template.html', {'projects':actual_pag, 'pages':pages})
+        return render (request, 'project_list_template.html', {'projects':actual_pag, 'pages':pages, 'view_mode': view_mode})
         
     else:
         actual_pag, pages = paginate_queryset(request, Project.objects.select_related('client').filter(closed=False, paused=False).order_by('-created')[:108])
-    return render (request, 'project_list_template.html', {'projects':actual_pag, 'pages':pages})
+    return render (request, 'project_list_template.html', {'projects':actual_pag, 'pages':pages, 'view_mode': view_mode})
 
 #Proyectos por cliente
 def alt_projectlist_view(request: HttpRequest, pk: int) -> HttpResponse:
+    view_mode = request.GET.get('view', 'cards')
     projects = Project.objects.select_related('client').filter(client__pk=pk).order_by('-created')[:108]
     if not projects.exists():
-        return render (request, 'project_list_template.html', {'no_projects':True})
+        return render (request, 'project_list_template.html', {'no_projects':True, 'view_mode': view_mode})
     actual_pag, pages = paginate_queryset(request, projects)
-    return render (request, 'project_list_template.html', {'projects':actual_pag, 'pages':pages})
+    return render (request, 'project_list_template.html', {'projects':actual_pag, 'pages':pages, 'view_mode': view_mode})
 
 #Proyectos por tipo
 def projectlistfortype_view(request: HttpRequest, type: int) -> HttpResponse:
@@ -581,6 +585,7 @@ def create_view(request: HttpRequest) -> HttpResponse:
                             phone=request.POST.get('client-phone')
                         )
                 form_instance.client = client
+                form_instance.created_by = request.user  # Asigna el usuario actual
                 form_instance.save()#Se guarda la instancia
                 #Si el cliente es el titular
                 msg = "Se ha creado un nuevo proyecto"   
@@ -845,6 +850,7 @@ def create_for_client(request: HttpRequest, pk: int) -> HttpResponse:
             try:
                 form_instance = form.save(commit=False)
                 form_instance.client = Client.objects.get(pk=pk)
+                form_instance.created_by = request.user  # Asigna el usuario actual
                 form_instance.save()#Se guarda la instancia 
                 msg = "Se ha creado un nuevo proyecto"   
                 save_in_history(pk, 2, msg)

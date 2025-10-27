@@ -2,57 +2,134 @@
 {% load static %}
 {% block form %}
 
-<div id="galeria-work" class="galeria-work">
-  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; width: 100%;">
-    {% if no_projects %}
-      <span style="font-weight: bold; grid-column: 1 / -1;">No se encontraron resultados</span>
-    {% else %}
+<!-- Load list view CSS -->
+<link rel="stylesheet" href="{% static 'css/project_list_view.css' %}">
+
+<!-- View Mode Selector -->
+<div class="view-mode-selector">
+  <span class="view-mode-label">Vista:</span>
+  <a href="?view=cards{% if request.GET.page %}&page={{ request.GET.page }}{% endif %}" 
+     class="view-mode-btn cards-view {% if view_mode == 'cards' %}active{% endif %}">
+    Cartas
+  </a>
+  <a href="?view=list{% if request.GET.page %}&page={{ request.GET.page }}{% endif %}" 
+     class="view-mode-btn list-view {% if view_mode == 'list' %}active{% endif %}">
+    Lista
+  </a>
+</div>
+
+{% if no_projects %}
+  <div class="{% if view_mode == 'list' %}no-projects-list{% else %}galeria-work{% endif %}">
+    <span style="font-weight: bold;">No se encontraron resultados</span>
+  </div>
+{% else %}
+
+{% if view_mode == 'list' %}
+  <!-- LIST VIEW -->
+   <div class="project-list-container">
+
+   
+  <div class="project-list-header">
+    <span>ID</span>
+    <span>Tipo</span>
+    <span>Partido</span>
+    <span>Partida</span>
+    <span>Cliente</span>
+    <span>Dirección</span>
+    <span>Fecha</span>
+  </div>
+  
+  <div class="project-list-view">
     {% for Project in projects %}
-    <div style="width: 100%;">
-      <a style="width: 100%;" href="{% url 'projectview' pk=Project.pk %}">
-        {% if Project.closed %}
-        <div class="cont-work" style="background-color:rgb(183, 239, 184);">
-        {% elif Project.paused %}
-        <div class="cont-work" style="background-color:rgba(240, 215, 102, 1);">
-        {% else %}
-        <div class="cont-work">
-        {% endif %} 
-                <h1>{{Project.type}}</h1>
-                {% if Project.mens %}
-                  <h3>{{Project.mens}}</h3>
-                {% endif %}
-                
-                <div>
-                  <span style="width: 80%;">
-                    <h5>Partido: {{Project.partido}} </h5> 
-                    <h5>Partida: {{Project.partida}}</h5>
-                    <h5>Cliente: {{Project.client.name}}</h5>
-                    <h5>Dir: {{Project.direction}} {{Project.direction_number}}</h5>
-                    <h5>Fecha: {{Project.created|date:"d/m/Y" }}</h5>
-                  </span>
-                  <div style="display: flex; justify-content: end; align-items:flex-end; width: 20%;">
-                    <h2>{{ Project.pk }} </h2>
-                  </div>
-                  
-                </div>
-                
+      <a href="{% url 'projectview' pk=Project.pk %}" 
+         class="project-list-item 
+                {% if Project.closed %}status-closed
+                {% elif Project.paused %}status-paused
+                {% else %}status-active{% endif %}">
+        
+        <div class="project-list-content">
+          <span class="project-list-id">#{{ Project.pk }}</span>
+          
+          <div class="project-list-type">
+            {{ Project.type }}
+            {% if Project.mens %}
+              <div class="project-list-subtype">{{ Project.mens }}</div>
+            {% endif %}
+          </div>
+          
+          <span class="project-list-detail">
+            <strong>{{ Project.partido }}</strong>
+          </span>
+          
+          <span class="project-list-detail">
+            {{ Project.partida }}
+          </span>
+          
+          <span class="project-list-client">
+            {{ Project.client.name }}
+          </span>
+          
+          <span class="project-list-detail">
+            {{ Project.direction }} {{ Project.direction_number }}
+          </span>
+          
+          <span class="project-list-date">
+            {{ Project.created|date:"d/m/Y" }}
+          </span>
         </div>
       </a>
-    </div>
     {% endfor %}
-
   </div>
 </div>
+{% else %}
+  <!-- CARDS VIEW (Original) -->
+  <div id="galeria-work" class="galeria-work">
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; width: 100%;">
+      {% for Project in projects %}
+      <div style="width: 100%;">
+        <a style="width: 100%;" href="{% url 'projectview' pk=Project.pk %}">
+          {% if Project.closed %}
+          <div class="cont-work" style="background-color:rgb(183, 239, 184);">
+          {% elif Project.paused %}
+          <div class="cont-work" style="background-color:rgba(240, 215, 102, 1);">
+          {% else %}
+          <div class="cont-work">
+          {% endif %} 
+                  <h1>{{Project.type}}</h1>
+                  {% if Project.mens %}
+                    <h3>{{Project.mens}}</h3>
+                  {% endif %}
+                  
+                  <div>
+                    <span style="width: 80%;">
+                      <h5>Partido: {{Project.partido}} </h5> 
+                      <h5>Partida: {{Project.partida}}</h5>
+                      <h5>Cliente: {{Project.client.name}}</h5>
+                      <h5>Dir: {{Project.direction}} {{Project.direction_number}}</h5>
+                      <h5>Fecha: {{Project.created|date:"d/m/Y" }}</h5>
+                    </span>
+                    <div style="display: flex; justify-content: end; align-items:flex-end; width: 20%;">
+                      <h2>{{ Project.pk }} </h2>
+                    </div>
+                    
+                  </div>
+                  
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}
+
 {% if pages.num_pages > 1 %}
 <div class="pagination-cont" >
   {% for page in pages.page_range %}
-   <a href="?page={{page}}">{{page}}</a>
+   <a href="?page={{page}}{% if view_mode %}&view={{ view_mode }}{% endif %}">{{page}}</a>
   {% endfor %}
 </div>
 {% endif %}
 
 {% endif %}
-
-
 
 {% endblock %}

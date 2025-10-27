@@ -501,7 +501,8 @@ def get_earnings_per_client(count: int = 10):
                 'projects_count': client_data['projects_count'],
                 'active_projects': client.active_projects_count,
                 'earnings_by_type': client.earnings_by_project_type,
-                'projects_by_type': dict(client.projects_count_by_type.values_list('type', 'count'))
+                'projects_by_type': dict(client.projects_count_by_type.values_list('type', 'count')),
+                
             })
             
         return clients_earnings
@@ -524,9 +525,11 @@ def get_earnings_per_client(count: int = 10):
 @login_required
 def display_earnings(request, count: int = 10):
     """
-    Display earnings for all clients.
+    Display earnings for all clients
+    
     """
     context = get_earnings_per_client(count=count)
+    context['count'] = count  # Add count to context for template
     return render(request, 'earnings_per_client.html', context)
 
 @login_required  

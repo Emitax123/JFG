@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models import Sum, Count
 from decimal import Decimal
+from django.contrib.auth.models import User
 
 # Create your models here.
 class Client(models.Model):
@@ -98,8 +99,19 @@ class Project (models.Model):
     
     type = models.CharField(max_length=30, choices=TYPE_CHOICES, verbose_name='Proyecto')
     mens = models.CharField(null=True, blank=True, max_length=30, choices=MENS_CHOICES, verbose_name='Mensura')
-    #CLiente
+    
+    #Cliente
     client = models.ForeignKey(Client, on_delete=models.CASCADE, null=True)
+    
+    #Usuario que creó el proyecto
+    created_by = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL,  # Si se borra el usuario, el proyecto se mantiene
+        null=True,
+        blank=True,
+        related_name='created_projects',
+        verbose_name='Creado por'
+    )
     
     #Deberia añadir files como un campo relacionado a un modelo de archivos
     
@@ -170,6 +182,11 @@ class Project (models.Model):
     def __str__(self):
         namepk = str(self.pk) + " - " + self.type
         return namepk
+    
+    def get_created_by_username(self):
+        if self.created_by:
+            return self.created_by.username
+        return "Desconocido"
     class Meta:
         verbose_name = "Proyecto"
         verbose_name_plural = "Proyectos"
