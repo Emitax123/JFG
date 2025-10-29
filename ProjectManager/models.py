@@ -185,7 +185,7 @@ class Project (models.Model):
     
     def get_created_by_username(self):
         if self.created_by:
-            return self.created_by.username
+            return self.created_by.first_name
         return "Desconocido"
     class Meta:
         verbose_name = "Proyecto"
