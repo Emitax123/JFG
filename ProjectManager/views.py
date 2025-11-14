@@ -36,6 +36,7 @@ def paginate_queryset(request: HttpRequest, queryset, per_page=12) -> tuple:
     return page_obj, paginator
 
 #Vista principal
+@login_required
 def index(request):
     return render (request, 'Index.html')
 
@@ -476,7 +477,7 @@ def balance(request: HttpRequest) -> HttpResponse:
         'chart_data': chart_data,
         'clients_ctx': clients_ctx,
     })
-
+@login_required
 def list_paused(request: HttpRequest) -> HttpResponse:
     """
     List all paused projects.
@@ -488,6 +489,7 @@ def list_paused(request: HttpRequest) -> HttpResponse:
     actual_pag, pages = paginate_queryset(request, projects)
     return render(request, 'project_list_template.html', {'projects': actual_pag, 'pages': pages})
 
+@login_required
 def list_closed(request: HttpRequest) -> HttpResponse:
     """
     List all closed projects.
@@ -498,7 +500,10 @@ def list_closed(request: HttpRequest) -> HttpResponse:
     
     actual_pag, pages = paginate_queryset(request, projects)
     return render(request, 'project_list_template.html', {'projects': actual_pag, 'pages': pages})
+
+    
 #Todos los proyectos
+@login_required
 def projectlist_view(request: HttpRequest) -> HttpResponse:
     # Get view mode from GET parameter (default to 'cards')
     view_mode = request.GET.get('view', 'cards')
@@ -520,6 +525,7 @@ def projectlist_view(request: HttpRequest) -> HttpResponse:
     return render (request, 'project_list_template.html', {'projects':actual_pag, 'pages':pages, 'view_mode': view_mode})
 
 #Proyectos por cliente
+@login_required
 def alt_projectlist_view(request: HttpRequest, pk: int) -> HttpResponse:
     view_mode = request.GET.get('view', 'cards')
     projects = Project.objects.select_related('client').filter(client__pk=pk).order_by('-created')[:108]
@@ -529,6 +535,7 @@ def alt_projectlist_view(request: HttpRequest, pk: int) -> HttpResponse:
     return render (request, 'project_list_template.html', {'projects':actual_pag, 'pages':pages, 'view_mode': view_mode})
 
 #Proyectos por tipo
+@login_required
 def projectlistfortype_view(request: HttpRequest, type: int) -> HttpResponse:
     #Mensuras
     type_map = {
@@ -548,6 +555,7 @@ def projectlistfortype_view(request: HttpRequest, type: int) -> HttpResponse:
     return render (request, 'project_list_template.html', {'projects':actual_pag, 'pages':pages})
 
 #Vista de un proyecto
+@login_required
 def project_view(request: HttpRequest, pk: int) -> HttpResponse:
     try:
         project = Project.objects.get(pk=pk)
@@ -566,6 +574,7 @@ def save_in_history(pk: int, type: int, msg: str):
     event = Event.objects.create(model_pk=pk, type=type, msg=msg)
 
 #Vista formulario de creacion
+@login_required
 def create_view(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         form = ProjectForm(request.POST)    
@@ -680,6 +689,7 @@ def mod_view(request: HttpRequest, pk: int) -> HttpResponse:
     return redirect(prev)
 
 #Modificacion total del proyecto
+@login_required
 @transaction.atomic
 def full_mod_view(request: HttpRequest, pk: int) -> HttpResponse:
     if request.method == 'POST':
@@ -720,6 +730,7 @@ def history_view(request: HttpRequest) -> HttpResponse:
     return render (request, 'history_template.html', {'yearlist':grouped_objects})
 
 #Modulo de busqueda
+@login_required
 def search(request: HttpRequest) -> JsonResponse:
     try:
         query = request.GET.get('query')  # Get the search query from the request
@@ -818,6 +829,7 @@ def create_client_view(request: HttpRequest) -> HttpResponse:
     return render (request, 'create_client_template.html')
 
 #Vista de clientes
+@login_required
 @transaction.atomic
 def clients_view(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
@@ -842,6 +854,7 @@ def clients_view(request: HttpRequest) -> HttpResponse:
     return render (request, 'clients_template.html', {'clients':clients})
 
 #Creacion de proyecto a partir de un cliente
+@login_required
 @transaction.atomic
 def create_for_client(request: HttpRequest, pk: int) -> HttpResponse:
     if request.method == 'POST':
@@ -880,6 +893,7 @@ def clientedislist(request: HttpRequest, pk: int) -> HttpResponse:
     return redirect('clients')
 
 # Add this new function to handle balance info requests
+@login_required
 def balance_info(request: HttpRequest) -> JsonResponse:
     """
     Return balance information for AJAX requests.
