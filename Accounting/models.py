@@ -1,5 +1,6 @@
 from django.utils import timezone
 from django.db import models
+from django.contrib.auth.models import User
 
 from ProjectManager.models import Project
 
@@ -62,6 +63,14 @@ class MonthlyFinancialSummary(models.Model):
     total_net_amoj = models.DecimalField(max_digits=20, decimal_places=2, default=0.00, verbose_name="Ganancia Neta Amojonamiento")
     total_net_relev = models.DecimalField(max_digits=20, decimal_places=2, default=0.00, verbose_name="Ganancia Neta Relevamiento")
     last_updated = models.DateTimeField(auto_now=True, verbose_name="Última Actualización")
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='monthly_summaries',
+        verbose_name='Creado por'
+    )
 
     class Meta:
         verbose_name = "Resumen Mensual"

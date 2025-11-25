@@ -119,15 +119,28 @@ def chart_data(request: HttpRequest) -> JsonResponse:
             month = datetime.now().month
             year = datetime.now().year
 
-            
-        month_summary = MonthlyFinancialSummary.objects.filter(year=year, month=month).first()
+        # Filtrar por usuario
+        if request.user.is_staff:
+            month_summary = MonthlyFinancialSummary.objects.filter(year=year, month=month).first()
+        else:
+            month_summary = MonthlyFinancialSummary.objects.filter(year=year, month=month, created_by=request.user).first()
         total_estimated = 0
-        sums = Account.objects.filter(
-            project__created__month=month, 
-            project__created__year=year
-        ).aggregate(
-            total_estimated=Sum('estimated')
-        )
+        # Filtrar por usuario
+        if request.user.is_staff:
+            sums = Account.objects.filter(
+                project__created__month=month, 
+                project__created__year=year
+            ).aggregate(
+                total_estimated=Sum('estimated')
+            )
+        else:
+            sums = Account.objects.filter(
+                project__created__month=month, 
+                project__created__year=year,
+                project__created_by=request.user
+            ).aggregate(
+                total_estimated=Sum('estimated')
+            )
         total_estimated = sums['total_estimated'] or 0
     
         
@@ -278,10 +291,11 @@ def format_currency(value):
     return f"{value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
 #Obtengo los datos financieros
-def get_financial_data(year: int, month: int) -> dict:
+def get_financial_data(year: int, month: int, user=None) -> dict:
     """
     Single function to retrieve all financial data needed for both
     balance and chart displays.
+    Filters by user if provided (staff sees all, regular users see only their data).
     """
     data = {
         'raw': {},
@@ -290,8 +304,11 @@ def get_financial_data(year: int, month: int) -> dict:
         'objects': {},
     }
     
-    # 1. Get monthly summary (single query)
-    monthly_summary = MonthlyFinancialSummary.objects.filter(year=year, month=month).first()
+    # 1. Get monthly summary (single query) - staff ve todo, usuarios normales solo lo suyo
+    if user and not user.is_staff:
+        monthly_summary = MonthlyFinancialSummary.objects.filter(year=year, month=month, created_by=user).first()
+    else:
+        monthly_summary = MonthlyFinancialSummary.objects.filter(year=year, month=month).first()
     data['objects']['monthly_summary'] = monthly_summary
     
     if not monthly_summary:
@@ -329,12 +346,18 @@ def get_financial_data(year: int, month: int) -> dict:
         })
         return data
     
-    # 2. Get projects (single query) - include ALL projects for the month/year
-    projects = Project.objects.filter(created__month=month, created__year=year)
+    # 2. Get projects (single query) - filtrar por usuario
+    if user and not user.is_staff:
+        projects = Project.objects.filter(created__month=month, created__year=year, created_by=user)
+    else:
+        projects = Project.objects.filter(created__month=month, created__year=year)
     data['objects']['projects'] = projects
     
-    # 3. Get accounts (single query)
-    accounts = Account.objects.filter(project__created__month=month, project__created__year=year)
+    # 3. Get accounts (single query) - filtrar por usuario
+    if user and not user.is_staff:
+        accounts = Account.objects.filter(project__created__month=month, project__created__year=year, project__created_by=user)
+    else:
+        accounts = Account.objects.filter(project__created__month=month, project__created__year=year)
     data['objects']['accounts'] = accounts
     # 4. Calculate all values once
     if monthly_summary:
@@ -407,16 +430,25 @@ def get_financial_data(year: int, month: int) -> dict:
     return data
 
 #Funcion usada dentro de balance, para mostrar el balance anual
-def balance_anual(year: int) -> tuple[list, list]:
+def balance_anual(year: int, user=None) -> tuple[list, list]:
     # Annotate each project with its month
+    # Filtrar por usuario
+    if user and not user.is_staff:
+        year_summary = MonthlyFinancialSummary.objects.filter(year=year, created_by=user).order_by('month')
+    else:
+        year_summary = MonthlyFinancialSummary.objects.filter(year=year).order_by('month')
     
-    year_summary = MonthlyFinancialSummary.objects.filter(year=year).order_by('month')
     # Create a dictionary to easily look up summaries by month
     summary_by_month = {summary.month: summary for summary in year_summary}
     
-    # Pre-fetch all project counts for the year to avoid multiple queries
+    # Pre-fetch all project counts for the year to avoid multiple queries - filtrar por usuario
     project_counts = {}
-    for month_data in Project.objects.filter(created__year=year).annotate(
+    if user and not user.is_staff:
+        project_filter = Project.objects.filter(created__year=year, created_by=user)
+    else:
+        project_filter = Project.objects.filter(created__year=year)
+    
+    for month_data in project_filter.annotate(
         month=ExtractMonth('created')
     ).values('month').annotate(count=Count('id')):
         project_counts[month_data['month']] = month_data['count']
@@ -464,10 +496,10 @@ def balance(request: HttpRequest) -> HttpResponse:
         year = datetime.now().year
         #Obtengo los proyectos del mes y año actual, pero solo los que no estan cerrados
     try:
-        balance_data = get_financial_data(year, month)
-        data, year_total = balance_anual(year)
+        balance_data = get_financial_data(year, month, request.user)
+        data, year_total = balance_anual(year, request.user)
         chart_data = chart_data_format(balance_data)
-        clients_ctx = get_earnings_per_client(5)
+        clients_ctx = get_earnings_per_client(5, request.user)
 
     except Exception as e:
         # Manejo de errores
@@ -765,7 +797,12 @@ def full_mod_view(request: HttpRequest, pk: int) -> HttpResponse:
 #Vista de historial
 @login_required
 def history_view(request: HttpRequest) -> HttpResponse:
-    events = Event.objects.order_by('-time')[:100]
+    # Filtrar eventos por usuario: staff ve todo, usuarios normales solo sus eventos
+    if request.user.is_staff:
+        events = Event.objects.order_by('-time')[:100]
+    else:
+        events = Event.objects.filter(created_by=request.user).order_by('-time')[:100]
+    
     grouped_objects_def = defaultdict(lambda: defaultdict(list))
     for e in events:
         #Si es un type 3 (eliminacion) no hay link
@@ -789,9 +826,16 @@ def search(request: HttpRequest) -> JsonResponse:
         query = request.GET.get('query')  # Get the search query from the request
         # Perform your search logic here and get the results
         if query:
-            objectc = Project.objects.select_related('client').filter(
-                    Q(client__name__icontains=query) | Q(partida__icontains=query)
-                ).order_by('-created')[:5]
+            # Filtrar por usuario: staff ve todo, usuarios normales solo sus proyectos
+            if request.user.is_staff:
+                objectc = Project.objects.select_related('client').filter(
+                        Q(client__name__icontains=query) | Q(partida__icontains=query)
+                    ).order_by('-created')[:5]
+            else:
+                objectc = Project.objects.select_related('client').filter(
+                        Q(client__name__icontains=query) | Q(partida__icontains=query),
+                        created_by=request.user
+                    ).order_by('-created')[:5]
             results = []
             for obj in objectc:
                 results.append({
@@ -993,8 +1037,8 @@ def balance_info(request: HttpRequest) -> JsonResponse:
             month = datetime.now().month
             year = datetime.now().year
         
-        # Use the existing function to get financial data
-        balance_data = get_financial_data(year, month)
+        # Use the existing function to get financial data - filtrar por usuario
+        balance_data = get_financial_data(year, month, request.user)
         if balance_data is False:
             return JsonResponse({'error': 'No financial data found for the specified month and year.'}, status=404)
         # Format the data for the response

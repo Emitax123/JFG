@@ -86,13 +86,14 @@ def create_acc_entry(project_id: int,
             account, created = Account.objects.get_or_create(project=project)
             print(f"{'Created new' if created else 'Using existing'} account for project {project_id}")
             
-            # Get or create the monthly summary
+            # Get or create the monthly summary - asignar usuario del proyecto
             current_year = int(timezone.now().year)
             current_month = int(timezone.now().month)
             
             monthly_summary, createdm = MonthlyFinancialSummary.objects.get_or_create(
                 year=current_year,
                 month=current_month,
+                created_by=project.created_by,  # Usar el created_by del proyecto
                 defaults={
                     'total_advance': Decimal('0.00'),
                     'total_expenses': Decimal('0.00'),
@@ -233,6 +234,7 @@ def accounting_mov_display(request: HttpRequest,
     """
     Display the accounting information for all projects or for a specific project.
     Optimized version with proper pagination and query optimization.
+    Filters by user (staff sees all, regular users see only their data).
     """
     logger.info(f"Loading accounting movements for project: {pk}")
     
@@ -242,6 +244,10 @@ def accounting_mov_display(request: HttpRequest,
         'project__client',
         'account'
     ).exclude(movement_type='EST')
+    
+    # Filtrar por usuario: staff ve todo, usuarios normales solo lo suyo
+    if not request.user.is_staff:
+        accounts_query = accounts_query.filter(project__created_by=request.user)
     
     # If project pk is provided in URL, filter by it
     if pk is not None:
@@ -463,11 +469,12 @@ def create_manual_acc_entry (request, pk):
         return render(request, 'account_form.html', {'form': form})
 
 
-def get_earnings_per_client(count: int = 10):
+def get_earnings_per_client(count: int = 10, user=None):
     """
     This view returns the earnings per client separated by flag status.
     Shows top earnings for both flag=True (VIP clients) and flag=False (regular clients).
     Ordered by net earnings (advance - expenses).
+    Filters by user if provided (staff sees all, regular users see only their data).
     """
     logger.info(f"Getting top {count} earnings for both VIP and regular clients")
     
@@ -475,12 +482,16 @@ def get_earnings_per_client(count: int = 10):
         """Helper function to get earnings data for clients by flag status"""
         clients_earnings = []
         
-        # Query desde Account hacia Client a través de Project, filtrado por flag
-        clients_data = Account.objects.select_related(
-            'project__client'
-        ).filter(
+        # Query desde Account hacia Client a través de Project, filtrado por flag y usuario
+        base_query = Account.objects.select_related('project__client').filter(
             project__client__flag=flag_value
-        ).values(
+        )
+        
+        # Filtrar por usuario si no es staff
+        if user and not user.is_staff:
+            base_query = base_query.filter(project__created_by=user)
+        
+        clients_data = base_query.values(
             'project__client__id',
             'project__client__name'
         ).annotate(
@@ -526,9 +537,9 @@ def get_earnings_per_client(count: int = 10):
 def display_earnings(request, count: int = 10):
     """
     Display earnings for all clients
-    
+    Filters by user (staff sees all, regular users see only their data)
     """
-    context = get_earnings_per_client(count=count)
+    context = get_earnings_per_client(count=count, user=request.user)
     context['count'] = count  # Add count to context for template
     return render(request, 'earnings_per_client.html', context)
 
@@ -537,12 +548,16 @@ def client_detailed_earnings(request, client_id: int):
     """
     Detailed earnings view for a specific client.
     Shows all projects with their individual earnings.
+    Filters by user (staff sees all, regular users see only their data).
     """
     client = get_object_or_404(Client, id=client_id)
     
-    # Get all projects with their accounts for this client
-    projects_data = []
-    projects = Project.objects.filter(client=client)
+    # Get all projects with their accounts for this client - filtrar por usuario
+    if request.user.is_staff:
+        projects = Project.objects.filter(client=client)
+    else:
+        projects = Project.objects.filter(client=client, created_by=request.user)
+    
     accounts = Account.objects.filter(project__in=projects)
 
     for project in projects:
