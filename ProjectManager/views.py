@@ -211,6 +211,11 @@ def delete_view(request: HttpRequest, pk: int) -> HttpResponse:
     try:
         if request.method == 'POST':
             project = Project.objects.select_related('client').get(pk=pk)
+            # Verificar permisos: staff ve todo, usuarios normales solo sus proyectos
+            if not request.user.is_staff and project.created_by != request.user:
+                logger.warning(f"User {request.user.username} attempted to delete project {pk} without permission")
+                return redirect('projects')
+            
             msg = "Se ha eliminado un proyecto " + project.type + " de " + project.client.name
         
             Event.objects.filter(model_pk=pk).delete()
@@ -218,7 +223,7 @@ def delete_view(request: HttpRequest, pk: int) -> HttpResponse:
             if file:
                 delete_file(request, pk)
             project.delete()
-            save_in_history(pk, 3, msg)
+            save_in_history(pk, 3, msg, request.user)
         return redirect('index')
     except Project.DoesNotExist:
         logger.error(f"Project with pk {pk} does not exist.")
@@ -229,11 +234,16 @@ def delete_view(request: HttpRequest, pk: int) -> HttpResponse:
 def close_view(request: HttpRequest, pk: int) -> HttpResponse:
     try:
         project = Project.objects.get(pk=pk)
+        # Verificar permisos: staff ve todo, usuarios normales solo sus proyectos
+        if not request.user.is_staff and project.created_by != request.user:
+            logger.warning(f"User {request.user.username} attempted to close project {pk} without permission")
+            return redirect('projects')
+        
         project.closed = True
         project.paused = False
         project.save()
         msg = "Se ha cerrado un proyecto"
-        save_in_history(pk, 1, msg)
+        save_in_history(pk, 1, msg, request.user)
         return redirect('projects')
     except Project.DoesNotExist:
         logger.error(f"Project with pk {pk} does not exist.")
@@ -243,6 +253,11 @@ def close_view(request: HttpRequest, pk: int) -> HttpResponse:
 def pause_view(request: HttpRequest, pk: int) -> HttpResponse:
     try:
         project = Project.objects.get(pk=pk)
+        # Verificar permisos: staff ve todo, usuarios normales solo sus proyectos
+        if not request.user.is_staff and project.created_by != request.user:
+            logger.warning(f"User {request.user.username} attempted to pause/resume project {pk} without permission")
+            return redirect('projects')
+        
         if project.paused:
             # If already paused, resume it
             project.paused = False
@@ -251,7 +266,7 @@ def pause_view(request: HttpRequest, pk: int) -> HttpResponse:
             project.paused = True
             msg = "Se ha pausado un proyecto"
         project.save()
-        save_in_history(pk, 1, msg)
+        save_in_history(pk, 1, msg, request.user)
         return redirect('projects')
     except Project.DoesNotExist:
         logger.error(f"Project with pk {pk} does not exist.")
@@ -504,14 +519,21 @@ def list_closed(request: HttpRequest) -> HttpResponse:
     
 #Todos los proyectos
 @login_required
+@login_required
 def projectlist_view(request: HttpRequest) -> HttpResponse:
     # Get view mode from GET parameter (default to 'cards')
     view_mode = request.GET.get('view', 'cards')
     
+    # Filtrar por usuario: staff ve todo, usuarios normales solo ven sus proyectos
+    if request.user.is_staff:
+        base_queryset = Project.objects.select_related('client')
+    else:
+        base_queryset = Project.objects.select_related('client').filter(created_by=request.user)
+    
     if request.method == 'POST':
         if request.POST.get('search-input')!="":
             query = request.POST.get('search-input')
-            projects = Project.objects.select_related('client').filter(
+            projects = base_queryset.filter(
                  Q(client__name__icontains=query) | Q(partido__icontains=query)
             ).order_by('-created')[:108]
             
@@ -521,14 +543,19 @@ def projectlist_view(request: HttpRequest) -> HttpResponse:
         return render (request, 'project_list_template.html', {'projects':actual_pag, 'pages':pages, 'view_mode': view_mode})
         
     else:
-        actual_pag, pages = paginate_queryset(request, Project.objects.select_related('client').filter(closed=False, paused=False).order_by('-created')[:108])
+        actual_pag, pages = paginate_queryset(request, base_queryset.filter(closed=False, paused=False).order_by('-created')[:108])
     return render (request, 'project_list_template.html', {'projects':actual_pag, 'pages':pages, 'view_mode': view_mode})
 
 #Proyectos por cliente
 @login_required
 def alt_projectlist_view(request: HttpRequest, pk: int) -> HttpResponse:
     view_mode = request.GET.get('view', 'cards')
-    projects = Project.objects.select_related('client').filter(client__pk=pk).order_by('-created')[:108]
+    # Filtrar por usuario: staff ve todo, usuarios normales solo ven sus proyectos
+    if request.user.is_staff:
+        projects = Project.objects.select_related('client').filter(client__pk=pk).order_by('-created')[:108]
+    else:
+        projects = Project.objects.select_related('client').filter(client__pk=pk, created_by=request.user).order_by('-created')[:108]
+    
     if not projects.exists():
         return render (request, 'project_list_template.html', {'no_projects':True, 'view_mode': view_mode})
     actual_pag, pages = paginate_queryset(request, projects)
@@ -548,7 +575,13 @@ def projectlistfortype_view(request: HttpRequest, type: int) -> HttpResponse:
     project_type = type_map.get(type)
     if not project_type:
         return render(request, 'project_list_template.html', {'no_projects': True})
-    projects = Project.objects.select_related('client').filter(type=project_type, closed=False, paused=False).order_by('-created')[:108]
+    
+    # Filtrar por usuario: staff ve todo, usuarios normales solo ven sus proyectos
+    if request.user.is_staff:
+        projects = Project.objects.select_related('client').filter(type=project_type, closed=False, paused=False).order_by('-created')[:108]
+    else:
+        projects = Project.objects.select_related('client').filter(type=project_type, closed=False, paused=False, created_by=request.user).order_by('-created')[:108]
+    
     actual_pag, pages = paginate_queryset(request, projects)
     if not projects.exists():
         return render (request, 'project_list_template.html', {'no_projects':True})
@@ -559,6 +592,11 @@ def projectlistfortype_view(request: HttpRequest, type: int) -> HttpResponse:
 def project_view(request: HttpRequest, pk: int) -> HttpResponse:
     try:
         project = Project.objects.get(pk=pk)
+        # Verificar permisos: staff ve todo, usuarios normales solo sus proyectos
+        if not request.user.is_staff and project.created_by != request.user:
+            logger.warning(f"User {request.user.username} attempted to access project {pk} without permission")
+            return redirect('projects')
+        
         file = ProjectFiles.objects.filter(project_pk=pk).first()
         if file:
             return render(request, 'project_template.html', {'project': project, 'file_url': file.url})
@@ -570,8 +608,8 @@ def project_view(request: HttpRequest, pk: int) -> HttpResponse:
         return redirect('projects')
 
 #Registro en historial
-def save_in_history(pk: int, type: int, msg: str):
-    event = Event.objects.create(model_pk=pk, type=type, msg=msg)
+def save_in_history(pk: int, type: int, msg: str, user=None):
+    event = Event.objects.create(model_pk=pk, type=type, msg=msg, created_by=user)
 
 #Vista formulario de creacion
 @login_required
@@ -599,7 +637,7 @@ def create_view(request: HttpRequest) -> HttpResponse:
                 #Si el cliente es el titular
                 msg = "Se ha creado un nuevo proyecto"   
                 pk = form_instance.pk
-                save_in_history(pk, 2, msg)
+                save_in_history(pk, 2, msg, request.user)
                 create_account(pk)
                 if 'save_and_backhome' in request.POST:
                     return redirect('projectview', pk=pk)
@@ -622,6 +660,11 @@ def mod_view(request: HttpRequest, pk: int) -> HttpResponse:
     if request.method == 'POST':
         try:
             instance = Project.objects.select_related('client').get(pk=pk)
+            # Verificar permisos: staff ve todo, usuarios normales solo sus proyectos
+            if not request.user.is_staff and instance.created_by != request.user:
+                logger.warning(f"User {request.user.username} attempted to modify project {pk} without permission")
+                return redirect('projects')
+            
             msg = "" 
             if request.POST.get('contact_name'):
                 instance.contact_name = request.POST.get('contact_name')
@@ -675,7 +718,7 @@ def mod_view(request: HttpRequest, pk: int) -> HttpResponse:
             if msg == "":
                 msg = "Se ha modificado un proyecto"
             pk = instance.pk
-            save_in_history(pk, 1, msg)
+            save_in_history(pk, 1, msg, request.user)
             prev = request.META.get('HTTP_REFERER')
             return redirect(prev)
         except Project.DoesNotExist:
@@ -694,18 +737,28 @@ def mod_view(request: HttpRequest, pk: int) -> HttpResponse:
 def full_mod_view(request: HttpRequest, pk: int) -> HttpResponse:
     if request.method == 'POST':
         instance = Project.objects.get(pk=pk)
+        # Verificar permisos: staff ve todo, usuarios normales solo sus proyectos
+        if not request.user.is_staff and instance.created_by != request.user:
+            logger.warning(f"User {request.user.username} attempted to fully modify project {pk} without permission")
+            return redirect('projects')
+        
         form = ProjectFullForm(request.POST, instance=instance) 
         if form.is_valid():
             try:
                 form.save()
                 msg = "Se ha modificado un proyecto"   
-                save_in_history(instance.pk, 1, msg)
+                save_in_history(instance.pk, 1, msg, request.user)
                 return redirect('projectview', pk=pk)
             except Exception as e:
                 logger.error(f"Error saving full project modification: {str(e)}")
                 return render(request, 'full_mod_template.html', {'error': 'Error saving project.'})
     else:
         instance = Project.objects.get(pk=pk)
+        # Verificar permisos: staff ve todo, usuarios normales solo sus proyectos
+        if not request.user.is_staff and instance.created_by != request.user:
+            logger.warning(f"User {request.user.username} attempted to access full modify form for project {pk} without permission")
+            return redirect('projects')
+        
         form = ProjectFullForm(instance=instance)
     return render (request, 'full_mod_template.html', {'form':form, 'project':instance})
 
@@ -820,7 +873,12 @@ def create_client_view(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         if request.POST.get('name') != '':
             try:
-                client = Client.objects.create(name=request.POST.get('name'), phone=request.POST.get('phone'), flag = True)
+                client = Client.objects.create(
+                    name=request.POST.get('name'), 
+                    phone=request.POST.get('phone'), 
+                    flag=True,
+                    created_by=request.user
+                )
                 client.save() 
                 return redirect('clients')
             except Exception as e:
@@ -835,23 +893,33 @@ def clients_view(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         try:
             if request.POST.get('client-name') != '':
-                client = Client.objects.create(name=request.POST.get('client-name'), phone=request.POST.get('client-phone'))
+                client = Client.objects.create(
+                    name=request.POST.get('client-name'), 
+                    phone=request.POST.get('client-phone'),
+                    created_by=request.user
+                )
                 client.save()
             return redirect('clients')
         except Exception as e:
             logger.error(f"Error creating client: {str(e)}")
             return render(request, 'clients_template.html', {'error': 'Error creating client.'})    
+    # Filtrar por usuario: staff ve todo, usuarios normales solo ven sus clientes
+    if request.user.is_staff:
+        base_clients = Client.objects.filter(flag=True).only('id', 'name', 'phone').order_by('name')
+    else:
+        base_clients = Client.objects.filter(flag=True, created_by=request.user).only('id', 'name', 'phone').order_by('name')
+    
     if request.GET.get('flagc') != "":
         query = request.GET.get('flagc')
         if query == 'True':
             flag= True
-            clients = Client.objects.filter(flag=flag).only('id', 'name', 'phone').order_by('name')
+            clients = base_clients.filter(flag=flag)
         else:
             flag= False
-            clients = Client.objects.filter(flag=flag).only('id', 'name', 'phone').order_by('name')
+            clients = base_clients.filter(flag=flag)
         context = {'clients': clients, 'flag': flag}
         return render (request, 'clients_template.html', context)
-    return render (request, 'clients_template.html', {'clients':clients})
+    return render (request, 'clients_template.html', {'clients':base_clients})
 
 #Creacion de proyecto a partir de un cliente
 @login_required
@@ -866,7 +934,7 @@ def create_for_client(request: HttpRequest, pk: int) -> HttpResponse:
                 form_instance.created_by = request.user  # Asigna el usuario actual
                 form_instance.save()#Se guarda la instancia 
                 msg = "Se ha creado un nuevo proyecto"   
-                save_in_history(pk, 2, msg)
+                save_in_history(pk, 2, msg, request.user)
                 create_account(form_instance.pk)
                 if 'save_and_backhome' in request.POST:
                     

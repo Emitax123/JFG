@@ -9,6 +9,14 @@ class Client(models.Model):
     phone = models.CharField(max_length=40, default="", verbose_name='Telefono')
     flag = models.BooleanField(default=False, verbose_name='Fijo')
     not_listed = models.BooleanField(default=False, verbose_name='No listado')
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='created_clients',
+        verbose_name='Creado por'
+    )
 
     class Meta:
         verbose_name = "Cliente"
@@ -205,6 +213,14 @@ class Event (models.Model):
     time = models.DateTimeField(auto_now_add=True)
     model_pk = models.IntegerField(default=0)
     msg = models.CharField(max_length=100, null=True)
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='created_events',
+        verbose_name='Creado por'
+    )
     
     class Meta:
         verbose_name = "Evento"
