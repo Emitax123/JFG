@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from ProjectManager.models import Project
 
 class Account(models.Model):
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    project = models.OneToOneField(Project, on_delete=models.CASCADE, related_name='account')
     estimated = models.DecimalField(max_digits=20, decimal_places=2, default=0.00, verbose_name="Presupuesto")
     expenses = models.DecimalField(max_digits=20, decimal_places=2, default=0.00)
     advance = models.DecimalField(max_digits=20, decimal_places=2, default=0.00)

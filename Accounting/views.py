@@ -552,25 +552,28 @@ def client_detailed_earnings(request, client_id: int):
     """
     client = get_object_or_404(Client, id=client_id)
     
+    # Initialize projects_data list
+    projects_data = []
+    
     # Get all projects with their accounts for this client - filtrar por usuario
     if request.user.is_staff:
-        projects = Project.objects.filter(client=client)
+        projects = Project.objects.filter(client=client).select_related('account')
     else:
-        projects = Project.objects.filter(client=client, created_by=request.user)
+        projects = Project.objects.filter(client=client, created_by=request.user).select_related('account')
     
-    accounts = Account.objects.filter(project__in=projects)
-
+    # Build projects data with account information
     for project in projects:
         try:
+            # Now we can use project.account thanks to related_name
             account = project.account
             net_earnings = (account.advance or Decimal('0.00')) - (account.expenses or Decimal('0.00'))
             projects_data.append({
                 'project': project,
-                'account': accounts.get(project=project),
+                'account': account,
                 'net_earnings': net_earnings,
                 'status': 'Cerrado' if project.closed else 'Pausado' if project.paused else 'Activo'
             })
-        except:
+        except Account.DoesNotExist:
             # Project without account
             projects_data.append({
                 'project': project,
