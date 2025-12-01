@@ -121,6 +121,13 @@ class Project (models.Model):
         verbose_name='Creado por'
     )
     
+    #Proyecto grupal (colaborativo)
+    is_group_project = models.BooleanField(
+        default=False,
+        verbose_name='Proyecto Grupal',
+        help_text='Indica si este proyecto es colaborativo entre varios usuarios'
+    )
+    
     #Deberia añadir files como un campo relacionado a un modelo de archivos
     
     #Titular, que puede o no puede ser el cliente
@@ -195,10 +202,67 @@ class Project (models.Model):
         if self.created_by:
             return self.created_by.first_name
         return "Desconocido"
+    
+    def get_collaborators_with_percentages(self):
+        """Retorna lista de colaboradores con sus porcentajes"""
+        return self.collaborators.all().select_related('user')
+    
     class Meta:
         verbose_name = "Proyecto"
         verbose_name_plural = "Proyectos"
         ordering = ['-created']
+
+
+class ProjectCollaborator(models.Model):
+    """
+    Modelo intermedio para proyectos grupales.
+    Define qué usuarios participan y qué porcentaje de ganancias les corresponde.
+    """
+    project = models.ForeignKey(
+        Project,
+        on_delete=models.CASCADE,
+        related_name='collaborators',
+        verbose_name='Proyecto'
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='collaborated_projects',
+        verbose_name='Usuario'
+    )
+    percentage = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=0.00,
+        verbose_name='Porcentaje de Ganancias',
+        help_text='Porcentaje de las ganancias netas que corresponde a este usuario'
+    )
+    added_date = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de Agregado')
+    
+    class Meta:
+        verbose_name = "Colaborador de Proyecto"
+        verbose_name_plural = "Colaboradores de Proyectos"
+        unique_together = ('project', 'user')  # Un usuario solo puede aparecer una vez por proyecto
+        ordering = ['-percentage']
+    
+    def __str__(self):
+        return f"{self.project.pk} - {self.user.username} ({self.percentage}%)"
+    
+    def clean(self):
+        """Validación para asegurar que los porcentajes no excedan 100%"""
+        from django.core.exceptions import ValidationError
+        total_percentage = ProjectCollaborator.objects.filter(
+            project=self.project
+        ).exclude(id=self.id).aggregate(
+            total=models.Sum('percentage')
+        )['total'] or Decimal('0.00')
+        
+        if total_percentage + self.percentage > Decimal('100.00'):
+            raise ValidationError(
+                f'La suma de porcentajes no puede exceder 100%. '
+                f'Actual: {total_percentage}%, Intentando agregar: {self.percentage}%'
+            )
+
 
 class ProjectFiles (models.Model):
     project_pk= models.IntegerField(default=0)

@@ -1,6 +1,11 @@
 {% extends 'base_template.html' %}
 {% load static %}
 {% block form %}
+  <style>
+    button {
+      padding: 0.2em;
+    }
+  </style>
   <div class="cont-project-div">
     
      {% if project.closed %}
@@ -69,7 +74,7 @@
               {% if not project.contact_name %}
               <div style="display: flex; flex-flow: row; justify-content: left;">
                 <button style="margin-top:6px; margin-bottom: 6px;" class="blue-button client-btn">Agregar Contacto</button>
-                <form style="display: none;" method="post" action="{% url 'modification' pk=project.pk %}">
+                <form style="   display: none;" method="post" action="{% url 'modification' pk=project.pk %}">
                   {% csrf_token %}
                   <div style="flex-flow: column;">
                     <input class="contact-input" required placeholder="Nombre de contacto" type="text" name="contact_name" />
@@ -282,11 +287,11 @@
         Terminar
         </button>
         {% if project.paused %}
-        <button class="pause-button" onclick="window.location.href='{% url 'pause' pk=project.pk %}'" class="full-modify-btn">
+        <button class="blue-button" onclick="window.location.href='{% url 'pause' pk=project.pk %}'" class="full-modify-btn">
           Reanudar
         </button>
         {% else %}
-        <button class="pause-button" onclick="window.location.href='{% url 'pause' pk=project.pk %}'" class="full-modify-btn">
+        <button class="blue-button" onclick="window.location.href='{% url 'pause' pk=project.pk %}'" class="full-modify-btn">
         Archivar
         </button>
         {% endif %}

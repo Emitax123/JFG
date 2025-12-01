@@ -348,16 +348,16 @@ def get_financial_data(year: int, month: int, user=None) -> dict:
     
     # 2. Get projects (single query) - filtrar por usuario
     if user and not user.is_staff:
-        projects = Project.objects.filter(created__month=month, created__year=year, created_by=user)
+        projects = Project.objects.filter(created__month=month, created__year=year, created_by=user, is_group_project=False)
     else:
-        projects = Project.objects.filter(created__month=month, created__year=year)
+        projects = Project.objects.filter(created__month=month, created__year=year, is_group_project=False)
     data['objects']['projects'] = projects
     
     # 3. Get accounts (single query) - filtrar por usuario
     if user and not user.is_staff:
-        accounts = Account.objects.filter(project__created__month=month, project__created__year=year, project__created_by=user)
+        accounts = Account.objects.filter(project__created__month=month, project__created__year=year, project__created_by=user, project__is_group_project=False)
     else:
-        accounts = Account.objects.filter(project__created__month=month, project__created__year=year)
+        accounts = Account.objects.filter(project__created__month=month, project__created__year=year, project__is_group_project=False)
     data['objects']['accounts'] = accounts
     # 4. Calculate all values once
     if monthly_summary:
@@ -416,11 +416,13 @@ def get_financial_data(year: int, month: int, user=None) -> dict:
         'total': projects.count(),                    # Total projects for the requested month
         'current_month': Project.objects.filter(     # Projects created in the actual current month
             created__year=current_year, 
-            created__month=current_month_num
+            created__month=current_month_num,
+            is_group_project=False
         ).count(),
         'previous_months': Project.objects.filter(
             closed=False, 
-            paused=False
+            paused=False,
+            is_group_project=False
         ).exclude(
             created__year=year, 
             created__month=month
@@ -444,9 +446,9 @@ def balance_anual(year: int, user=None) -> tuple[list, list]:
     # Pre-fetch all project counts for the year to avoid multiple queries - filtrar por usuario
     project_counts = {}
     if user and not user.is_staff:
-        project_filter = Project.objects.filter(created__year=year, created_by=user)
+        project_filter = Project.objects.filter(created__year=year, created_by=user, is_group_project=False)
     else:
-        project_filter = Project.objects.filter(created__year=year)
+        project_filter = Project.objects.filter(created__year=year, is_group_project=False)
     
     for month_data in project_filter.annotate(
         month=ExtractMonth('created')
@@ -556,11 +558,14 @@ def projectlist_view(request: HttpRequest) -> HttpResponse:
     # Get view mode from GET parameter (default to 'cards')
     view_mode = request.GET.get('view', 'cards')
     
-    # Filtrar por usuario: staff ve todo, usuarios normales solo ven sus proyectos
+    # Excluir proyectos grupales y filtrar por usuario
     if request.user.is_staff:
-        base_queryset = Project.objects.select_related('client')
+        base_queryset = Project.objects.select_related('client').filter(is_group_project=False)
     else:
-        base_queryset = Project.objects.select_related('client').filter(created_by=request.user)
+        base_queryset = Project.objects.select_related('client').filter(
+            created_by=request.user,
+            is_group_project=False  # Excluir proyectos grupales
+        )
     
     if request.method == 'POST':
         if request.POST.get('search-input')!="":

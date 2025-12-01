@@ -641,6 +641,7 @@ button {
   border-radius: 5px;
   cursor: pointer;
   white-space: nowrap;
+  border: none;
 }
 
 .blue-button:hover {
@@ -1035,7 +1036,7 @@ div.cont-work {
   border: 1px solid black;
   border-radius: 10px;
   background-color: white;
-  color: black;
+  color: #2c3e50;
   box-shadow: 2px 2px 10px black;
   display: flex;
   flex-flow: column;
@@ -1074,7 +1075,7 @@ div.cont-work {
   background-color: #27ae60;
   color: white;
   padding: 5px 10px;
-
+  border: none;
   border-radius: 5px;
   font-weight: bold;
   cursor: pointer;
@@ -1086,21 +1087,7 @@ div.cont-work {
   transition: all 0.2s ease;
 }
 
-.pause-button {
-  background-color: #00799b;
-  color: white;
-  padding: 5px 10px;
 
-  border-radius: 5px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.pause-button:hover {
-  background-color: #005f6b;
-  transform: scale(1.05);
-  transition: all 0.2s ease;
-}
 
 
 .visually-hidden {
@@ -1315,7 +1302,7 @@ div.expand:hover {
   max-width: 650px;
   padding: 20px;
   background-color: white;
-  color: black;
+  color: #2c3e50;
   box-shadow: 2px 2px 10px black;
   border-radius: 10px;
   display: flex;

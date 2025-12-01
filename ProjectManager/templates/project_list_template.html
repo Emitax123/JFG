@@ -41,7 +41,8 @@
   
   <div class="project-list-view">
     {% for Project in projects %}
-      <a href="{% url 'projectview' pk=Project.pk %}" 
+      <a 
+         href="{% if Project.is_group_project %}{% url 'group_project_detail' pk=Project.pk %}{% else %}{% url 'projectview' pk=Project.pk %}{% endif %}" 
          class="project-list-item 
                 {% if Project.closed %}status-closed
                 {% elif Project.paused %}status-paused
@@ -76,6 +77,7 @@
           <span class="project-list-date">
             {{ Project.created|date:"d/m/Y" }}
           </span>
+          
         </div>
       </a>
     {% endfor %}
@@ -87,7 +89,7 @@
     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; width: 100%;">
       {% for Project in projects %}
       <div style="width: 100%;">
-        <a style="width: 100%;" href="{% url 'projectview' pk=Project.pk %}">
+        <a style="width: 100%;" href="{% if Project.is_group_project %}{% url 'group_project_detail' pk=Project.pk %}{% else %}{% url 'projectview' pk=Project.pk %}{% endif %}">
           {% if Project.closed %}
           <div class="cont-work" style="background-color:rgb(183, 239, 184);">
           {% elif Project.paused %}
@@ -107,6 +109,7 @@
                       <h5>Cliente: {{Project.client.name}}</h5>
                       <h5>Dir: {{Project.direction}} {{Project.direction_number}}</h5>
                       <h5>Fecha: {{Project.created|date:"d/m/Y" }}</h5>
+                    
                     </span>
                     <div style="display: flex; justify-content: end; align-items:flex-end; width: 20%;">
                       <h2>{{ Project.pk }} </h2>

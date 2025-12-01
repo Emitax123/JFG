@@ -482,9 +482,10 @@ def get_earnings_per_client(count: int = 10, user=None):
         """Helper function to get earnings data for clients by flag status"""
         clients_earnings = []
         
-        # Query desde Account hacia Client a través de Project, filtrado por flag y usuario
+        # Query desde Account hacia Client a través de Project, filtrado por flag, usuario y excluyendo proyectos grupales
         base_query = Account.objects.select_related('project__client').filter(
-            project__client__flag=flag_value
+            project__client__flag=flag_value,
+            project__is_group_project=False  # Excluir proyectos grupales
         )
         
         # Filtrar por usuario si no es staff

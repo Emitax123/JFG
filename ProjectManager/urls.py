@@ -5,6 +5,7 @@ from django.conf.urls.static import static
 from django.contrib.staticfiles.urls import static, staticfiles_urlpatterns
 from django.contrib.auth import views as auth_views
 from . import views
+from . import views_group_projects
 
 urlpatterns = [
   path('', views.index, name = 'index'),
@@ -36,6 +37,12 @@ urlpatterns = [
   path('create/clientedislist/<int:pk>', views.clientedislist, name='clientedislist'),
   path('accounting/', include('Accounting.urls')),
   path('balance-info/', views.balance_info, name='balance_info'),
+  
+  # Group Projects URLs
+  path('group-projects/', views_group_projects.group_projects_list, name='group_projects_list'),
+  path('group-projects/<int:pk>/', views_group_projects.group_project_detail, name='group_project_detail'),
+  path('group-projects/<int:pk>/manage/', views_group_projects.manage_collaborators, name='manage_collaborators'),
+  path('group-projects/<int:pk>/toggle/', views_group_projects.toggle_group_project, name='toggle_group_project'),
 ]
 urlpatterns += staticfiles_urlpatterns()
 urlpatterns += static(settings.STATIC_URL,document_root=settings.STATICFILES_DIRS)

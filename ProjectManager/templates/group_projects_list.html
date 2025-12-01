@@ -1,0 +1,56 @@
+{% extends 'base_template.html' %}
+{% load static %}
+
+{% block form %}
+  <div class="group-projects-container">
+    <h1>Proyectos en Conjunto</h1>
+    <p>Total de proyectos: {{ total_projects }}</p>
+
+    {% if projects_data %}
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Tipo</th>
+            <th>Cliente</th>
+            <th>Rol</th>
+            <th>Tu Porcentaje</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for data in projects_data %}
+            <tr>
+              <td>#{{ data.project.pk }}</td>
+              <td>{{ data.project.type }}</td>
+              <td>{{ data.project.client.name }}</td>
+              <td>{{ data.role }}</td>
+              <td>{{ data.percentage }}%</td>
+              <td>
+                {% if data.project.closed %}
+                  Cerrado
+                {% elif data.project.paused %}
+                  Pausado
+                {% else %}
+                  Activo
+                {% endif %}
+              </td>
+              <td>
+                <a href="{% url 'group_project_detail' data.project.pk %}">Ver Detalles</a>
+                {% if data.role == 'Creador' %}
+                  | <a href="{% url 'manage_collaborators' data.project.pk %}">Gestionar</a>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>No participas en ningún proyecto grupal.</p>
+    {% endif %}
+
+    <br />
+    <a href="{% url 'projects' %}">← Volver a Mis Proyectos</a>
+  </div>
+{% endblock %}

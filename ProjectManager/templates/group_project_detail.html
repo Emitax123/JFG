@@ -1,0 +1,241 @@
+{% extends 'base_template.html' %}
+{% load static %}
+
+{% block form %}
+  <style>
+    .group-project-detail-container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 2px 2px 10px black;
+    }
+    
+    .group-project-detail-container h1 {
+      color: #2c3e50;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 3px solid #00799b;
+      font-size: 28px;
+    }
+    
+    .group-project-detail-container h2 {
+      color: #34495e;
+      font-size: 22px;
+      margin-bottom: 15px;
+    }
+    
+    .financial-info,
+    .collaborators-info {
+      background: #f8f9fa;
+      padding: 1em;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      border-left: 4px solid #00799b;
+    }
+    
+    .financial-info p {
+      margin: 0, 5em 0;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    
+    .financial-info strong {
+      color: #2c3e50;
+      display: inline-block;
+      min-width: 180px;
+      font-weight: 600;
+    }
+    
+    .collaborators-info table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      background: #ffffff;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .collaborators-info thead {
+      background: #00799b;
+      color: #ffffff;
+    }
+    
+    .collaborators-info th {
+      padding: 12px 15px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .collaborators-info tbody tr {
+      border-bottom: 1px solid #ecf0f1;
+      transition: background-color 0.2s ease;
+    }
+    
+    .collaborators-info tbody tr:hover {
+      background-color: #f1f3f5;
+    }
+    
+    .collaborators-info tbody tr:last-child {
+      border-bottom: none;
+    }
+    
+    .collaborators-info td {
+      padding: 12px 15px;
+      color: #2c3e50;
+      font-size: 15px;
+    }
+    
+    .collaborators-info td:nth-child(2) {
+      font-weight: 600;
+      color: black;
+    }
+    
+    .collaborators-info td:nth-child(3) {
+      font-weight: 600;
+      color: black;
+    }
+    
+    .actions {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    
+      padding-top: 10px;
+      border-top: 2px solid #ecf0f1;
+    }
+    
+    .actions a {
+      padding: 8px 18px;
+      border-radius: 5px;
+      text-decoration: none;
+    
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    .actions a:first-child {
+      background: #27ae60;
+      color: white;
+    }
+    
+    .actions a:first-child:hover {
+      background: #229954;
+      box-shadow: 0 4px 8px rgba(39, 174, 96, 0.3);
+    }
+    .actions a:last-child:hover {
+      background: #d2d4d4ff;
+      box-shadow: 0 4px 8px rgba(149, 165, 166, 0.3);
+    }
+    
+    /* Estilos para mensajes de "no disponible" */
+    .financial-info p:only-child,
+    .collaborators-info p:only-child {
+      text-align: center;
+      color: #7f8c8d;
+      font-style: italic;
+      padding: 20px;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .group-project-detail-container {
+        padding: 15px;
+        margin: 10px;
+      }
+    
+      .group-project-detail-container h1 {
+        font-size: 22px;
+      }
+    
+      .group-project-detail-container h2 {
+        font-size: 18px;
+      }
+    
+      .financial-info strong {
+        display: block;
+        margin-bottom: 5px;
+      }
+    
+      .collaborators-info table {
+        font-size: 13px;
+      }
+    
+      .collaborators-info th,
+      .collaborators-info td {
+        padding: 8px 10px;
+      }
+    
+      .actions {
+        flex-direction: column;
+      }
+    
+      .actions a {
+        width: 100%;
+      }
+    }
+  </style>
+
+  <div class="group-project-detail-container">
+    <h1>Proyecto Grupal #{{ project.pk }}</h1>
+
+    <div class="financial-info">
+      <h2>Información Financiera</h2>
+      {% if account %}
+        <p>
+          <strong>Presupuesto:</strong> ${{ account.estimated|floatformat:2 }}
+        </p>
+        <p>
+          <strong>Adelantos:</strong> ${{ account.advance|floatformat:2 }}
+        </p>
+        <p>
+          <strong>Gastos:</strong> ${{ account.expenses|floatformat:2 }}
+        </p>
+        <p>
+          <strong>Ganancias Netas:</strong> ${{ net_earnings|floatformat:2 }}
+        </p>
+      {% else %}
+        <p>No hay información financiera disponible.</p>
+      {% endif %}
+    </div>
+
+    <div class="collaborators-info">
+      <h2>Colaboradores ({{ total_percentage }}% asignado)</h2>
+
+      {% if collaborators_earnings %}
+        <table>
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Porcentaje</th>
+              <th>Ganancias Estimadas</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for collab in collaborators_earnings %}
+              <tr>
+                <td>{{ collab.user.username }}</td>
+                <td>{{ collab.percentage }}%</td>
+                <td>${{ collab.earnings|floatformat:2 }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p>No hay colaboradores asignados.</p>
+      {% endif %}
+    </div>
+
+    <div class="actions">
+      {% if is_creator %}
+        <a href="{% url 'manage_collaborators' project.pk %}">Gestionar Colaboradores</a>
+      {% endif %}
+      <a class="blue-button" href="{% url 'projectview' project.pk %}">Ver Proyecto Completo</a>
+      <a class="white-button" href="{% url 'group_projects_list' %}">← Volver a Lista</a>
+    </div>
+  </div>
+{% endblock %}

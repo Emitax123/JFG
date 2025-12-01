@@ -1,0 +1,399 @@
+{% extends 'base_template.html' %}
+{% load static %}
+
+{% block form %}
+<style>
+  .manage-collaborators-container {
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 25px;
+    background: #ffffff;
+    border-radius: 8px;
+   box-shadow: 2px 2px 10px black;
+   color:  #2c3e50;;
+
+  }
+  .manage-collaborators-container h1 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 3px solid #00799b;
+    font-size: 26px;
+    
+  }
+  .manage-collaborators-container p {
+    font-size: 16px;
+    margin: 5px 0;
+  }
+
+  .add-collaborator-form {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    border-left: #00799b 5px solid;
+    display: flex;
+    flex-flow: column;
+    gap: 0.5em;
+    margin-bottom: 1em;
+  }
+  .add-collaborator-form form button {
+    margin-top: 0.5em;
+    padding:0.4em;
+    font-weight: 600;
+  }
+  .add-collaborator-form form button.quick-assign-btn {
+    background: #00799b;
+    color: white;
+  }
+  
+  .quick-assign-btn {
+    background: #00799b;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 0.6em 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+  }
+  
+  .quick-assign-btn:hover:not(:disabled) {
+    background: #005f7a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 121, 155, 0.3);
+  }
+  
+  .quick-assign-btn:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  
+  .current-collaborators {
+    
+  }
+ .current-collaborators h2 {
+    color: #2c3e50;
+    font-size: 20px;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 3px solid #00799b;
+  }
+  .current-collaborators .table{
+    display: flex;
+    flex-flow:column;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  .current-collaborators .table .row {
+     display: flex;
+     flex-flow: row;
+     justify-content: space-between;
+    
+  }
+  .current-collaborators .table-body .row {
+    padding: 0.5em;
+  }
+  .current-collaborators .table-body .row:hover {
+    background-color: #f0f0f0;
+  }
+
+  .current-collaborators .table .row span {
+    width: 25%;
+    display: flex;
+  }
+  .table-head span:last-child {
+    justify-content: right;
+  }
+  .current-collaborators .table-head{
+    overflow: hidden;
+    background-color: #00799b;
+    color: white;
+    font-weight: bold;
+    padding: 10px 5px;
+  }
+  .current-collaborators .table .row .buttons-section {
+    display: flex;
+    flex-flow: row;
+  }
+  .current-collaborators .table .row .buttons-section .delete-button {
+    padding: 0.2em 0.4em;
+    border-radius: 5px;
+    margin-left: 0.2em;
+  }
+   .current-collaborators .table .row .buttons-section .blue-button {
+    padding: 0.2em 0.4em;
+    
+  }
+  .manage-collaborators-container .white-button {
+    padding: 0.4em ;
+  }
+  .manage-collaborators-container .white-button:hover {
+    background: #d2d4d4ff;
+      box-shadow: 0 4px 8px rgba(149, 165, 166, 0.3);
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .manage-collaborators-container {
+      padding: 15px;
+      margin: 10px;
+    }
+
+    .manage-collaborators-container h1 {
+      font-size: 20px;
+    }
+
+    .manage-collaborators-container h2 {
+      font-size: 18px;
+    }
+
+    .add-collaborator-form form {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .add-collaborator-form label {
+      margin-top: 10px;
+    }
+
+    .add-collaborator-form button[type="submit"] {
+      grid-column: 1;
+      width: 100%;
+    }
+
+    .quick-assign-section {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .quick-assign-btn {
+      width: 100%;
+    }
+
+    .quick-assign-info {
+      text-align: center;
+    }
+
+    .current-collaborators table {
+      font-size: 12px;
+    }
+
+    .current-collaborators th,
+    .current-collaborators td {
+      padding: 8px 6px;
+    }
+
+    .current-collaborators button {
+      padding: 5px 8px;
+      font-size: 11px;
+      margin: 2px 1px;
+    }
+
+    /* En móvil, hacer que los botones se vean en columna */
+    .current-collaborators td:last-child {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .current-collaborators button {
+      width: 100%;
+    }
+  }
+</style>
+
+<div class="manage-collaborators-container">
+  <h1>Gestionar Colaboradores - Proyecto #{{ project.pk }}</h1>
+  <p><strong>Proyecto:</strong> {{ project.type }} - {{ project.client.name }}</p>
+  <p><strong>Porcentaje asignado:</strong> {{ total_percentage }}%</p>
+  <p><strong>Porcentaje disponible:</strong> {{ remaining_percentage }}%</p>
+
+  <!-- Formulario para Agregar Colaborador -->
+  <div class="add-collaborator-form">
+    <h2>Agregar Colaborador</h2>
+    <form method="POST" id="addCollaboratorForm">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="add">
+      
+      <label for="user_id">Usuario:</label>
+      <select name="user_id" id="user_id" required>
+        <option value="">Seleccionar usuario...</option>
+        {% for user in available_users %}
+          <option value="{{ user.id }}">{{ user.username }} ({{ user.first_name }} {{ user.last_name }})</option>
+        {% endfor %}
+      </select>
+      
+      <label for="percentage">Porcentaje:</label>
+      <input type="number" name="percentage" id="percentage" min="0" max="{{ remaining_percentage }}" step="0.01" required>
+      
+      <button class="blue-button" type="submit">Agregar</button>
+    </form>
+    
+    <!-- Sección de asignación rápida -->
+    <div class="quick-assign-section">
+      <button type="button" class="quick-assign-btn" onclick="assignRemainingToMe()" {% if remaining_percentage == 0 %}disabled{% endif %}>
+        Autoasignar el resto ({{ remaining_percentage }}%)
+      </button>
+      
+    </div>
+    
+    <div id="addMessage"></div>
+  </div>
+
+  <!-- Lista de Colaboradores Actuales -->
+  <div class="current-collaborators">
+    <h2>Colaboradores Actuales</h2>
+    
+    {% if collaborators %}
+      <div class="table">
+        <div class="table-head row">
+          <span>Usuario</span>
+          <span>Porcentaje</span>
+          <span>Fecha Agregado</span>
+          <span>Acciones</span>
+        </div>
+        <div class="table-body">
+          {% for collab in collaborators %}
+          <div class="row" id="collab-{{ collab.id }}">
+            <span>{{ collab.user.username }}</span>
+            <span>
+              <span class="percentage-display">{{ collab.percentage }}%</span>
+              <input type="number" class="percentage-edit" data-collab-id="{{ collab.id }}" value="{{ collab.percentage }}" min="0" max="100" step="0.01" style="display:none;">
+            </span>
+            <span>{{ collab.added_date|date:"d/m/Y" }}</span>
+            <div class="buttons-section">
+              <button class="blue-button" onclick="editPercentage({{ collab.id }})">Editar</button>
+              <button onclick="savePercentage({{ collab.id }})" style="display:none;">Guardar</button>
+              <button onclick="cancelEdit({{ collab.id }})" style="display:none;">Cancelar</button>
+              <button class="delete-button" onclick="removeCollaborator({{ collab.id }})">Eliminar</button>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% else %}
+      <p>No hay colaboradores asignados.</p>
+    {% endif %}
+  </div>
+
+  <br>
+  <a class="white-button" href="{% url 'group_project_detail' project.pk %}">← Volver a Detalles del Proyecto</a>
+</div>
+
+<script>
+// Asignar porcentaje restante al usuario actual
+function assignRemainingToMe() {
+    const remainingPercentage = parseFloat('{{ remaining_percentage }}');
+    const currentUserId = '{{ current_user_id }}';
+    
+    if (remainingPercentage <= 0) {
+        alert('No hay porcentaje disponible para asignar.');
+        return;
+    }
+    
+    if (!confirm(`¿Asignarte el ${remainingPercentage}% restante?`)) return;
+    
+    const formData = new FormData();
+    formData.append('action', 'add');
+    formData.append('user_id', currentUserId);
+    formData.append('percentage', remainingPercentage);
+    formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+    
+    fetch('', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('addMessage').innerHTML = 
+            `<p style="color: ${data.success ? 'green' : 'red'}">${data.message}</p>`;
+        if (data.success) {
+            setTimeout(() => location.reload(), 1000);
+        }
+    });
+}
+
+// Agregar colaborador
+document.getElementById('addCollaboratorForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    
+    fetch('', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('addMessage').innerHTML = 
+            `<p style="color: ${data.success ? 'green' : 'red'}">${data.message}</p>`;
+        if (data.success) {
+            setTimeout(() => location.reload(), 1000);
+        }
+    });
+});
+
+// Editar porcentaje
+function editPercentage(collabId) {
+    const row = document.getElementById('collab-' + collabId);
+    row.querySelector('.percentage-display').style.display = 'none';
+    row.querySelector('.percentage-edit').style.display = 'inline';
+    row.querySelector('button[onclick^="editPercentage"]').style.display = 'none';
+    row.querySelector('button[onclick^="savePercentage"]').style.display = 'inline';
+    row.querySelector('button[onclick^="cancelEdit"]').style.display = 'inline';
+}
+
+function cancelEdit(collabId) {
+    location.reload();
+}
+
+function savePercentage(collabId) {
+    const row = document.getElementById('collab-' + collabId);
+    const newPercentage = row.querySelector('.percentage-edit').value;
+    
+    const formData = new FormData();
+    formData.append('action', 'update');
+    formData.append('collab_id', collabId);
+    formData.append('percentage', newPercentage);
+    formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+    
+    fetch('', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message);
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+
+function removeCollaborator(collabId) {
+    if (!confirm('¿Estás seguro de eliminar este colaborador?')) return;
+    
+    const formData = new FormData();
+    formData.append('action', 'remove');
+    formData.append('collab_id', collabId);
+    formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+    
+    fetch('', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message);
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+</script>
+{% endblock %}
